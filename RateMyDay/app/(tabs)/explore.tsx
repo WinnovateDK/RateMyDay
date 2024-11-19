@@ -20,7 +20,7 @@ export default function TabTwoScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
-      <Text className="text-xl text-blue-800">
+      <Text className="text-xl text-blue-100">
         This app includes example code to help you get started.
       </Text>
       <Collapsible title="File-based routing">
