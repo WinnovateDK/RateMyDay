@@ -1,11 +1,34 @@
-import { Image, StyleSheet, Platform, Button } from 'react-native';
-
+import { Image, Platform,View, Text, TouchableOpacity, Button, Alert, StyleSheet } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { getItem } from '@/utills/AsyncStorage';
+
+import AddRatingComponent from '@/components/AddRatingComponent';
+import { useEffect, useState } from 'react';
 
 export default function AddRating() {
+  const [isGetRatingPressed, setIsGetRatingPressed] = useState<Boolean>(false);
+  const [rating, setRating] = useState<String>("");
+
+  const handleGetRating = async () => {
+    const dateObject = new Date();
+    const dateMonthYear = `${dateObject.getUTCDate()}${(dateObject.getUTCMonth()) + 1}${dateObject.getUTCFullYear()}`;
+    const rating = await getItem(`rating${dateMonthYear}`).then((rating) => {
+      return rating
+    });
+    return rating;
+  }
+
+  useEffect(()=>{
+    if(isGetRatingPressed){
+      const rating = handleGetRating().then((rating => {
+        setRating(`${rating}`)
+      }));
+    }
+  }, [isGetRatingPressed])
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -34,9 +57,12 @@ export default function AddRating() {
         <ThemedText type='subtitle'>
             How has your day been?
         </ThemedText>
-        <Button title="Add">
-
-        </Button>
+        <AddRatingComponent/>
+      <Button
+        title='GetRating'
+        onPress={()=>{setIsGetRatingPressed(true)}}
+      />
+      <Text>{rating}</Text>
       </ThemedView>
     </ParallaxScrollView>
   );
