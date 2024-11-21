@@ -1,5 +1,13 @@
-import { View, Text, SafeAreaView } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Modal,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 import { Calendar, CalendarList } from "react-native-calendars";
+import { useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
 
 const calendar = () => {
@@ -16,23 +24,25 @@ const calendar = () => {
     "#00BF00",
   ];
 
-  const markedDates = {
-    "2024-11-18": {
-      rating: 10,
-      selected: true,
-      selectedColor: colors[9],
-    },
-    "2024-11-17": {
-      rating: 5,
-      selected: true,
-      selectedColor: colors[4],
-    },
-    "2024-11-16": {
-      rating: 1,
-      selected: true,
-      selectedColor: colors[2],
-    },
+  const markedDates: Record<
+    string,
+    { rating: number; selected: boolean; selectedColor: string }
+  > = {
+    "2024-11-18": { rating: 10, selected: true, selectedColor: colors[9] },
+    "2024-11-17": { rating: 5, selected: true, selectedColor: colors[4] },
+    "2024-11-16": { rating: 1, selected: true, selectedColor: colors[0] },
   };
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const getRatingForDate = (date: string) => markedDates[date]?.rating;
+
+  const onDayPress = (day: { dateString: string }) => {
+    setSelectedDate(day.dateString);
+    setModalVisible(true);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-blue-300">
       {/* Top Section */}
@@ -49,6 +59,7 @@ const calendar = () => {
         <View className="flex-1/2 px-2">
           <Calendar
             markedDates={markedDates}
+            onDayPress={onDayPress}
             theme={{
               calendarBackground: "white",
               textSectionTitleColor: "#b6c1cd",
@@ -78,6 +89,39 @@ const calendar = () => {
           />
         </View>
       </View>
+      <Modal
+        visible={isModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white p-6 rounded-lg items-center w-4/5">
+            <Text className="text-lg font-bold text-gray-700 mb-4">
+              {selectedDate ? `Rating for ${selectedDate}` : "No Date Selected"}
+            </Text>
+            <Text
+              className="text-4xl font-bold mb-6"
+              style={{
+                color:
+                  selectedDate && getRatingForDate(selectedDate) !== undefined
+                    ? colors[getRatingForDate(selectedDate) - 1]
+                    : "#3b82f6",
+              }}
+            >
+              {selectedDate && getRatingForDate(selectedDate) !== undefined
+                ? getRatingForDate(selectedDate)
+                : "No rating"}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              className="bg-blue-500 px-4 py-2 rounded-md"
+            >
+              <Text className="text-white text-lg">Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
