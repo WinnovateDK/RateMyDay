@@ -55,7 +55,7 @@ export const getAllItems = async () => {
   try {
     const keys = await AsyncStorage.getAllKeys();
     const items = await AsyncStorage.multiGet(keys);
-    return items.reduce((accumulator: {[key:string]: string}, [key, value]) => {
+    return items.reduce((accumulator: {[key:string]: any}, [key, value]) => {
       accumulator[key] = JSON.parse(value ? value : "Value not found");
       return accumulator;
     }, {});

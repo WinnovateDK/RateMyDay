@@ -14,10 +14,11 @@ const AddRatingComponent: React.FC = () => {
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
-    const dateMonthYear = `${dateObject.getUTCDate()}${
+    const day = dateObject.getUTCDate() < 10 ? `0${dateObject.getUTCDate()}` : dateObject.getUTCDate();
+    const yearMonthDate = `${dateObject.getUTCFullYear()}-${
       dateObject.getUTCMonth() + 1
-    }${dateObject.getUTCFullYear()}`;
-    await setItem(`rating${dateMonthYear}`, selectedScore);
+    }-${day}`;
+    await setItem(`${yearMonthDate}`, selectedScore);
   };
 
   const handleSubmit = () => {

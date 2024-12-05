@@ -4,8 +4,20 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useRatingStore } from '@/stores/RatingStore';
+import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
+import { useIsFocused } from '@react-navigation/native';
+import { useEffect } from 'react';
 
 export default function HomeScreen() {
+  const isFocused = useIsFocused();
+  const storageSavedDates = useStorageSavedDates(isFocused);
+  const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
+
+  useEffect(()=>{
+    setStoredDateRatings(storageSavedDates);
+    console.log("set stored ratings: " , storageSavedDates);
+  }, [storageSavedDates])
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}

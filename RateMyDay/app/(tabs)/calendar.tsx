@@ -7,41 +7,40 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Calendar, CalendarList } from "react-native-calendars";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
+import { useStorageSavedDates, MarkedDate } from "@/hooks/useStorageSavedDates";
+import { CalendarColors } from "@/constants/Colors";
+import { useRatingStore } from "@/stores/RatingStore";
 
 const calendar = () => {
-  const colors = [
-    "#FF0000",
-    "#FF4000",
-    "#FF8000",
-    "#FFBF00",
-    "#FFFF00",
-    "#BFFF00",
-    "#80FF00",
-    "#40FF00",
-    "#00FF00",
-    "#00BF00",
-  ];
-
-  const markedDates: Record<
-    string,
-    { rating: number; selected: boolean; selectedColor: string }
-  > = {
-    "2024-11-18": { rating: 10, selected: true, selectedColor: colors[9] },
-    "2024-11-17": { rating: 5, selected: true, selectedColor: colors[4] },
-    "2024-11-16": { rating: 1, selected: true, selectedColor: colors[0] },
-  };
-
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const storedDateRatings = useRatingStore((state) => state.savedRatings);
+  /*
+  const markedDates: MarkedDate = {
+    "2024-11-18": { rating: 10, selected: true, selectedColor: CalendarColors[9] },
+    "2024-11-17": { rating: 5, selected: true, selectedColor: CalendarColors[4] },
+    "2024-11-16": { rating: 1, selected: true, selectedColor: CalendarColors[0] },
+    "2024-12-03": { rating: 1, selected: true, selectedColor: CalendarColors[0] }
+  };
+  */
 
-  const getRatingForDate = (date: string) => markedDates[date]?.rating;
+  const getRatingForDate = useMemo(() => {
+    const ratingForDate = selectedDate && storedDateRatings ? storedDateRatings[selectedDate]?.rating : null;
+    
+    return ratingForDate;
+  }, [selectedDate]);
 
   const onDayPress = (day: { dateString: string }) => {
     setSelectedDate(day.dateString);
+    console.log("selected date: ", day.dateString);
     setModalVisible(true);
   };
+
+  useEffect(() => {
+    console.log('Fetched Marked Dates:', storedDateRatings);
+  }, [storedDateRatings]);
 
   return (
     <SafeAreaView className="flex-1 bg-blue-300">
@@ -58,7 +57,7 @@ const calendar = () => {
       <View className="flex-1 ">
         <View className="flex-1/2 px-2">
           <Calendar
-            markedDates={markedDates}
+            markedDates={storedDateRatings}
             onDayPress={onDayPress}
             theme={{
               calendarBackground: "white",
@@ -104,13 +103,13 @@ const calendar = () => {
               className="text-4xl font-bold mb-6"
               style={{
                 color:
-                  selectedDate && getRatingForDate(selectedDate) !== undefined
-                    ? colors[getRatingForDate(selectedDate) - 1]
+                  selectedDate && getRatingForDate !== null
+                    ? CalendarColors[getRatingForDate - 1]
                     : "#3b82f6",
               }}
             >
-              {selectedDate && getRatingForDate(selectedDate) !== undefined
-                ? getRatingForDate(selectedDate)
+              {selectedDate && getRatingForDate !== null
+                ? getRatingForDate
                 : "No rating"}
             </Text>
             <TouchableOpacity

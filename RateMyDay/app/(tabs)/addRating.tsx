@@ -19,14 +19,17 @@ import { useEffect, useState } from "react";
 
 export default function AddRating() {
   const [isGetRatingPressed, setIsGetRatingPressed] = useState<Boolean>(false);
-  const [rating, setRating] = useState<String>("");
+  const [rating, setRating] = useState<number | null>();
 
   const handleGetRating = async () => {
     const dateObject = new Date();
-    const dateMonthYear = `${dateObject.getUTCDate()}${
+    const day = dateObject.getUTCDate() < 10 ? `0${dateObject.getUTCDate()}` : dateObject.getUTCDate();
+    const yearMonthDate = `${dateObject.getUTCFullYear()}-${
       dateObject.getUTCMonth() + 1
-    }${dateObject.getUTCFullYear()}`;
-    const rating = await getItem(`rating${dateMonthYear}`).then((rating) => {
+    }-${day}`;
+    const rating = await getItem(`${yearMonthDate}`).then((rating) => {
+      const stringRating = '' + rating;
+      Alert.alert("Rating for: " + yearMonthDate, stringRating);
       return rating;
     });
     return rating;
@@ -35,7 +38,8 @@ export default function AddRating() {
   useEffect(() => {
     if (isGetRatingPressed) {
       const rating = handleGetRating().then((rating) => {
-        setRating(`${rating}`);
+        setRating(rating);
+        setIsGetRatingPressed(false);
       });
     }
   }, [isGetRatingPressed]);

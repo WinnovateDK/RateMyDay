@@ -24,3 +24,16 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
 };
+
+export const CalendarColors = [
+  "#FF0000",
+  "#FF4000",
+  "#FF8000",
+  "#FFBF00",
+  "#FFFF00",
+  "#BFFF00",
+  "#80FF00",
+  "#40FF00",
+  "#00FF00",
+  "#00BF00",
+];
