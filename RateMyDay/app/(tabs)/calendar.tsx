@@ -9,7 +9,6 @@ import {
 import { Calendar, CalendarList } from "react-native-calendars";
 import { useEffect, useMemo, useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
-import { useStorageSavedDates, MarkedDate } from "@/hooks/useStorageSavedDates";
 import { CalendarColors } from "@/constants/Colors";
 import { useRatingStore } from "@/stores/RatingStore";
 

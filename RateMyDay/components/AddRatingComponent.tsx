@@ -1,16 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Button,
   Alert,
-  StyleSheet,
 } from "react-native";
-import { getItem, setItem } from "@/utills/AsyncStorage";
-
+import { setItem } from "@/utills/AsyncStorage";
+import { useRatingStore } from "@/stores/RatingStore";
+import { CalendarColors } from "@/constants/Colors";
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
+  const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
@@ -19,6 +20,13 @@ const AddRatingComponent: React.FC = () => {
       dateObject.getUTCMonth() + 1
     }-${day}`;
     await setItem(`${yearMonthDate}`, selectedScore);
+    const key = yearMonthDate;
+    const newRating = {
+      rating: selectedScore!,
+      selected: true,
+      selectedColor: CalendarColors[selectedScore! - 1],
+    };
+    updateSavedRating(key, newRating);
   };
 
   const handleSubmit = () => {
