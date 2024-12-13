@@ -9,8 +9,9 @@ import {
 import { Calendar, CalendarList } from "react-native-calendars";
 import { useEffect, useMemo, useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
-import { CalendarColors } from "@/constants/Colors";
+import { CalendarColors, RMDColors } from "@/constants/Colors";
 import { useRatingStore } from "@/stores/RatingStore";
+import "../../global.css";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -42,13 +43,13 @@ const calendar = () => {
   }, [storedDateRatings]);
 
   return (
-    <SafeAreaView className="flex-1 bg-blue-300">
+    <SafeAreaView className="flex-1 bg-teal-900">
       {/* Top Section */}
       <View className="h-1/6 justify-center items-center pt-10">
-        <Text className="text-4xl font-bold text-gray-500">
+        <Text className="text-4xl font-bold text-teal-50">
           Overview of your days
         </Text>
-        <Text className="text-xl text-gray-300">
+        <Text className="text-xl text-teal-100">
           Track how your days have been
         </Text>
       </View>
@@ -61,11 +62,12 @@ const calendar = () => {
             theme={{
               calendarBackground: "white",
               textSectionTitleColor: "#b6c1cd",
-              selectedDayBackgroundColor: "#00adf5",
+              selectedDayBackgroundColor: RMDColors.rmdMid,
               selectedDayTextColor: "#ffffff",
-              todayTextColor: "#00adf5",
+              todayTextColor: RMDColors.rmdLighter,
               dayTextColor: "#2d4150",
               dotColor: "red",
+              arrowColor: RMDColors.rmdMid
             }}
             style={{
               borderRadius: 10,
@@ -113,7 +115,7 @@ const calendar = () => {
             </Text>
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
-              className="bg-blue-500 px-4 py-2 rounded-md"
+              className="bg-teal-800 px-4 py-2 rounded-md"
             >
               <Text className="text-white text-lg">Close</Text>
             </TouchableOpacity>

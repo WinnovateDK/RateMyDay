@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import { setItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
-import { CalendarColors } from "@/constants/Colors";
+import { CalendarColors, RMDColors } from "@/constants/Colors";
+
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
@@ -58,11 +59,10 @@ const AddRatingComponent: React.FC = () => {
 
   return (
     <View className="flex-1 justify-center items-center p-5">
-      <Text className="text-xl font-bold mb-5">How has your day been?</Text>
       <View className="flex-1 flex-row justify-center items-center mb-5 max-w-full">
         {renderScale()}
       </View>
-      <Button title="Add" onPress={handleSubmit} />
+      <Button title="Add" color={RMDColors.rmdDark} onPress={handleSubmit} />
       <Text>{selectedScore}</Text>
     </View>
   );

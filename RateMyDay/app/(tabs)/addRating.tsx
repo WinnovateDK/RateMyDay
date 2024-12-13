@@ -11,11 +11,11 @@ import {
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { getItem } from "@/utills/AsyncStorage";
-
+import "../../global.css";
 import AddRatingComponent from "@/components/AddRatingComponent";
 import { useEffect, useState } from "react";
+import { RMDColors, RMDTealColors } from "@/constants/Colors";
 
 export default function AddRating() {
   const [isGetRatingPressed, setIsGetRatingPressed] = useState<Boolean>(false);
@@ -45,8 +45,9 @@ export default function AddRating() {
   }, [isGetRatingPressed]);
 
   return (
+    <View className="bg-teal-950">
     <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+      headerBackgroundColor={{ light: RMDTealColors.rmdTeal900, dark: RMDTealColors.rmdTeal900 }}
       headerImage={
         <Image
           source={require("@/assets/images/emojis.png")}
@@ -54,47 +55,32 @@ export default function AddRating() {
         />
       }
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Add a daily rating!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: "cmd + d", android: "cmd + m" })}
-          </ThemedText>{" "}
-          to open developer toolssdsd.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">How has your day been?</ThemedText>
-        <AddRatingComponent />
-        <Button
-          title="GetRating"
-          onPress={() => {
-            setIsGetRatingPressed(true);
-          }}
-        />
-        <Text>{rating}</Text>
-      </ThemedView>
+      
+        <View className="flex-row align-middle gap-8" >
+          <ThemedText className="flex-row align-middle gap-8" type="title">Add a daily rating!</ThemedText>
+          <HelloWave />
+        </View>
+        <View className="gap-8 mb-8">
+          <View>
+            <ThemedText type="subtitle">How has your day been?</ThemedText>
+          </View>
+          <AddRatingComponent />
+          <Button
+            color={RMDColors.rmdDark}
+            title="GetRating"
+            onPress={() => {
+              setIsGetRatingPressed(true);
+            }}
+          />
+          <Text>{rating}</Text>
+        </View>
+      
     </ParallaxScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
   reactLogo: {
     height: 178,
     width: 290,

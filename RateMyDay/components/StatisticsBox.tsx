@@ -34,21 +34,21 @@ const StatisticsBox = ({
       </View>
       <View className="justify-center items-center h-full">
         <View className="flex items-center">
-          <Text className="text-4xl text-gray-600">Average Rating</Text>
-          <Text className="text-4xl font-bold text-gray-900 mt-4">
+          <Text className="text-4xl text-teal-800">Average Rating</Text>
+          <Text className="text-4xl font-bold text-teal-900 mt-4">
             {averageRating}
           </Text>
         </View>
         <View className="mt-5 flex-row justify-between w-full px-4">
           <View className="flex items-center">
-            <Text className="text-xl text-gray-600">Lowest Rating</Text>
-            <Text className="text-2xl font-bold text-gray-900 mt-4">
+            <Text className="text-xl text-teal-800">Lowest Rating</Text>
+            <Text className="text-2xl font-bold text-teal-900 mt-4">
               {lowestRating}
             </Text>
           </View>
           <View className="items-center">
-            <Text className="text-xl text-gray-600">Highest Rating</Text>
-            <Text className="text-2xl font-bold text-gray-900 mt-4">
+            <Text className="text-xl text-teal-800">Highest Rating</Text>
+            <Text className="text-2xl font-bold text-teal-900 mt-4">
               {highestRating}
             </Text>
           </View>
