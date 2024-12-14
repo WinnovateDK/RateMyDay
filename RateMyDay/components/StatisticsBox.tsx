@@ -20,23 +20,6 @@ const StatisticsBox = () => {
     return currentDayOfWeek;
   }
 
-  const getFirstDayOfWeekFormatted = (): string => {
-    const today = new Date();
-    
-    let currentDayOfWeek = today.getDay();
-    currentDayOfWeek = (currentDayOfWeek === 0) ? 6 : currentDayOfWeek - 1;
-    const diffToFirstDay = currentDayOfWeek;
-  
-    const firstDay = new Date(today);
-    firstDay.setDate(today.getDate() - diffToFirstDay);
-
-    const year = firstDay.getFullYear();
-    const month = String(firstDay.getMonth() + 1).padStart(2, "0");
-    const date = String(firstDay.getDate()).padStart(2, "0");
-  
-    return `${year}-${month}-${date}`;
-  }
-
   function getDatesInCurrentWeek(): string[] {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -93,7 +76,6 @@ const StatisticsBox = () => {
 
   async function calculateAverageRatingForWeek() {
     let daysPassed = daysPassedThisWeek();
-    const startingWeekDate = getFirstDayOfWeekFormatted();
     const datesInPastWeek = getDatesInCurrentWeek();
     const isRatingTodaySet = await isRatingSetToday();
     const pastWeeksRatings: number[] = [];
