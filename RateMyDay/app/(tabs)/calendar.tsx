@@ -70,9 +70,6 @@ const calendar = () => {
         </View>
         <View className="flex-1 mt-4 max-h-full">
           <StatisticsBox
-            averageRating={6.4}
-            lowestRating={1}
-            highestRating={10}
           />
         </View>
       </View>
