@@ -1,16 +1,12 @@
 import {
   Image,
-  Platform,
   View,
   Text,
-  TouchableOpacity,
-  Button,
   Alert,
   StyleSheet,
+  SafeAreaView
 } from "react-native";
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
+import Animated from 'react-native-reanimated';
 import { getItem } from "@/utills/AsyncStorage";
 import "../../global.css";
 import AddRatingComponent from "@/components/AddRatingComponent";
@@ -18,65 +14,32 @@ import { useEffect, useState } from "react";
 import { RMDColors, RMDTealColors } from "@/constants/Colors";
 
 export default function AddRating() {
-  const [isGetRatingPressed, setIsGetRatingPressed] = useState<Boolean>(false);
   const [rating, setRating] = useState<number | null>();
 
-  const handleGetRating = async () => {
-    const dateObject = new Date();
-    const day = dateObject.getUTCDate() < 10 ? `0${dateObject.getUTCDate()}` : dateObject.getUTCDate();
-    const yearMonthDate = `${dateObject.getUTCFullYear()}-${
-      dateObject.getUTCMonth() + 1
-    }-${day}`;
-    const rating = await getItem(`${yearMonthDate}`).then((rating) => {
-      const stringRating = '' + rating;
-      Alert.alert("Rating for: " + yearMonthDate, stringRating);
-      return rating;
-    });
-    return rating;
-  };
-
-  useEffect(() => {
-    if (isGetRatingPressed) {
-      const rating = handleGetRating().then((rating) => {
-        setRating(rating);
-        setIsGetRatingPressed(false);
-      });
-    }
-  }, [isGetRatingPressed]);
-
   return (
-    <View className="bg-teal-950">
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: RMDTealColors.rmdTeal900, dark: RMDTealColors.rmdTeal900 }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/emojis.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      
-        <View className="flex-row align-middle gap-8" >
-          <ThemedText className="flex-row align-middle gap-8" type="title">Add a daily rating!</ThemedText>
-          <HelloWave />
-        </View>
-        <View className="gap-8 mb-8">
-          <View>
-            <ThemedText type="subtitle">How has your day been?</ThemedText>
+    <SafeAreaView className="flex-1 bg-emerald-200">
+        <Animated.View className="bg-teal-900 p-32 gap-16 h-1/4"
+                  >
+                  {
+                    <Image
+                      source={require("@/assets/images/emojis.png")}
+                      style={styles.reactLogo}
+                    />
+                  }
+          </Animated.View>
+        <View className="gap-4 pt-8">
+          <View >
+            <Text className="text-center text-4xl text-emerald-800">Add a daily rating!</Text>
           </View>
-          <AddRatingComponent />
-          <Button
-            color={RMDColors.rmdDark}
-            title="GetRating"
-            onPress={() => {
-              setIsGetRatingPressed(true);
-            }}
-          />
-          <Text>{rating}</Text>
+          <View className="gap-8 mb-8">
+            <View>
+              <Text className="text-center text-2xl">How has your day been?</Text>
+            </View>
+            <AddRatingComponent />
+            <Text>{rating}</Text>
+          </View>
         </View>
-      
-    </ParallaxScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

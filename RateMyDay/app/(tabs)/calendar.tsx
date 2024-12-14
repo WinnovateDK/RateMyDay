@@ -3,11 +3,10 @@ import {
   Text,
   SafeAreaView,
   Modal,
-  Button,
   TouchableOpacity,
 } from "react-native";
-import { Calendar, CalendarList } from "react-native-calendars";
-import { useEffect, useMemo, useState } from "react";
+import { Calendar } from "react-native-calendars";
+import { useMemo, useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
 import { CalendarColors, RMDColors } from "@/constants/Colors";
 import { useRatingStore } from "@/stores/RatingStore";
@@ -17,14 +16,6 @@ const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const storedDateRatings = useRatingStore((state) => state.savedRatings);
-  /*
-  const markedDates: MarkedDate = {
-    "2024-11-18": { rating: 10, selected: true, selectedColor: CalendarColors[9] },
-    "2024-11-17": { rating: 5, selected: true, selectedColor: CalendarColors[4] },
-    "2024-11-16": { rating: 1, selected: true, selectedColor: CalendarColors[0] },
-    "2024-12-03": { rating: 1, selected: true, selectedColor: CalendarColors[0] }
-  };
-  */
 
   const getRatingForDate = useMemo(() => {
     const ratingForDate = selectedDate && storedDateRatings ? storedDateRatings[selectedDate]?.rating : null;
@@ -37,10 +28,6 @@ const calendar = () => {
     console.log("selected date: ", day.dateString);
     setModalVisible(true);
   };
-
-  useEffect(() => {
-    console.log('Fetched Marked Dates:', storedDateRatings);
-  }, [storedDateRatings]);
 
   return (
     <SafeAreaView className="flex-1 bg-teal-900">

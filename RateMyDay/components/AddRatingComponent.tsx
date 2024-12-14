@@ -27,6 +27,7 @@ const AddRatingComponent: React.FC = () => {
       selected: true,
       selectedColor: CalendarColors[selectedScore! - 1],
     };
+    
     updateSavedRating(key, newRating);
   };
 
@@ -45,7 +46,7 @@ const AddRatingComponent: React.FC = () => {
       <TouchableOpacity
         key={index}
         className={`aspect-square rounded-full justify-center items-center mx-1 ${
-          selectedScore === index ? "bg-blue-500" : "bg-gray-300"
+          selectedScore === index ? "bg-emerald-900" : "bg-emerald-700"
         }`}
         style={{
           width: `${100 / totalCircles}%`,
@@ -58,11 +59,18 @@ const AddRatingComponent: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 justify-center items-center p-5">
-      <View className="flex-1 flex-row justify-center items-center mb-5 max-w-full">
+    <View className="flex-1 justify-center items-center p-5 pt-10">
+      <View className="flex-row justify-center items-center mb-5">
         {renderScale()}
       </View>
-      <Button title="Add" color={RMDColors.rmdDark} onPress={handleSubmit} />
+      <View className="pt-8">
+        <TouchableOpacity 
+          className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center" 
+          onPress={handleSubmit}
+          >
+          <Text className="text-white">Add</Text>
+        </TouchableOpacity>
+      </View>
       <Text>{selectedScore}</Text>
     </View>
   );

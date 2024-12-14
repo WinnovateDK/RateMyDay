@@ -16,8 +16,8 @@ export default function HomeScreen() {
 
   useEffect(()=>{
     setStoredDateRatings(storageSavedDates);
-    console.log("set stored ratings: " , storageSavedDates);
   }, [storageSavedDates])
+  
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
