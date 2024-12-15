@@ -11,11 +11,21 @@ import StatisticsBox from "@/components/StatisticsBox";
 import { CalendarColors, RMDColors } from "@/constants/Colors";
 import { useRatingStore } from "@/stores/RatingStore";
 import "../../global.css";
+import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
+import { useIsFocused } from '@react-navigation/native';
+import { useEffect } from 'react';
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const storedDateRatings = useRatingStore((state) => state.savedRatings);
+  const isFocused = useIsFocused();
+  const storageSavedDates = useStorageSavedDates(isFocused);
+  const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
+
+  useEffect(()=>{
+    setStoredDateRatings(storageSavedDates);
+  }, [storageSavedDates])
 
   const getRatingForDate = useMemo(() => {
     const ratingForDate = selectedDate && storedDateRatings ? storedDateRatings[selectedDate]?.rating : null;

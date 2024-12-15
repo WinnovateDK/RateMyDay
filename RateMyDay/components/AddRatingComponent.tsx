@@ -9,6 +9,7 @@ import {
 import { setItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
 import { CalendarColors, RMDColors } from "@/constants/Colors";
+import { formatDate } from "@/utills/CalendarUtills";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -16,12 +17,9 @@ const AddRatingComponent: React.FC = () => {
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
-    const day = dateObject.getUTCDate() < 10 ? `0${dateObject.getUTCDate()}` : dateObject.getUTCDate();
-    const yearMonthDate = `${dateObject.getUTCFullYear()}-${
-      dateObject.getUTCMonth() + 1
-    }-${day}`;
-    await setItem(`${yearMonthDate}`, selectedScore);
-    const key = yearMonthDate;
+    const formattedDate = formatDate(dateObject);
+    await setItem(`${formattedDate}`, selectedScore);
+    const key = formattedDate;
     const newRating = {
       rating: selectedScore!,
       selected: true,
@@ -45,7 +43,7 @@ const AddRatingComponent: React.FC = () => {
     return Array.from({ length: 11 }, (_, index) => (
       <TouchableOpacity
         key={index}
-        className={`aspect-square rounded-full justify-center items-center mx-1 ${
+        className={`aspect-square rounded-full  justify-center items-center mx-auto ${
           selectedScore === index ? "bg-emerald-900" : "bg-emerald-700"
         }`}
         style={{
@@ -59,11 +57,11 @@ const AddRatingComponent: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 justify-center items-center p-5 pt-10">
+    <View className="flex-1 justify-center items-center">
       <View className="flex-row justify-center items-center mb-5">
         {renderScale()}
       </View>
-      <View className="pt-8">
+      <View>
         <TouchableOpacity 
           className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center" 
           onPress={handleSubmit}
@@ -71,7 +69,6 @@ const AddRatingComponent: React.FC = () => {
           <Text className="text-white">Add</Text>
         </TouchableOpacity>
       </View>
-      <Text>{selectedScore}</Text>
     </View>
   );
 };

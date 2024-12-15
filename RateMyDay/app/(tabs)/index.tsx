@@ -1,82 +1,73 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-import "../../global.css";
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useRatingStore } from '@/stores/RatingStore';
-import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
-import { useIsFocused } from '@react-navigation/native';
-import { useEffect } from 'react';
-
-export default function HomeScreen() {
-  const isFocused = useIsFocused();
-  const storageSavedDates = useStorageSavedDates(isFocused);
-  const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
-
-  useEffect(()=>{
-    setStoredDateRatings(storageSavedDates);
-  }, [storageSavedDates])
+import {
+  Image,
+  View,
+  Text,
+  Alert,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView
   
+} from "react-native";
+import Animated from 'react-native-reanimated';
+import "../../global.css";
+import AddRatingComponent from "@/components/AddRatingComponent";
+import { useState } from "react";
+
+
+export default function AddRating() {
+  const [rating ] = useState<number | null>();
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer toolssdsd.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView className="flex-1 bg-emerald-200">
+        <Animated.View className="bg-teal-900 p-32 gap-16 h-1/4"
+                  >
+                  {
+                    <Image
+                      source={require("@/assets/images/emojis.png")}
+                      style={styles.reactLogo}
+                    />
+                  }
+          </Animated.View>
+        <View className="bg-teal-900 py-4 px-6 flex-row justify-between items-center">
+                
+              </View>        
+              {/* Main Content */}
+              <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
+                <View className="gap-4 pt-8">
+                  <View >
+                    <Text className="text-center text-5xl font-bold text-emerald-800">Add todays rating!</Text>
+                  </View>
+                  <View className="gap-8 mb-8">
+                    <View>
+                      <Text className="text-teal-900 text-center text-2xl font-medium">How has your day been?</Text>
+                    </View>
+                    {/* Emoji and Progress Bar */}
+                    <View className="bg-emerald-200 flex-row justify-around items-center">
+                      <Text className="text-3xl">😔</Text>
+                      <View className="flex-1 mx-4 bg-emerald-400 h-2 rounded-full">
+                        <View className="w-1/2 h-2 bg-emerald-600 rounded-full" />
+                      </View>
+                      <Text className="text-3xl">😊</Text>
+                    </View>
+                    <View className="flex-row">
+                    <AddRatingComponent />
+                    </View>
+                  </View>
+                </View>
+              </ScrollView>
+                
+                
+        
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
   reactLogo: {
     height: 178,
     width: 290,
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    position: "absolute",
   },
 });
