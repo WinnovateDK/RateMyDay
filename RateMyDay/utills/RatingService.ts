@@ -134,3 +134,30 @@ export async function calculateAverageRatingForYear() {
         highestRating: 0
       }
 }
+
+export async function getRatingsforLastMonth(){
+  let daysPassed = daysPassedThisMonth();
+  const datesInPastMonth = getDatesInCurrentMonth();
+  const isRatingTodaySet = await isRatingSetToday();
+  const pastMontsRatings: number[] = [];
+  let daysWithoutARating = 0;
+
+  if (isRatingTodaySet){
+      daysPassed += 1
+    }
+    
+    if(daysPassed > 0){
+      for(let i=0; i < daysPassed; i++){
+        const rating = await getItem(datesInPastMonth[i]).then((rating) => {
+          if(rating===null){
+              daysWithoutARating += 1
+          }
+          return rating;
+        });
+        if(rating !== null){
+          pastMontsRatings.push(parseInt(rating));
+        }
+      }
+    }
+    return pastMontsRatings;
+}
