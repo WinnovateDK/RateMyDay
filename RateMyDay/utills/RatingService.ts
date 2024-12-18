@@ -9,6 +9,12 @@ import {
     daysPassedThisYear
  } from "@/utills/CalendarUtills";
 
+type rateDatePair = {
+  rating: number,
+  date: string
+}
+
+
 export async function calculateAverageRatingForWeek() {
     let daysPassed = daysPassedThisWeek();
     const datesInPastWeek = getDatesInCurrentWeek();
@@ -135,7 +141,7 @@ export async function calculateAverageRatingForYear() {
       }
 }
 
-export async function getRatingsforLastMonth(){
+export async function getRatingsforLastMonth() {
   let daysPassed = daysPassedThisMonth();
   const datesInPastMonth = getDatesInCurrentMonth();
   const isRatingTodaySet = await isRatingSetToday();
@@ -159,5 +165,72 @@ export async function getRatingsforLastMonth(){
         }
       }
     }
+
+    //const rateDate: rateDatePair[] = [{rating: 0, date: ""}]  
+    // make it return Promise<rateDatePair[]
     return pastMontsRatings;
+}
+
+export async function getRatingsForLastWeek() {
+  let daysPassed = daysPassedThisWeek();
+  const datesInPastWeek = getDatesInCurrentWeek();
+  const isRatingTodaySet = await isRatingSetToday();
+  const pastWeeksRatings: number[] = [];
+  let daysWithoutARating = 0;
+
+  if (isRatingTodaySet){
+    daysPassed += 1
+  }
+  
+  if(daysPassed > 0){
+    for(let i=0; i < daysPassed; i++){
+      const rating = await getItem(datesInPastWeek[i]).then((rating) => {
+          if(rating===null){
+              daysWithoutARating += 1
+          }
+        return rating;
+      });
+      if(rating !== null){
+          pastWeeksRatings.push(parseInt(rating));
+        }
+    }
+  }
+
+  return pastWeeksRatings;
+
+}
+
+export async function getRatingsForLastYear() {
+  let daysPassed = daysPassedThisYear();
+  const datesInPastYear = getDatesInCurrentYear();
+  const isRatingTodaySet = await isRatingSetToday();
+  const pastYearsRatings: number[] = [];
+  let daysWithoutARating = 0
+
+  if (isRatingTodaySet){
+      daysPassed += 1
+    }
+    
+    if(daysPassed > 0){
+      for(let i=0; i < daysPassed; i++){
+        const rating = await getItem(datesInPastYear[i]).then((rating) => {
+          if(rating===null){
+              daysWithoutARating += 1
+          }
+          return rating;
+        });
+        if(rating !== null){
+          pastYearsRatings.push(parseInt(rating));
+        }
+      }
+    }
+    return pastYearsRatings;
+}
+
+export function getAmountOfDaysInCurrentMonth(): number {
+  const now: Date = new Date(); 
+  const year: number = now.getFullYear();
+  const month: number = now.getMonth();
+
+  return new Date(year, month + 1, 0).getDate();
 }

@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { RMDColors } from "@/constants/Colors";
-import { getRatingsforLastMonth } from "@/utills/RatingService";
+import { getAmountOfDaysInCurrentMonth, getRatingsforLastMonth, getRatingsForLastWeek, getRatingsForLastYear } from "@/utills/RatingService";
+import { getDatesInCurrentWeek } from "@/utills/CalendarUtills";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -15,45 +16,49 @@ type chartDataType = {
 
 export default function ChartScreen() {
   const [timeRange, setTimeRange] = useState("weekly");
-  const [data, setData] = useState<number[]>([]);
-  const chartData: chartDataType = useMemo(()=> {
-    let chartData: chartDataType = {labels: [], data: []};
-    let labels = [];
-
+  const [chartData, setChartData] = useState<chartDataType>({labels: [], data: [4, 6, 5, 7, 8, 9, 10]} as chartDataType);
+  
+  useEffect(()=> {
     switch (timeRange) {
         case "weekly":
-          labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-          setData([4, 6, 5, 7, 8, 9, 10]);
-          chartData.labels = labels;
-          chartData.data = data;
+          let days = getDatesInCurrentWeek();
+          let labels: string[] = [];
+          for(let i=0; i < days.length; i++){
+            let temp = days[i].split("-")[2];
+            labels.push(temp);
+          }
+          getRatingsForLastWeek().then((ratings) => {
+            setChartData({labels: labels, data: ratings});
+          });
           break;
   
         case "monthly":
-          labels = ["Wk1", "Wk2", "Wk3", "Wk4"];
+          labels = ["Week 1", "Week 2", "Week 3", "Week 4"];
           getRatingsforLastMonth().then((ratings) => {
-            console.log("rr: ", ratings);
-            setData(ratings);
-            chartData.data = data;
-          })
-          chartData.labels = labels;
-          
+            const daysInMonth = getAmountOfDaysInCurrentMonth();
+            const weeksInMonth = Math.ceil(daysInMonth / 7);
+            const labels = Array.from({ length: weeksInMonth }, (_, i) => `Week ${i + 1}`);
+            const data = Array(daysInMonth).fill(null);
+            for (let i = 0; i < ratings.length; i++) {
+              data[i] = ratings[i];
+            }
+            setChartData({labels: labels, data: data});
+          });
           break;
 
         case "yearly": 
           labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          setData([5, 6, 7, 8, 6, 5, 7, 8, 9, 6, 5, 7]);
-          chartData.labels = labels;
-          chartData.data = data;
+          getRatingsForLastYear().then((ratings) => {
+            setChartData({labels: labels, data: ratings});
+          });
           break;
       }; 
-
-      return chartData;
     }, [timeRange]);
 
   return (
-    <View className="flex-1 bg-teal-900 p-4 self-center gap-8 justify-center">
+    <View className="flex-1 bg-emerald-200 p-4 self-center gap-8 justify-center">
       <View >
-          <Text className="text-center text-4xl font-bold text-teal-50">See your ratings</Text>
+          <Text className="text-center text-4xl font-bold text-teal-900">See your ratings</Text>
       </View>
       
       {/* Chart */}
@@ -78,9 +83,9 @@ export default function ChartScreen() {
         height={220}
         yAxisInterval={1}
         chartConfig={{
-          backgroundColor: RMDColors.rmdDarkest, // Dark background
-          backgroundGradientFrom: "#1e293b",
-          backgroundGradientTo: "#1e293b",
+          backgroundColor: RMDColors.rmdDark, // Dark background
+          backgroundGradientFrom: RMDColors.rmdDark,
+          backgroundGradientTo: RMDColors.rmdMidDark,
           decimalPlaces: 0,
           color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})`, // Green line
           labelColor: () => "#e5e7eb", // Light labels
@@ -88,8 +93,8 @@ export default function ChartScreen() {
             borderRadius: 16,
           },
           propsForDots: {
-            r: "5",
-            strokeWidth: "2",
+            r: "1",
+            strokeWidth: "1",
             stroke: "#22c55e",
           },
         }}
