@@ -1,4 +1,5 @@
 import { getItem } from "@/utills/AsyncStorage";
+import moment from "moment";
 
 export function daysPassedThisWeek(): number  {
     const today = new Date();
@@ -108,6 +109,29 @@ export function getDatesInCurrentYear(): string[] {
     }
   
     return dates;
+}
+
+/**
+ * Function to get all week numbers for the current month
+ * @returns {number[]} - Array of week numbers for the current month
+ */
+export const getWeekNumbersForCurrentMonth = (): number[] => {
+  const currentDate = moment(); // Get the current date
+  const startOfMonth = currentDate.clone().startOf("month"); // Start of the current month
+  const endOfMonth = currentDate.clone().endOf("month"); // End of the current month
+
+  const weekNumbers: number[] = [];
+  let currentWeek = startOfMonth.isoWeek();
+
+  while (startOfMonth.isBefore(endOfMonth, "day")) {
+    weekNumbers.push(currentWeek); // Add the current week number to the array
+    startOfMonth.add(1, "week"); // Move to the next week
+    currentWeek = startOfMonth.isoWeek(); // Update the week number
   }
+
+  return [...new Set(weekNumbers)]; // Return unique week numbers
+};
+
+
 
   

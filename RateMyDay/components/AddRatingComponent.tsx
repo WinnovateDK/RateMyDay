@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Button,
-  Alert,
-} from "react-native";
-import { setItem } from "@/utills/AsyncStorage";
+import { View, Text, TouchableOpacity, Button, Alert } from "react-native";
+import { setItem, removeItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
 import { CalendarColors, RMDColors } from "@/constants/Colors";
-import { formatDate } from "@/utills/CalendarUtills";
+import {
+  formatDate,
+  getDatesInCurrentMonth,
+  getDatesInCurrentYear,
+} from "@/utills/CalendarUtills";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -25,7 +23,7 @@ const AddRatingComponent: React.FC = () => {
       selected: true,
       selectedColor: CalendarColors[selectedScore! - 1],
     };
-    
+    //removeItem("2024-12-05");
     updateSavedRating(key, newRating);
   };
 
@@ -62,10 +60,10 @@ const AddRatingComponent: React.FC = () => {
         {renderScale()}
       </View>
       <View>
-        <TouchableOpacity 
-          className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center" 
+        <TouchableOpacity
+          className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center"
           onPress={handleSubmit}
-          >
+        >
           <Text className="text-white">Add</Text>
         </TouchableOpacity>
       </View>

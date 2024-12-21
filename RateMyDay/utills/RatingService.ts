@@ -141,14 +141,14 @@ export async function calculateAverageRatingForYear() {
       }
 }
 
-export async function getRatingsforLastMonth() {
+export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
   let daysPassed = daysPassedThisMonth();
   const datesInPastMonth = getDatesInCurrentMonth();
   const isRatingTodaySet = await isRatingSetToday();
-  const pastMontsRatings: number[] = [];
+  const pastMontsRatings: rateDatePair[] = [];
   let daysWithoutARating = 0;
 
-  if (isRatingTodaySet){
+    if (isRatingTodaySet){
       daysPassed += 1
     }
     
@@ -157,12 +157,14 @@ export async function getRatingsforLastMonth() {
         const rating = await getItem(datesInPastMonth[i]).then((rating) => {
           if(rating===null){
               daysWithoutARating += 1
+              rating = 0;
           }
           return rating;
         });
-        if(rating !== null){
-          pastMontsRatings.push(parseInt(rating));
-        }
+        
+        const dateRate: rateDatePair = {rating: parseInt(rating), date: datesInPastMonth[i]} 
+        pastMontsRatings.push(dateRate);
+        
       }
     }
 
@@ -200,11 +202,11 @@ export async function getRatingsForLastWeek() {
 
 }
 
-export async function getRatingsForLastYear() {
+export async function getRatingsForLastYear(): Promise<rateDatePair[]> {
   let daysPassed = daysPassedThisYear();
   const datesInPastYear = getDatesInCurrentYear();
   const isRatingTodaySet = await isRatingSetToday();
-  const pastYearsRatings: number[] = [];
+  const pastYearsRatings: rateDatePair[] = [];
   let daysWithoutARating = 0
 
   if (isRatingTodaySet){
@@ -219,9 +221,8 @@ export async function getRatingsForLastYear() {
           }
           return rating;
         });
-        if(rating !== null){
-          pastYearsRatings.push(parseInt(rating));
-        }
+        
+        pastYearsRatings.push({rating: rating !== null ? parseInt(rating) : rating, date: datesInPastYear[i]});
       }
     }
     return pastYearsRatings;
