@@ -5,9 +5,11 @@ import { Picker } from "@react-native-picker/picker";
 import { RMDColors } from "@/constants/Colors";
 
 import {
+  getAverageRatingsPerMonth,
   getRatingsforLastMonth,
   getRatingsForLastWeek,
   getRatingsForLastYear,
+  interpolateRating,
 } from "@/utills/RatingService";
 import {
   getDatesInCurrentMonth,
@@ -22,46 +24,6 @@ type chartDataType = {
   labels: string[];
   data: number[];
 };
-
-function interpolateNullValues(data: number[]): number[] {
-  const interpolatedData = [...data]; // Copy data array
-
-  for (let i = 0; i < interpolatedData.length; i++) {
-    if (interpolatedData[i] === null) {
-      // Find the closest previous and next non-null values
-      let prevIndex = i - 1;
-      let nextIndex = i + 1;
-
-      while (prevIndex >= 0 && interpolatedData[prevIndex] === null) {
-        prevIndex--;
-      }
-
-      while (
-        nextIndex < interpolatedData.length &&
-        interpolatedData[nextIndex] === null
-      ) {
-        nextIndex++;
-      }
-
-      // Interpolate value if valid neighbors exist
-      if (prevIndex >= 0 && nextIndex < interpolatedData.length) {
-        const prevValue = interpolatedData[prevIndex];
-        const nextValue = interpolatedData[nextIndex];
-        interpolatedData[i] =
-          prevValue +
-          ((nextValue - prevValue) * (i - prevIndex)) / (nextIndex - prevIndex);
-      } else if (prevIndex >= 0) {
-        // If only previous value exists
-        interpolatedData[i] = interpolatedData[prevIndex];
-      } else if (nextIndex < interpolatedData.length) {
-        // If only next value exists
-        interpolatedData[i] = interpolatedData[nextIndex];
-      }
-    }
-  }
-
-  return interpolatedData;
-}
 
 export default function ChartScreen() {
   const [timeRange, setTimeRange] = useState("weekly");
@@ -80,7 +42,17 @@ export default function ChartScreen() {
           labels.push(temp);
         }
         getRatingsForLastWeek().then((ratings) => {
-          setChartData({ labels: labels, data: ratings });
+          const labels: string[] = [];
+          const data: number[] = [];
+
+          ratings.map((rating) => {
+            labels.push(rating.date.split("-")[2]);
+            data.push(rating.rating);
+          });
+          setChartData({
+            data: data,
+            labels: labels,
+          });
         });
         break;
 
@@ -120,7 +92,7 @@ export default function ChartScreen() {
           "Nov",
           "Dec",
         ];
-        getRatingsForLastYear().then((ratings) => {
+        getAverageRatingsPerMonth().then((ratings) => {
           const daysInYear = getDatesInCurrentYear();
           const amountOfDays = daysInYear.length;
 
@@ -128,12 +100,9 @@ export default function ChartScreen() {
             { length: labels.length },
             (_, i) => `${labels[i]}`
           );
-          const data = Array(amountOfDays).fill(null);
+          const data = Array(12).fill(null);
           for (let i = 0; i < ratings.length; i++) {
-            if (ratings[i].rating === null) {
-              continue;
-            }
-            data[i] = ratings[i].rating;
+            data[i] = ratings[i];
           }
           setChartData({ labels: labelsArray, data: data });
         });

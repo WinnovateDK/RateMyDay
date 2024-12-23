@@ -157,7 +157,11 @@ export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
         const rating = await getItem(datesInPastMonth[i]).then((rating) => {
           if(rating===null){
               daysWithoutARating += 1
-              rating = 0;
+              const tempRating = interpolateRating(pastMontsRatings, i, datesInPastMonth).then((rating) => {
+                return rating;
+              });
+              
+              return tempRating;
           }
           return rating;
         });
@@ -168,16 +172,14 @@ export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
       }
     }
 
-    //const rateDate: rateDatePair[] = [{rating: 0, date: ""}]  
-    // make it return Promise<rateDatePair[]
     return pastMontsRatings;
 }
 
-export async function getRatingsForLastWeek() {
+export async function getRatingsForLastWeek(): Promise<rateDatePair[]> {
   let daysPassed = daysPassedThisWeek();
   const datesInPastWeek = getDatesInCurrentWeek();
   const isRatingTodaySet = await isRatingSetToday();
-  const pastWeeksRatings: number[] = [];
+  const pastWeeksRatings: rateDatePair[] = [];
   let daysWithoutARating = 0;
 
   if (isRatingTodaySet){
@@ -193,7 +195,7 @@ export async function getRatingsForLastWeek() {
         return rating;
       });
       if(rating !== null){
-          pastWeeksRatings.push(parseInt(rating));
+          pastWeeksRatings.push({rating: parseInt(rating), date: datesInPastWeek[i]});
         }
     }
   }
@@ -218,6 +220,11 @@ export async function getRatingsForLastYear(): Promise<rateDatePair[]> {
         const rating = await getItem(datesInPastYear[i]).then((rating) => {
           if(rating===null){
               daysWithoutARating += 1
+              const tempRating = interpolateRating(pastYearsRatings, i, datesInPastYear).then((rating) => {
+                return rating;
+              });
+              
+              return tempRating;
           }
           return rating;
         });
@@ -228,6 +235,34 @@ export async function getRatingsForLastYear(): Promise<rateDatePair[]> {
     return pastYearsRatings;
 }
 
+export async function getAverageRatingsPerMonth(): Promise<number[]> {
+  const ratings = await getRatingsForLastYear();
+  const monthlyRatings: { [key: string]: number[] } = {};
+
+  ratings.forEach(({ rating, date }) => {
+    const month = new Date(date).getMonth();
+    if (rating !== null) {
+      if (!monthlyRatings[month]) {
+        monthlyRatings[month] = [];
+      }
+      monthlyRatings[month].push(rating);
+    }
+  });
+
+  const averageRatings: number[] = [];
+  for (let month = 0; month < 12; month++) {
+    if (monthlyRatings[month] && monthlyRatings[month].length > 0) {
+      const sum = monthlyRatings[month].reduce((acc, rating) => acc + rating, 0);
+      const average = sum / monthlyRatings[month].length;
+      averageRatings.push(average);
+    } else {
+      averageRatings.push(0); // No ratings for this month
+    }
+  }
+
+  return averageRatings;
+}
+
 export function getAmountOfDaysInCurrentMonth(): number {
   const now: Date = new Date(); 
   const year: number = now.getFullYear();
@@ -235,3 +270,57 @@ export function getAmountOfDaysInCurrentMonth(): number {
 
   return new Date(year, month + 1, 0).getDate();
 }
+
+export async function interpolateRating(ratings: { rating: number | null, date: string }[], index: number, dates: string[]): Promise<number> {
+  const maxRange = 3;
+  let previousValue: number | null = null;
+  let nextValue: number | null = null;
+
+  // Search for previous value within the range
+  try {
+    for (let i = 1; i <= maxRange; i++) {
+      if (index - i >= 0 && ratings[index - i].rating !== null) {
+        previousValue = ratings[index - i].rating!;
+        break;
+      }
+    }
+  } catch (error) {
+    console.log("Error in previous interpolation value: ", error);
+  }
+
+  // Search for next value within the range
+  try {
+    for (let i = 1; i <= maxRange; i++) {
+      if (index + i < dates.length && dates[index + i] !== null) {
+        const nextRating = await getItem(dates[index+ i]).then((rating) => {
+          return parseInt(rating);
+        });
+        if(nextRating !== null){
+          nextValue = nextRating;
+          break;
+        }
+      }
+    }
+  } catch (error) {
+    console.log("Error in finding next interpolation value: ", error);
+  }
+
+  // Interpolate if both previous and next values are found
+  if (previousValue !== null && nextValue !== null) {
+    return (previousValue + nextValue) / 2;
+  }
+
+  // Return previous or next value if only one is found
+  if (previousValue !== null) {
+    console.log("Interpolating only prev: ", previousValue);
+    return previousValue;
+  }
+  if (nextValue !== null) {
+    return nextValue;
+  }
+
+  // Return 0 if no values are found within the range
+  return 0;
+}
+
+
