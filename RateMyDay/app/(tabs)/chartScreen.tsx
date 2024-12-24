@@ -28,7 +28,7 @@ type chartDataType = {
 export default function ChartScreen() {
   const [timeRange, setTimeRange] = useState("weekly");
   const [chartData, setChartData] = useState<chartDataType>({
-    labels: [],
+    labels: ["Your", "Data", "Will", "Appear", "Here", "When", "You", "Log"],
     data: [4, 6, 5, 7, 8, 9, 10],
   } as chartDataType);
 
@@ -58,6 +58,9 @@ export default function ChartScreen() {
 
       case "monthly":
         getRatingsforLastMonth().then((ratings) => {
+          if (ratings.length === 0) {
+            return;
+          }
           const daysInMonth = getDatesInCurrentMonth();
           const amountOfDays = daysInMonth.length;
           const weeksInMonth = getWeekNumbersForCurrentMonth();
@@ -93,6 +96,9 @@ export default function ChartScreen() {
           "Dec",
         ];
         getAverageRatingsPerMonth().then((ratings) => {
+          if (ratings.length === 0) {
+            return;
+          }
           const daysInYear = getDatesInCurrentYear();
           const amountOfDays = daysInYear.length;
 

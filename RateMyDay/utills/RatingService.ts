@@ -160,7 +160,6 @@ export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
               const tempRating = interpolateRating(pastMontsRatings, i, datesInPastMonth).then((rating) => {
                 return rating;
               });
-              
               return tempRating;
           }
           return rating;
@@ -253,6 +252,7 @@ export async function getAverageRatingsPerMonth(): Promise<number[]> {
   for (let month = 0; month < 12; month++) {
     if (monthlyRatings[month] && monthlyRatings[month].length > 0) {
       const sum = monthlyRatings[month].reduce((acc, rating) => acc + rating, 0);
+
       const average = sum / monthlyRatings[month].length;
       averageRatings.push(average);
     } else {
@@ -279,7 +279,7 @@ export async function interpolateRating(ratings: { rating: number | null, date: 
   // Search for previous value within the range
   try {
     for (let i = 1; i <= maxRange; i++) {
-      if (index - i >= 0 && ratings[index - i].rating !== null) {
+      if (index - i >= 0 && ratings[index - i].rating !== null && ratings[index - i].rating !== undefined && ratings[index - i].rating !== 0) {
         previousValue = ratings[index - i].rating!;
         break;
       }
@@ -293,9 +293,9 @@ export async function interpolateRating(ratings: { rating: number | null, date: 
     for (let i = 1; i <= maxRange; i++) {
       if (index + i < dates.length && dates[index + i] !== null) {
         const nextRating = await getItem(dates[index+ i]).then((rating) => {
-          return parseInt(rating);
+          return rating;
         });
-        if(nextRating !== null){
+        if(nextRating !== null && nextRating !== undefined){
           nextValue = nextRating;
           break;
         }
@@ -312,13 +312,11 @@ export async function interpolateRating(ratings: { rating: number | null, date: 
 
   // Return previous or next value if only one is found
   if (previousValue !== null) {
-    console.log("Interpolating only prev: ", previousValue);
     return previousValue;
   }
   if (nextValue !== null) {
     return nextValue;
   }
-
   // Return 0 if no values are found within the range
   return 0;
 }
