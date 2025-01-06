@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Button, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Button,
+  Alert,
+  TextInput,
+} from "react-native";
 import { setItem, removeItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
 import { CalendarColors, RMDColors } from "@/constants/Colors";
@@ -12,14 +19,16 @@ import {
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
+  const [note, setNote] = useState<string>("");
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
     const formattedDate = formatDate(dateObject);
-    await setItem(`${formattedDate}`, selectedScore);
+    await setItem(`${formattedDate}`, selectedScore, note);
     const key = formattedDate;
     const newRating = {
       rating: selectedScore!,
+      note: note,
       selected: true,
       selectedColor: CalendarColors[selectedScore! - 1],
     };
@@ -59,12 +68,19 @@ const AddRatingComponent: React.FC = () => {
       <View className="flex-row justify-center items-center mb-5">
         {renderScale()}
       </View>
-      <View>
+      <View className="flex-1 w-full items-center justify-items-center">
+        <TextInput
+          className="w-full h-36  bg-emerald-100 border border-gray-300 rounded-md my-2 px-2 text-center mb-5"
+          placeholder="Enter a note for the day (optional)"
+          value={note}
+          onChangeText={setNote}
+          multiline={true}
+        />
         <TouchableOpacity
-          className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center"
+          className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center mt-2"
           onPress={handleSubmit}
         >
-          <Text className="text-white">Add</Text>
+          <Text className="text-white">Add Rating</Text>
         </TouchableOpacity>
       </View>
     </View>

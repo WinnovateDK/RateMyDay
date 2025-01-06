@@ -11,9 +11,9 @@ import StatisticsBox from "@/components/StatisticsBox";
 import { CalendarColors, RMDColors } from "@/constants/Colors";
 import { useRatingStore } from "@/stores/RatingStore";
 import "../../global.css";
-import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
-import { useIsFocused } from '@react-navigation/native';
-import { useEffect } from 'react';
+import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
+import { useIsFocused } from "@react-navigation/native";
+import { useEffect } from "react";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -23,13 +23,17 @@ const calendar = () => {
   const storageSavedDates = useStorageSavedDates(isFocused);
   const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
 
-  useEffect(()=>{
+  useEffect(() => {
     setStoredDateRatings(storageSavedDates);
-  }, [storageSavedDates])
+    console.log("stored dates: ", storageSavedDates);
+  }, [storageSavedDates]);
 
   const getRatingForDate = useMemo(() => {
-    const ratingForDate = selectedDate && storedDateRatings ? storedDateRatings[selectedDate]?.rating : null;
-    
+    const ratingForDate =
+      selectedDate && storedDateRatings
+        ? storedDateRatings[selectedDate]?.rating
+        : null;
+
     return ratingForDate;
   }, [selectedDate]);
 
@@ -41,7 +45,6 @@ const calendar = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-teal-900">
-      {/* Top Section */}
       <View className="h-1/6 justify-center items-center pt-10">
         <Text className="text-4xl font-bold text-teal-50">
           Overview of your days
@@ -64,7 +67,7 @@ const calendar = () => {
               todayTextColor: RMDColors.rmdLighter,
               dayTextColor: "#2d4150",
               dotColor: "red",
-              arrowColor: RMDColors.rmdMid
+              arrowColor: RMDColors.rmdMid,
             }}
             style={{
               borderRadius: 10,
@@ -79,8 +82,7 @@ const calendar = () => {
           />
         </View>
         <View className="flex-1 mt-4 max-h-full">
-          <StatisticsBox
-          />
+          <StatisticsBox />
         </View>
       </View>
       <Modal
