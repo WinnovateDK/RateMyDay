@@ -7,11 +7,17 @@ import {
   getDatesInCurrentMonth,
   getDatesInCurrentYear,
   daysPassedThisYear,
+  getWeekNumbersForCurrentMonth,
 } from "@/utills/CalendarUtills";
 
-type rateDatePair = {
-  rating: number;
-  date: string;
+export type rateDatePair = {
+  Label: string;
+  Rating: number;
+};
+
+export type chartDataType = {
+  Label: Date;
+  Rating: number;
 };
 
 export async function calculateAverageRatingForWeek() {
@@ -20,7 +26,7 @@ export async function calculateAverageRatingForWeek() {
   const isRatingTodaySet = await isRatingSetToday();
   const pastWeeksRatings: number[] = [];
   let daysWithoutARating = 0;
-
+  console.log("hej");
   if (isRatingTodaySet) {
     daysPassed += 1;
   }
@@ -28,7 +34,7 @@ export async function calculateAverageRatingForWeek() {
   if (daysPassed > 0) {
     for (let i = 0; i < daysPassed; i++) {
       const rating = await getItem(datesInPastWeek[i]).then((rating) => {
-        if (rating.rating === null) {
+        if (rating === null) {
           daysWithoutARating += 1;
         }
         return rating;
@@ -161,26 +167,16 @@ export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
       const rating = await getItem(datesInPastMonth[i]).then((rating) => {
         if (rating === null) {
           daysWithoutARating += 1;
-          const tempRating = interpolateRating(
-            pastMontsRatings,
-            i,
-            datesInPastMonth
-          ).then((rating) => {
-            return rating;
-          });
-          return tempRating;
+        } else {
+          const dateRate: rateDatePair = {
+            Label: datesInPastMonth[i],
+            Rating: parseInt(rating.rating),
+          };
+          pastMontsRatings.push(dateRate);
         }
-        return rating;
       });
-
-      const dateRate: rateDatePair = {
-        rating: parseInt(rating.rating),
-        date: datesInPastMonth[i],
-      };
-      pastMontsRatings.push(dateRate);
     }
   }
-
   return pastMontsRatings;
 }
 
@@ -205,13 +201,12 @@ export async function getRatingsForLastWeek(): Promise<rateDatePair[]> {
       });
       if (rating.rating !== null) {
         pastWeeksRatings.push({
-          rating: parseInt(rating.rating),
-          date: datesInPastWeek[i],
+          Label: datesInPastWeek[i].split("-")[2],
+          Rating: parseInt(rating.rating),
         });
       }
     }
   }
-
   return pastWeeksRatings;
 }
 
@@ -228,26 +223,15 @@ export async function getRatingsForLastYear(): Promise<rateDatePair[]> {
 
   if (daysPassed > 0) {
     for (let i = 0; i < daysPassed; i++) {
-      const rating = await getItem(datesInPastYear[i]).then((rating) => {
-        if (rating === null) {
-          daysWithoutARating += 1;
-          const tempRating = interpolateRating(
-            pastYearsRatings,
-            i,
-            datesInPastYear
-          ).then((rating) => {
-            return rating;
-          });
+      const rating = await getItem(datesInPastYear[i]);
 
-          return tempRating;
-        }
-        return rating;
-      });
-
+      if (rating === null) {
+        daysWithoutARating += 1;
+        continue;
+      }
       pastYearsRatings.push({
-        rating:
-          rating.rating !== null ? parseInt(rating.rating) : rating.rating,
-        date: datesInPastYear[i],
+        Label: datesInPastYear[i],
+        Rating: rating !== null ? parseInt(rating.rating) : rating.rating,
       });
     }
   }
@@ -257,17 +241,15 @@ export async function getRatingsForLastYear(): Promise<rateDatePair[]> {
 export async function getAverageRatingsPerMonth(): Promise<number[]> {
   const ratings = await getRatingsForLastYear();
   const monthlyRatings: { [key: string]: number[] } = {};
-
-  ratings.forEach(({ rating, date }) => {
-    const month = new Date(date).getMonth();
-    if (rating !== null) {
+  ratings.forEach(({ Label, Rating }) => {
+    const month = new Date(Label).getMonth();
+    if (Rating !== null) {
       if (!monthlyRatings[month]) {
         monthlyRatings[month] = [];
       }
-      monthlyRatings[month].push(rating);
+      monthlyRatings[month].push(Rating);
     }
   });
-
   const averageRatings: number[] = [];
   for (let month = 0; month < 12; month++) {
     if (monthlyRatings[month] && monthlyRatings[month].length > 0) {
@@ -352,3 +334,45 @@ export async function interpolateRating(
   // Return 0 if no values are found within the range
   return 0;
 }
+
+const getISOWeekStart = (year: number, weekNumber: number) => {
+  const simple = new Date(year, 0, 1 + (weekNumber - 1) * 7);
+  const dayOfWeek = simple.getUTCDay() || 7;
+  const ISOWeekStart = new Date(simple);
+  ISOWeekStart.setUTCDate(simple.getUTCDate() - dayOfWeek + 1);
+  return ISOWeekStart;
+};
+
+export const getWeekData = (
+  data: chartDataType[],
+  year: number,
+  weekNumber: number
+) => {
+  const startOfWeek = getISOWeekStart(year, weekNumber);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 7);
+
+  return data.filter(
+    (item) => item.Label >= startOfWeek && item.Label < endOfWeek
+  );
+};
+
+export const calculateWeeklyAverages = (
+  data: chartDataType[],
+  year: number
+) => {
+  const weekNumbers = getWeekNumbersForCurrentMonth();
+  const averages = weekNumbers.map((weekNumber) => {
+    const weekData = getWeekData(data, year, weekNumber);
+    const totalRating = weekData.reduce((sum, item) => sum + item.Rating, 0);
+    const averageRating = totalRating / weekData.length || 0;
+
+    const week = `Week ${weekNumber}`;
+
+    return {
+      Label: week,
+      Rating: averageRating,
+    };
+  });
+  return averages;
+};

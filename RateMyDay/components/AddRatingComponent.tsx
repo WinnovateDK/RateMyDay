@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Button,
   Alert,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { setItem, removeItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
@@ -42,42 +43,55 @@ const AddRatingComponent: React.FC = () => {
     } else {
       setScore(selectedScore);
       Alert.alert("Success", `You submitted: ${selectedScore}`);
+      setNote("");
     }
   };
 
+  /*useEffect(() => {
+    const date = new Date();
+    const formatteddate = formatDate(date);
+    removeItem(`${formatteddate}`);
+
+    console.log("removed item");
+  }, []);*/
+
   const renderScale = () => {
     const totalCircles = 11;
-    return Array.from({ length: 11 }, (_, index) => (
+    return Array.from({ length: totalCircles }, (_, index) => (
       <TouchableOpacity
         key={index}
-        className={`aspect-square rounded-full  justify-center items-center mx-auto ${
-          selectedScore === index ? "bg-emerald-900" : "bg-emerald-700"
+        className={`aspect-square w-16 h-16 rounded-full justify-center items-center mx-2 ${
+          selectedScore === index ? "bg-sky-700" : "bg-sky-300"
         }`}
-        style={{
-          width: `${100 / totalCircles}%`,
-        }}
         onPress={() => setSelectedScore(index)}
       >
-        <Text className="text-base text-white font-bold">{index}</Text>
+        <Text className="text-2xl text-white font-bold">{index}</Text>
       </TouchableOpacity>
     ));
   };
-
   return (
     <View className="flex-1 justify-center items-center">
-      <View className="flex-row justify-center items-center mb-5">
-        {renderScale()}
-      </View>
+      <ScrollView
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        className="mb-3 py-2"
+        contentOffset={{ x: 210, y: 0 }}
+        fadingEdgeLength={80}
+      >
+        <View className="flex-row justify-center items-center">
+          {renderScale()}
+        </View>
+      </ScrollView>
       <View className="flex-1 w-full items-center justify-items-center">
         <TextInput
-          className="w-full h-36  bg-emerald-100 border border-gray-300 rounded-md my-2 px-2 text-center mb-5"
+          className="w-full h-32  bg-sky-200 border border-gray-300 rounded-md my-2 px-2 text-center mb-3"
           placeholder="Enter a note for the day (optional)"
           value={note}
           onChangeText={setNote}
           multiline={true}
         />
         <TouchableOpacity
-          className="w-32 h-12 bg-emerald-900 rounded-md items-center justify-center mt-2"
+          className="w-32 h-12 bg-sky-700 rounded-md items-center justify-center mt-2"
           onPress={handleSubmit}
         >
           <Text className="text-white">Add Rating</Text>

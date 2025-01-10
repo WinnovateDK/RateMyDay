@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   Modal,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useMemo, useState } from "react";
@@ -14,6 +15,10 @@ import "../../global.css";
 import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect } from "react";
+import { Picker } from "@react-native-picker/picker";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Octicons from "@expo/vector-icons/Octicons";
+import GraphComponent from "@/components/GraphComponent";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -22,6 +27,8 @@ const calendar = () => {
   const isFocused = useIsFocused();
   const storageSavedDates = useStorageSavedDates(isFocused);
   const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
+  const [timerange, setTimerange] = useState("Monthly");
+  const [statsType, setStatsType] = useState("Numbers");
 
   useEffect(() => {
     setStoredDateRatings(storageSavedDates);
@@ -37,14 +44,38 @@ const calendar = () => {
     return ratingForDate;
   }, [selectedDate]);
 
+  const getNoteForDate = useMemo(() => {
+    return selectedDate && storedDateRatings
+      ? storedDateRatings[selectedDate]?.note
+      : null;
+  }, [selectedDate]);
+
   const onDayPress = (day: { dateString: string }) => {
     setSelectedDate(day.dateString);
     console.log("selected date: ", day.dateString);
     setModalVisible(true);
   };
 
+  const handleLeftArrowPress = () => {
+    setTimerange((prev) =>
+      prev === "Yearly" ? "Monthly" : prev === "Monthly" ? "Weekly" : "Yearly"
+    );
+  };
+
+  const handleRightArrowPress = () => {
+    setTimerange((prev) =>
+      prev === "Weekly" ? "Monthly" : prev === "Monthly" ? "Yearly" : "Weekly"
+    );
+    console.log("timerange2: ", timerange);
+  };
+
+  const handleIconPress = () => {
+    setStatsType((prev) => (prev === "Numbers" ? "Graph" : "Numbers"));
+    console.log("statstype: ", statsType);
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-teal-900">
+    <SafeAreaView className="flex-1 bg-sky-900">
       <View className="h-1/6 justify-center items-center pt-10">
         <Text className="text-4xl font-bold text-teal-50">
           Overview of your days
@@ -81,8 +112,40 @@ const calendar = () => {
             }}
           />
         </View>
-        <View className="flex-1 mt-4 max-h-full">
-          <StatisticsBox />
+        <View className="flex-1 px-4 py-3.5 rounded-t-3xl shadow-gray-800 max-w-full max-h-full items-center bg-white">
+          <View className="flex-row w-full relative justify-center">
+            <View className="absolute left-0 ">
+              <TouchableOpacity onPress={handleIconPress}>
+                <Octicons
+                  name={statsType === "Numbers" ? "graph" : "number"}
+                  size={24}
+                  color="black"
+                />
+              </TouchableOpacity>
+            </View>
+            <View className="flex-row justify-center self-center">
+              <TouchableOpacity className="mr-4" onPress={handleLeftArrowPress}>
+                <AntDesign name="left" size={24} color="black" />
+              </TouchableOpacity>
+              <Text className="align-middle w-20 text-center text-xl">
+                {timerange}
+              </Text>
+              <TouchableOpacity
+                className="ml-4"
+                onPress={handleRightArrowPress}
+              >
+                <AntDesign name="right" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          {statsType === "Numbers" ? (
+            <StatisticsBox
+              renderCondition={storedDateRatings}
+              timerange={timerange}
+            />
+          ) : (
+            <GraphComponent timerange={timerange} />
+          )}
         </View>
       </View>
       <Modal
@@ -97,7 +160,7 @@ const calendar = () => {
               {selectedDate ? `Rating for ${selectedDate}` : "No Date Selected"}
             </Text>
             <Text
-              className="text-4xl font-bold mb-6"
+              className="text-4xl font-bold mb-4"
               style={{
                 color:
                   selectedDate && getRatingForDate !== null
@@ -109,9 +172,17 @@ const calendar = () => {
                 ? getRatingForDate
                 : "No rating"}
             </Text>
+            <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
+              <Text className="text-lg text-gray-600">
+                {selectedDate && getNoteForDate !== null ? getNoteForDate : ""}
+              </Text>
+            </ScrollView>
             <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              className="bg-teal-800 px-4 py-2 rounded-md"
+              onPress={() => {
+                setModalVisible(false);
+                setSelectedDate(null);
+              }}
+              className="bg-sky-800 px-4 py-2 rounded-md"
             >
               <Text className="text-white text-lg">Close</Text>
             </TouchableOpacity>

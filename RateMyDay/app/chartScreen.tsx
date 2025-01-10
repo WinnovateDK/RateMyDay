@@ -37,17 +37,13 @@ export default function ChartScreen() {
       case "weekly":
         let days = getDatesInCurrentWeek();
         let labels: string[] = [];
-        for (let i = 0; i < days.length; i++) {
-          let temp = days[i].split("-")[2];
-          labels.push(temp);
-        }
         getRatingsForLastWeek().then((ratings) => {
           const labels: string[] = [];
           const data: number[] = [];
 
           ratings.map((rating) => {
-            labels.push(rating.date.split("-")[2]);
-            data.push(rating.rating);
+            labels.push(rating.Label.split("-")[2]);
+            data.push(rating.Rating);
           });
           setChartData({
             data: data,
@@ -64,19 +60,22 @@ export default function ChartScreen() {
           const daysInMonth = getDatesInCurrentMonth();
           const amountOfDays = daysInMonth.length;
           const weeksInMonth = getWeekNumbersForCurrentMonth();
+          console.log("weeksinmonth: ", weeksInMonth);
           const weeksInMonth2 = Math.ceil(amountOfDays / 7);
           const labelsArray = Array.from(
             { length: weeksInMonth.length },
             (_, i) => `Week ${weeksInMonth[i]}`
           );
+          console.log("ratingslength", ratings);
           const data = Array(ratings.length).fill(null);
           for (let i = 0; i < ratings.length; i++) {
-            if (ratings[i].rating === null) {
+            if (ratings[i].Rating === null) {
               continue;
             }
-            data[i] = ratings[i].rating;
+            data[i] = ratings[i].Rating;
           }
           setChartData({ labels: labelsArray, data: data });
+          console.log("chartdata: ", chartData);
         });
         break;
 
@@ -111,6 +110,7 @@ export default function ChartScreen() {
             data[i] = ratings[i];
           }
           setChartData({ labels: labelsArray, data: data });
+          console.log("chartdata: ", chartData);
         });
         break;
     }
@@ -130,15 +130,7 @@ export default function ChartScreen() {
           labels: chartData.labels,
           datasets: [
             {
-              data: chartData.data,
-            },
-            {
               data: [0],
-              withDots: false,
-            },
-            {
-              data: [10],
-              withDots: false,
             },
           ],
         }}

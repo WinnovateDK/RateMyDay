@@ -7,12 +7,8 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import "../../global.css";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-   
     <Tabs
-      
       screenOptions={{
         tabBarStyle: {
           backgroundColor: RMDColors.rmdDark,
@@ -46,10 +42,10 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="chartScreen"
+      {/*<Tabs.Screen
+        name="chartScreen2"
         options={{
-          title: "Chart",
+          title: "Chart2",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "linechart" : "linechart"}
@@ -57,8 +53,7 @@ export default function TabLayout() {
             />
           ),
         }}
-      />
+      />*/}
     </Tabs>
-
   );
 }

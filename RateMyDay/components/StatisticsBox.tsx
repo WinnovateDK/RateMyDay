@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { calculateAverageRatingForWeek, calculateAverageRatingForMonth, calculateAverageRatingForYear } from "@/utills/RatingService";
+import {
+  calculateAverageRatingForWeek,
+  calculateAverageRatingForMonth,
+  calculateAverageRatingForYear,
+} from "@/utills/RatingService";
 
 type Stats = {
   averageRating: number;
@@ -9,81 +13,73 @@ type Stats = {
   lowestRating: number;
 };
 
-const StatisticsBox = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("monthly");
-  const [stats, setStats] = useState<Stats>({averageRating: 0, highestRating: 0, lowestRating: 0})
+const StatisticsBox = ({
+  renderCondition,
+  timerange,
+}: {
+  renderCondition: any;
+  timerange: string;
+}) => {
+  const [stats, setStats] = useState<Stats>({
+    averageRating: 0,
+    highestRating: 0,
+    lowestRating: 0,
+  });
 
   useEffect(() => {
-    switch (selectedPeriod) {
-      case "weekly":
+    switch (timerange) {
+      case "Weekly":
         calculateAverageRatingForWeek().then((avgRatings) => {
           setStats({
-            averageRating: avgRatings.averageRating, 
-            highestRating: avgRatings.highestRating, 
-            lowestRating: avgRatings.lowestRating
+            averageRating: avgRatings.averageRating,
+            highestRating: avgRatings.highestRating,
+            lowestRating: avgRatings.lowestRating,
           });
         });
         break;
 
-      case "monthly":
+      case "Monthly":
         calculateAverageRatingForMonth().then((avgRatings) => {
           setStats({
-            averageRating: avgRatings.averageRating, 
-            highestRating: avgRatings.highestRating, 
-            lowestRating: avgRatings.lowestRating
+            averageRating: avgRatings.averageRating,
+            highestRating: avgRatings.highestRating,
+            lowestRating: avgRatings.lowestRating,
           });
         });
         break;
 
-      case "yearly":
+      case "Yearly":
         calculateAverageRatingForYear().then((avgRatings) => {
           setStats({
-            averageRating: avgRatings.averageRating, 
-            highestRating: avgRatings.highestRating, 
-            lowestRating: avgRatings.lowestRating
+            averageRating: avgRatings.averageRating,
+            highestRating: avgRatings.highestRating,
+            lowestRating: avgRatings.lowestRating,
           });
         });
-        break;    
-    }    
-  }, [selectedPeriod]);
-  
-  return (
-    <View className="flex-1 px-4 py-3.5 rounded-t-3xl shadow-gray-800 max-w-full max-h-full items-center bg-white">
-      <View className="absolute top-0 right-0">
-        <Picker
-          selectedValue={selectedPeriod}
-          onValueChange={(itemValue) => setSelectedPeriod(itemValue)}
-          style={{ width: 140, height: 40 }}
-        >
-          <Picker.Item label="Weekly" value="weekly" />
-          <Picker.Item label="Monthly" value="monthly" />
-          <Picker.Item label="Yearly" value="yearly" />
-        </Picker>
-      </View>
+        break;
+    }
+  }, [renderCondition, timerange]);
 
-      <View className="w-full items-center">
-        <Text className="text-xl font-semibold text-gray-800">Your stats</Text>
+  return (
+    <View className="justify-center items-center h-full">
+      <View className="flex items-center">
+        <Text className="text-4xl text-sky-800">Average Rating</Text>
+        <Text className="text-4xl font-bold text-sky-900 mt-4">
+          {stats.averageRating}
+        </Text>
       </View>
-      <View className="justify-center items-center h-full">
+      <View className="mt-5 flex-row justify-between w-full px-4">
         <View className="flex items-center">
-          <Text className="text-4xl text-teal-800">Average Rating</Text>
-          <Text className="text-4xl font-bold text-teal-900 mt-4">
-            {stats.averageRating}
+          <Text className="text-xl text-sky-800">Lowest Rating</Text>
+          <Text className="text-2xl font-bold text-sky-900 mt-4">
+            {stats.lowestRating}
           </Text>
         </View>
-        <View className="mt-5 flex-row justify-between w-full px-4">
-          <View className="flex items-center">
-            <Text className="text-xl text-teal-800">Lowest Rating</Text>
-            <Text className="text-2xl font-bold text-teal-900 mt-4">
-              {stats.lowestRating}
-            </Text>
-          </View>
-          <View className="items-center">
-            <Text className="text-xl text-teal-800">Highest Rating</Text>
-            <Text className="text-2xl font-bold text-teal-900 mt-4">
-              {stats.highestRating}
-            </Text>
-          </View>
+        <View className="items-center">
+          <Text className="text-xl text-sky-800">Highest Rating</Text>
+          <Text className="text-2xl font-bold text-sky-900 mt-4">
+            {stats.highestRating}
+          </Text>
         </View>
       </View>
     </View>

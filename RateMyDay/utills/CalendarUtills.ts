@@ -42,7 +42,7 @@ export async function handleGetTodaysRating() {
   const rating = await getItem(`${formattedDate}`).then((rating) => {
     return rating;
   });
-  return rating.rating;
+  return rating;
 }
 
 export async function isRatingSetToday(): Promise<boolean> {
