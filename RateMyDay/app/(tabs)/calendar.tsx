@@ -9,7 +9,7 @@ import {
 import { Calendar } from "react-native-calendars";
 import { useMemo, useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
-import { CalendarColors, RMDColors } from "@/constants/Colors";
+import { CalendarColors } from "@/constants/Colors";
 import { useRatingStore } from "@/stores/RatingStore";
 import "../../global.css";
 import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
@@ -32,7 +32,6 @@ const calendar = () => {
 
   useEffect(() => {
     setStoredDateRatings(storageSavedDates);
-    console.log("stored dates: ", storageSavedDates);
   }, [storageSavedDates]);
 
   const getRatingForDate = useMemo(() => {
@@ -52,7 +51,6 @@ const calendar = () => {
 
   const onDayPress = (day: { dateString: string }) => {
     setSelectedDate(day.dateString);
-    console.log("selected date: ", day.dateString);
     setModalVisible(true);
   };
 
@@ -66,12 +64,10 @@ const calendar = () => {
     setTimerange((prev) =>
       prev === "Weekly" ? "Monthly" : prev === "Monthly" ? "Yearly" : "Weekly"
     );
-    console.log("timerange2: ", timerange);
   };
 
   const handleIconPress = () => {
     setStatsType((prev) => (prev === "Numbers" ? "Graph" : "Numbers"));
-    console.log("statstype: ", statsType);
   };
 
   return (
@@ -90,15 +86,16 @@ const calendar = () => {
           <Calendar
             markedDates={storedDateRatings}
             onDayPress={onDayPress}
+            firstDay={1}
             theme={{
               calendarBackground: "white",
               textSectionTitleColor: "#b6c1cd",
-              selectedDayBackgroundColor: RMDColors.rmdMid,
+              selectedDayBackgroundColor: "#037A4B",
               selectedDayTextColor: "#ffffff",
-              todayTextColor: RMDColors.rmdLighter,
+              todayTextColor: "#00D382",
               dayTextColor: "#2d4150",
               dotColor: "red",
-              arrowColor: RMDColors.rmdMid,
+              arrowColor: "#0084c7",
             }}
             style={{
               borderRadius: 10,
@@ -115,7 +112,7 @@ const calendar = () => {
         <View className="flex-1 px-4 py-3.5 rounded-t-3xl shadow-gray-800 max-w-full max-h-full items-center bg-white">
           <View className="flex-row w-full relative justify-center">
             <View className="absolute left-0 ">
-              <TouchableOpacity onPress={handleIconPress}>
+              <TouchableOpacity className="w-8" onPress={handleIconPress}>
                 <Octicons
                   name={statsType === "Numbers" ? "graph" : "number"}
                   size={24}

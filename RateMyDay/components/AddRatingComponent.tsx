@@ -1,26 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  Button,
   Alert,
   TextInput,
   ScrollView,
+  NativeScrollEvent,
 } from "react-native";
 import { setItem, removeItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
-import { CalendarColors, RMDColors } from "@/constants/Colors";
-import {
-  formatDate,
-  getDatesInCurrentMonth,
-  getDatesInCurrentYear,
-} from "@/utills/CalendarUtills";
+import { CalendarColors } from "@/constants/Colors";
+import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useIsFocused } from "@react-navigation/native";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
   const [note, setNote] = useState<string>("");
+  const [scrollEnd, setScrollEnd] = useState(false);
+  const [scrollStart, setScrollStart] = useState(false);
+  const [updateOrAdd, setUpdateOrAdd] = useState("Add");
+  const isFocused = useIsFocused();
+  const [scoreSet, setScoreSet] = useState<boolean>();
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
@@ -33,7 +36,7 @@ const AddRatingComponent: React.FC = () => {
       selected: true,
       selectedColor: CalendarColors[selectedScore! - 1],
     };
-    //removeItem("2024-12-05");
+    removeItem("2025-01-07");
     updateSavedRating(key, newRating);
   };
 
@@ -44,16 +47,45 @@ const AddRatingComponent: React.FC = () => {
       setScore(selectedScore);
       Alert.alert("Success", `You submitted: ${selectedScore}`);
       setNote("");
+      setScoreSet(true);
     }
   };
 
-  /*useEffect(() => {
-    const date = new Date();
-    const formatteddate = formatDate(date);
-    removeItem(`${formatteddate}`);
+  const handleScroll = ({
+    nativeEvent,
+  }: {
+    nativeEvent: NativeScrollEvent;
+  }) => {
+    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+    const isEndReached =
+      contentOffset.x + layoutMeasurement.width >= contentSize.width - 5;
+    const isStartReached = contentOffset.x <= 5;
 
-    console.log("removed item");
-  }, []);*/
+    if (scrollEnd !== isEndReached) {
+      setScrollEnd(isEndReached);
+    }
+    if (scrollStart !== isStartReached) {
+      setScrollStart(isStartReached);
+    }
+  };
+
+  // useEffect(() => {
+  //   const date = new Date();
+  //   const formatteddate = formatDate(date);
+  //   removeItem(`${formatteddate}`);
+
+  //   console.log("removed item");
+  // }, []);
+
+  useEffect(() => {
+    isRatingSetToday().then((isSet) => {
+      if (isSet === true) {
+        setUpdateOrAdd("Update");
+      } else {
+        setUpdateOrAdd("Add");
+      }
+    });
+  }, [isFocused, scoreSet]);
 
   const renderScale = () => {
     const totalCircles = 11;
@@ -71,12 +103,27 @@ const AddRatingComponent: React.FC = () => {
   };
   return (
     <View className="flex-1 justify-center items-center">
+      <View className="flex-row w-full justify-between px-2.5">
+        <AntDesign
+          name="arrowleft"
+          size={18}
+          color={scrollStart === true ? "transparent" : "#0084c7"}
+        />
+
+        <AntDesign
+          name="arrowright"
+          size={18}
+          color={scrollEnd === true ? "transparent" : "#0084c7"}
+        />
+      </View>
       <ScrollView
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         className="mb-3 py-2"
         contentOffset={{ x: 210, y: 0 }}
         fadingEdgeLength={80}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <View className="flex-row justify-center items-center">
           {renderScale()}
@@ -84,17 +131,17 @@ const AddRatingComponent: React.FC = () => {
       </ScrollView>
       <View className="flex-1 w-full items-center justify-items-center">
         <TextInput
-          className="w-full h-32  bg-sky-200 border border-gray-300 rounded-md my-2 px-2 text-center mb-3"
+          className="w-full h-36  bg-sky-200 border border-gray-300 rounded-md my-4 px-2 text-center mb-3"
           placeholder="Enter a note for the day (optional)"
           value={note}
           onChangeText={setNote}
           multiline={true}
         />
         <TouchableOpacity
-          className="w-32 h-12 bg-sky-700 rounded-md items-center justify-center mt-2"
+          className="w-44 h-12 bg-sky-700 rounded-md items-center justify-center mt-6"
           onPress={handleSubmit}
         >
-          <Text className="text-white">Add Rating</Text>
+          <Text className="text-white">{updateOrAdd} Todays Rating</Text>
         </TouchableOpacity>
       </View>
     </View>

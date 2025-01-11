@@ -26,22 +26,20 @@ export async function calculateAverageRatingForWeek() {
   const isRatingTodaySet = await isRatingSetToday();
   const pastWeeksRatings: number[] = [];
   let daysWithoutARating = 0;
-  console.log("hej");
   if (isRatingTodaySet) {
     daysPassed += 1;
   }
 
   if (daysPassed > 0) {
     for (let i = 0; i < daysPassed; i++) {
-      const rating = await getItem(datesInPastWeek[i]).then((rating) => {
-        if (rating === null) {
-          daysWithoutARating += 1;
-        }
-        return rating;
-      });
-      if (rating !== null) {
-        pastWeeksRatings.push(parseInt(rating.rating));
+      const rating = await getItem(datesInPastWeek[i]);
+
+      if (rating === null) {
+        daysWithoutARating += 1;
+        continue;
       }
+
+      pastWeeksRatings.push(parseInt(rating.rating));
     }
 
     const highestRating = Math.max(...pastWeeksRatings);
@@ -194,14 +192,17 @@ export async function getRatingsForLastWeek(): Promise<rateDatePair[]> {
   if (daysPassed > 0) {
     for (let i = 0; i < daysPassed; i++) {
       const rating = await getItem(datesInPastWeek[i]).then((rating) => {
-        if (rating.rating === null) {
+        if (rating === null) {
           daysWithoutARating += 1;
         }
         return rating;
       });
-      if (rating.rating !== null) {
+      if (rating !== null) {
+        const split = datesInPastWeek[i].split("-");
+        const datesInPastWeekFormatted = `${split[2]}-${split[1]}`;
+
         pastWeeksRatings.push({
-          Label: datesInPastWeek[i].split("-")[2],
+          Label: datesInPastWeekFormatted,
           Rating: parseInt(rating.rating),
         });
       }

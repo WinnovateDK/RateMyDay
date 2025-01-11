@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RateMyDay",
-    "slug": "RateMyDay",
+    "slug": "ratemyday",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -38,8 +38,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "3576a9b3-952e-4db9-9843-84d0217683f2"
+        "projectId": "5f6bfc42-c699-4191-82a8-2ac8cf795edf"
       }
-    }
+    },
+    "owner": "tromborg"
   }
 }

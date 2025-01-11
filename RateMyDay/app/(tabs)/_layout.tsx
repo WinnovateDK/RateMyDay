@@ -1,8 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { RMDColors } from "@/constants/Colors";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import "../../global.css";
 
@@ -11,10 +9,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: RMDColors.rmdDark,
+          backgroundColor: "#0069a1",
         },
-        tabBarActiveTintColor: RMDColors.rmdLightest,
-        tabBarInactiveTintColor: "#99f6e4",
+        tabBarActiveTintColor: "white",
+        tabBarInactiveTintColor: "#acc5fd",
         headerShown: false,
       }}
     >

@@ -10,6 +10,7 @@ import {
   CartesianChart,
   Scatter,
   useLinePath,
+  useAnimatedPath,
   type PointsArray,
 } from "victory-native";
 import { Path } from "@shopify/react-native-skia";
@@ -29,20 +30,12 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
 
   const CustomLine = ({ points }: { points: PointsArray }) => {
     const { path } = useLinePath(points, { curveType: "cardinal" });
-    return <Path path={path} style="stroke" strokeWidth={3} color="#bae6fd" />;
-  };
+    const animPath = useAnimatedPath(path);
 
-  /*const handleLeftArrowPress = () => {
-    setTimerange((prev) =>
-      prev === "Yearly" ? "Monthly" : prev === "Monthly" ? "Weekly" : "Yearly"
+    return (
+      <Path path={animPath} style="stroke" strokeWidth={3} color="#bae6fd" />
     );
   };
-
-  const handleRightArrowPress = () => {
-    setTimerange((prev) =>
-      prev === "Weekly" ? "Monthly" : prev === "Monthly" ? "Yearly" : "Weekly"
-    );
-  };*/
 
   useEffect(() => {
     switch (timerange) {
@@ -69,9 +62,6 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
             console.log("no ratings for this week");
             return;
           }
-          const filteredData = ratings.filter(
-            (item) => item.Label !== undefined && item.Rating !== undefined
-          );
           setData(ratings);
         });
         break;
