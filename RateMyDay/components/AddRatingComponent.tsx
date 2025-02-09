@@ -36,7 +36,6 @@ const AddRatingComponent: React.FC = () => {
       selected: true,
       selectedColor: CalendarColors[selectedScore! - 1],
     };
-    removeItem("2025-01-07");
     updateSavedRating(key, newRating);
   };
 
@@ -142,6 +141,12 @@ const AddRatingComponent: React.FC = () => {
           onPress={handleSubmit}
         >
           <Text className="text-white">{updateOrAdd} Todays Rating</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="w-44 h-12 bg-sky-700 rounded-md items-center justify-center mt-6"
+          onPress={handleSubmit}
+        >
+          <Text className="text-white">Export data</Text>
         </TouchableOpacity>
       </View>
     </View>
