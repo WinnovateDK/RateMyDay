@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import RNFS from 'react-native-fs';
-import Share from 'react-native-share';
-import DocumentPicker from 'react-native-document-picker';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
+import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
+import { useIsFocused } from '@react-navigation/native';
+import { setItem } from '@/utills/AsyncStorage';
+import { useRatingStore } from '@/stores/RatingStore';
 
-const FileTransferDialog = () => {
+const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   const [filePath, setFilePath] = useState<string | null>(null);
-  const userData = { name: 'John Doe', age: 30, email: 'johndoe@example.com' };
-
+  const isFocused = useIsFocused();
+  const userData = useStorageSavedDates(isFocused);
+  
   const saveUserData = async () => {
     try {
-      const path = `${RNFS.DocumentDirectoryPath}/user_data.json`;
-      await RNFS.writeFile(path, JSON.stringify(userData, null, 2), 'utf8');
+      const path = `${FileSystem.documentDirectory}user_data.json`;
+      await FileSystem.writeAsStringAsync(path, JSON.stringify(userData, null, 2), {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
       setFilePath(path);
       Alert.alert('Success', 'User data saved successfully.');
     } catch (error) {
@@ -29,10 +34,11 @@ const FileTransferDialog = () => {
     }
 
     try {
-      await Share.open({
-        url: `file://${filePath}`,
-        type: 'application/json',
-      });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(filePath, { mimeType: 'application/json' });
+      } else {
+        Alert.alert('Error', 'Sharing is not available on this device.');
+      }
     } catch (error) {
       console.error('Error sharing file:', error);
     }
@@ -40,12 +46,19 @@ const FileTransferDialog = () => {
 
   const loadUserData = async () => {
     try {
-      const result = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.allFiles],
-      });
+      const result = await DocumentPicker.getDocumentAsync({ type: '*/*' });
+      if (result.canceled) return;
 
-      const content = await RNFS.readFile(result.uri, 'utf8');
+      const content = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
       const data = JSON.parse(content);
+
+      for (const [key, value] of Object.entries(data)) {
+        const userValue = value as { rating: any; note: string };
+        await setItem(key, userValue.rating, userValue.note);
+      }
+
       Alert.alert('Data Loaded', `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`);
     } catch (error) {
       console.error('Error loading file:', error);
@@ -54,20 +67,29 @@ const FileTransferDialog = () => {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="default">Transfer User Data</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>User Data Transfer</DialogTitle>
-        </DialogHeader>
-        <Button className="w-full mb-2" onPress={saveUserData}>Save Data to File</Button>
-        <Button className="w-full mb-2" onPress={shareUserData}>Share File</Button>
-        <Button className="w-full" onPress={loadUserData}>Load Data from File</Button>
-      </DialogContent>
-    </Dialog>
+    <View className='flex-1 justify-center items-center bg-sky-100'>
+      
+      <View className='flex-1 justify-center items-center bg-sky-100'>
+        <Text className='font-bold '>User Data Transfer</Text>
+
+        <TouchableOpacity className="bg-sky-800 p-14 m-10 border-r-8" onPress={saveUserData}>
+          <Text className="color-sky-100 font-bold">Save Data to File</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity className="bg-sky-800 p-14 m-10 border-r-8" onPress={shareUserData}>
+          <Text className="color-sky-100 font-bold">Share File</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity className="bg-sky-800 p-14 m-10 border-r-8" onPress={loadUserData}>
+          <Text className="color-sky-100 font-bold">Load Data from File</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity className="bg-red-500 p-2 m-2 rounded" onPress={onClose}>
+          <Text className="color-white font-bold">Close</Text>
+      </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
-export default FileTransferDialog;
+export default ExportFileComponent;

@@ -15,7 +15,6 @@ import "../../global.css";
 import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect } from "react";
-import { Picker } from "@react-native-picker/picker";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
 import GraphComponent from "@/components/GraphComponent";

@@ -14,6 +14,7 @@ import { CalendarColors } from "@/constants/Colors";
 import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
+import ExportFileComponent from "@/components/ExportFileComponent";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -24,7 +25,7 @@ const AddRatingComponent: React.FC = () => {
   const [updateOrAdd, setUpdateOrAdd] = useState("Add");
   const isFocused = useIsFocused();
   const [scoreSet, setScoreSet] = useState<boolean>();
-
+  const [showExportComponent, setShowExportComponent] = useState(false);
   const setScore = async (score: Number) => {
     const dateObject = new Date();
     const formattedDate = formatDate(dateObject);
@@ -141,12 +142,6 @@ const AddRatingComponent: React.FC = () => {
           onPress={handleSubmit}
         >
           <Text className="text-white">{updateOrAdd} Todays Rating</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="w-44 h-12 bg-sky-700 rounded-md items-center justify-center mt-6"
-          onPress={handleSubmit}
-        >
-          <Text className="text-white">Export data</Text>
         </TouchableOpacity>
       </View>
     </View>

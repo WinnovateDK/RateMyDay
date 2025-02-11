@@ -1,28 +1,31 @@
+import React, { useState } from "react";
 import {
   Image,
   View,
   Text,
-  Alert,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import Animated from "react-native-reanimated";
-import "../../global.css";
+import { Ionicons } from "@expo/vector-icons";
 import AddRatingComponent from "@/components/AddRatingComponent";
-import { useState } from "react";
+import ExportFileComponent from "@/components/ExportFileComponent";
+import "../../global.css";
 
 export default function AddRating() {
-  const [rating] = useState<number | null>();
+  const [showSidePanel, setShowSidePanel] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-sky-100">
       <View className="bg-sky-200 h-1/4 w-full justify-center pt-4 pb-2 flex-col">
-        <View>
+        <View className="flex-row justify-between px-4">
           <Image
             source={require("@/assets/images/logo.png")}
             style={styles.reactLogo}
           />
+          <TouchableOpacity className="pt-10" onPress={() => setShowSidePanel(true)}>
+            <Ionicons name="settings" size={24} color="#0084c7" />
+          </TouchableOpacity>
         </View>
         <View className="justify-center items-center">
           <Text className="text-5xl text-sky-800">Rate My Day</Text>
@@ -56,6 +59,11 @@ export default function AddRating() {
           </View>
         </View>
       </View>
+      {showSidePanel && (
+        <View style={styles.sidePanel}>
+          <ExportFileComponent onClose={() => setShowSidePanel(false)} />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -68,5 +76,19 @@ const styles = StyleSheet.create({
     position: "relative",
     resizeMode: "center",
     marginTop: 12,
+  },
+  sidePanel: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: "50%",
+    height: "100%",
+    backgroundColor: "#f0f0f0",
+    zIndex: 1000,
+    shadowColor: "#000",
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 5,
   },
 });
