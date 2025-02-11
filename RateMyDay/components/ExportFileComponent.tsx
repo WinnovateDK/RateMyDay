@@ -6,7 +6,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
 import { useIsFocused } from '@react-navigation/native';
 import { setItem } from '@/utills/AsyncStorage';
-import { useRatingStore } from '@/stores/RatingStore';
+import { MotiView } from 'moti';
+
 
 const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   const [filePath, setFilePath] = useState<string | null>(null);
@@ -67,28 +68,27 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <View className='flex-1 justify-center items-center bg-sky-100'>
-      
-      <View className='flex-1 justify-center items-center bg-sky-100'>
-        <Text className='font-bold '>User Data Transfer</Text>
-
-        <TouchableOpacity className="bg-sky-800 p-14 m-10 border-r-8" onPress={saveUserData}>
-          <Text className="color-sky-100 font-bold">Save Data to File</Text>
+      <View className='flex-1 justify-center items-center bg-sky-100 shadow-slate-800'>
+        <View className='flex-1 justify-center items-center bg-sky-100'>
+        <Text className='font-bold text-xl'>User Data Transfer</Text>
+        <Text className='text-m p-4'>Here you can export your ratings and notes to a file that can be sent or loaded again on another device</Text>
+        <TouchableOpacity className="bg-sky-800 px-6 py-3 m-4 rounded" onPress={saveUserData}>
+          <Text className="text-sky-100 text-lg font-bold">Save Data to File</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-sky-800 p-14 m-10 border-r-8" onPress={shareUserData}>
-          <Text className="color-sky-100 font-bold">Share File</Text>
+        <TouchableOpacity className="bg-sky-800 px-6 py-3 m-4 rounded" onPress={shareUserData}>
+          <Text className="text-sky-100 text-lg font-bold">Share File</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-sky-800 p-14 m-10 border-r-8" onPress={loadUserData}>
-          <Text className="color-sky-100 font-bold">Load Data from File</Text>
+        <TouchableOpacity className="bg-sky-800 px-6 py-3 m-4 rounded" onPress={loadUserData}>
+          <Text className="text-sky-100 text-m font-bold">Load Data from File</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-red-500 p-2 m-2 rounded" onPress={onClose}>
-          <Text className="color-white font-bold">Close</Text>
-      </TouchableOpacity>
+        <TouchableOpacity className="bg-red-500 px-4 py-2 m-2 rounded" onPress={onClose}>
+          <Text className="text-white text-lg font-bold">Close</Text>
+        </TouchableOpacity>
+        </View>
       </View>
-    </View>
   );
 };
 

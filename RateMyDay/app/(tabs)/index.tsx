@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AddRatingComponent from "@/components/AddRatingComponent";
 import ExportFileComponent from "@/components/ExportFileComponent";
 import "../../global.css";
+import { MotiView } from 'moti';
 
 export default function AddRating() {
   const [showSidePanel, setShowSidePanel] = useState(false);
@@ -59,8 +60,9 @@ export default function AddRating() {
           </View>
         </View>
       </View>
+    
       {showSidePanel && (
-        <View style={styles.sidePanel}>
+        <View style={styles.sidePanel} className="max-h-screen-safe">
           <ExportFileComponent onClose={() => setShowSidePanel(false)} />
         </View>
       )}
