@@ -14,7 +14,7 @@ import { CalendarColors } from "@/constants/Colors";
 import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
-import ExportFileComponent from "@/components/ExportFileComponent";
+import { shadowStyle } from "@/constants/Colors";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -96,6 +96,7 @@ const AddRatingComponent: React.FC = () => {
           selectedScore === index ? "bg-sky-700" : "bg-sky-300"
         }`}
         onPress={() => setSelectedScore(index)}
+        style={shadowStyle}
       >
         <Text className="text-2xl text-white font-bold">{index}</Text>
       </TouchableOpacity>
@@ -125,7 +126,7 @@ const AddRatingComponent: React.FC = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        <View className="flex-row justify-center items-center">
+        <View className="flex-row justify-center items-center pb-4">
           {renderScale()}
         </View>
       </ScrollView>
@@ -136,12 +137,15 @@ const AddRatingComponent: React.FC = () => {
           value={note}
           onChangeText={setNote}
           multiline={true}
+          style={shadowStyle}
         />
+      
         <TouchableOpacity
-          className="w-44 h-12 bg-sky-700 rounded-md items-center justify-center mt-6"
+          className="w-fit h-16 rounded-full items-center justify-center mt-6 bg-sky-100"
           onPress={handleSubmit}
+          style={shadowStyle}
         >
-          <Text className="text-white">{updateOrAdd} Todays Rating</Text>
+          <AntDesign name="pluscircle" size={56} color="#7dd3fc" />
         </TouchableOpacity>
       </View>
     </View>

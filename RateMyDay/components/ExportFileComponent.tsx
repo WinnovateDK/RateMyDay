@@ -7,7 +7,7 @@ import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
 import { useIsFocused } from '@react-navigation/native';
 import { setItem } from '@/utills/AsyncStorage';
 import { MotiView } from 'moti';
-
+import { shadowStyle } from '@/constants/Colors';
 
 const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   const [filePath, setFilePath] = useState<string | null>(null);
@@ -72,19 +72,35 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
         <View className='flex-1 justify-center items-center bg-sky-100'>
         <Text className='font-bold text-xl'>User Data Transfer</Text>
         <Text className='text-m p-4'>Here you can export your ratings and notes to a file that can be sent or loaded again on another device</Text>
-        <TouchableOpacity className="bg-sky-800 px-6 py-3 m-4 rounded" onPress={saveUserData}>
+        <TouchableOpacity 
+          className="bg-sky-800 px-6 py-3 m-4 rounded-full" 
+          onPress={saveUserData}
+          style={shadowStyle}
+          >
           <Text className="text-sky-100 text-lg font-bold">Save Data to File</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-sky-800 px-6 py-3 m-4 rounded" onPress={shareUserData}>
+        <TouchableOpacity 
+          className="bg-sky-800 px-6 py-3 m-4 rounded-full" 
+          onPress={shareUserData}
+          style={shadowStyle}
+          >
           <Text className="text-sky-100 text-lg font-bold">Share File</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-sky-800 px-6 py-3 m-4 rounded" onPress={loadUserData}>
+        <TouchableOpacity 
+          className="bg-sky-800 px-6 py-3 m-4 rounded-full" 
+          onPress={loadUserData}
+          style={shadowStyle}
+          >
           <Text className="text-sky-100 text-m font-bold">Load Data from File</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-red-500 px-4 py-2 m-2 rounded" onPress={onClose}>
+        <TouchableOpacity 
+          className="bg-red-500 px-4 py-2 m-2 rounded-full" 
+          onPress={onClose}
+          style={shadowStyle}
+          >
           <Text className="text-white text-lg font-bold">Close</Text>
         </TouchableOpacity>
         </View>
