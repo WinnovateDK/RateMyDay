@@ -33,14 +33,14 @@
     "experiments": {
       "typedRoutes": true
     },
+    "owner": "dulda",
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "5f6bfc42-c699-4191-82a8-2ac8cf795edf"
+        "projectId": "51c5fae3-9d2f-4133-8112-573ccf84369a"
       }
-    },
-    "owner": "tromborg"
+    }
   }
 }
