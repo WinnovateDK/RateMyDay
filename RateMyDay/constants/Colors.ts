@@ -19,7 +19,7 @@ export const shadowStyle = Platform.OS === 'ios' ? {
   shadowOpacity: 0.25,
   shadowRadius: 3.84,
 } : {
-  elevation: 3,
+  elevation: 6,
 };
 
 

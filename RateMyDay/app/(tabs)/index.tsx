@@ -15,6 +15,7 @@ import AddRatingComponent from "@/components/AddRatingComponent";
 import { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import ExportFileComponent from "@/components/ExportFileComponent";
+import { shadowStyle } from "@/constants/Colors";
 
 export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -49,13 +50,15 @@ export default function AddRating() {
             scrollEnabled={keyboardVisible}
           >
             <View className=" h-1/4 w-full justify-center pt-4 pb-2 border-b-2 border-cyan-400">
-              <View className="flex-row justify-between px-4">
+              <View className="flex-row items-center justify-between px-4">
+                <View className="w-6" />
                 <Image
                   source={require("@/assets/images/logo.png")}
                   style={styles.reactLogo}
+                  className="absolute left-1/2 -translate-x-1/2"
                 />
                 <TouchableOpacity
-                  className="pt-10"
+                  className="pt-10 pb-16"
                   onPress={() => setShowSidePanel(true)}
                 >
                   <Ionicons name="settings" size={24} color="#0084c7" />
@@ -78,14 +81,14 @@ export default function AddRating() {
                     How has your day been?
                   </Text>
                   {/* Emoji and Progress Bar */}
-                  <View className="bg-cyan-100 flex-row justify-around items-center p-4 rounded-lg shadow-md">
+                  <View className="bg-cyan-100 flex-row justify-around items-center p-4 rounded-lg shadow-md" style={shadowStyle}>
                     <Text className="text-3xl">😔</Text>
                     <View className="flex-1 mx-4 bg-cyan-300 h-2 rounded-full">
                       <View className="w-1/2 h-2 bg-cyan-600 rounded-full" />
                     </View>
                     <Text className="text-3xl">😊</Text>
                   </View>
-                  <View className="flex-row mt-2">
+                  <View className="flex-row mt-2 mb-2">
                     <AddRatingComponent />
                   </View>
                 </View>

@@ -126,13 +126,13 @@ const AddRatingComponent: React.FC = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        <View className="flex-row justify-center items-center pb-4">
+        <View className="flex-row justify-center items-center pb-6">
           {renderScale()}
         </View>
       </ScrollView>
 
       <TextInput
-        className="w-full h-36  bg-cyan-200 border border-gray-300 rounded-lg p-4 text-lg text-gray-700"
+        className="w-full h-36  bg-cyan-200 border border-gray-300 rounded-3xl p-4 text-lg text-gray-700"
         placeholder="Enter a note for the day (optional)"
         value={noteText}
         onChangeText={(txt) => {
@@ -140,15 +140,15 @@ const AddRatingComponent: React.FC = () => {
           setNote(txt);
         }}
         multiline={true}
+        style={shadowStyle}
       />
       <TouchableOpacity
-        className="w-52 h-12 bg-cyan-700 rounded-lg items-center justify-center mt-6 shadow-md"
-        onPress={handleSubmit}
-      >
-        <Text className="text-white text-lg font-semibold">
-          {updateOrAdd} Todays Rating
-        </Text>
-      </TouchableOpacity>
+          className="w-fit h-16 rounded-full items-center justify-center mt-6 bg-cyan-50"
+          onPress={handleSubmit}
+          style={shadowStyle}
+        >
+          <AntDesign name="pluscircle" size={56} color="#67e8f9" />
+        </TouchableOpacity>
     </View>
   );
 };
