@@ -65,20 +65,20 @@ const StatisticsBox = ({
       <View className="flex items-center">
         <Text className="text-4xl text-sky-800">Average Rating</Text>
         <Text className="text-4xl font-bold text-sky-900 mt-4">
-          {stats.averageRating}
+          {stats.averageRating ? stats.averageRating : 0}
         </Text>
       </View>
       <View className="mt-5 flex-row justify-between w-full px-4">
         <View className="flex items-center">
           <Text className="text-xl text-sky-800">Lowest Rating</Text>
           <Text className="text-2xl font-bold text-sky-900 mt-4">
-            {stats.lowestRating}
+            {stats.lowestRating ? stats.lowestRating : 0}
           </Text>
         </View>
         <View className="items-center">
           <Text className="text-xl text-sky-800">Highest Rating</Text>
           <Text className="text-2xl font-bold text-sky-900 mt-4">
-            {stats.highestRating}
+            {stats.highestRating ? stats.highestRating : 0}
           </Text>
         </View>
       </View>

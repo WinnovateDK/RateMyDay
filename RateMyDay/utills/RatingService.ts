@@ -50,8 +50,8 @@ export async function calculateAverageRatingForWeek() {
       100;
     return {
       averageRating: averageRating,
-      lowestRating: lowestRating,
-      highestRating: highestRating,
+      lowestRating: lowestRating < 11 ? lowestRating : 0,
+      highestRating: highestRating > 0 ? highestRating : 0,
     };
   }
 
@@ -94,8 +94,8 @@ export async function calculateAverageRatingForMonth() {
       100;
     return {
       averageRating: averageRating,
-      lowestRating: lowestRating,
-      highestRating: highestRating,
+      lowestRating: lowestRating < 11 ? lowestRating : 0,
+      highestRating: highestRating > 0 ? highestRating : 0,
     };
   }
 
@@ -137,8 +137,8 @@ export async function calculateAverageRatingForYear() {
       100;
     return {
       averageRating: averageRating,
-      lowestRating: lowestRating,
-      highestRating: highestRating,
+      lowestRating: lowestRating < 11 ? lowestRating : 0,
+      highestRating: highestRating > 0 ? highestRating : 0,
     };
   }
 
@@ -162,7 +162,7 @@ export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
 
   if (daysPassed > 0) {
     for (let i = 0; i < daysPassed; i++) {
-      const rating = await getItem(datesInPastMonth[i]).then((rating) => {
+      await getItem(datesInPastMonth[i]).then((rating) => {
         if (rating === null) {
           daysWithoutARating += 1;
         } else {
@@ -175,6 +175,7 @@ export async function getRatingsforLastMonth(): Promise<rateDatePair[]> {
       });
     }
   }
+
   return pastMontsRatings;
 }
 
@@ -363,17 +364,25 @@ export const calculateWeeklyAverages = (
   year: number
 ) => {
   const weekNumbers = getWeekNumbersForCurrentMonth();
-  const averages = weekNumbers.map((weekNumber) => {
-    const weekData = getWeekData(data, year, weekNumber);
-    const totalRating = weekData.reduce((sum, item) => sum + item.Rating, 0);
-    const averageRating = totalRating / weekData.length || 0;
+  const averages = weekNumbers
+    .map((weekNumber) => {
+      const weekData = getWeekData(data, year, weekNumber);
+      const totalRating = weekData.reduce((sum, item) => sum + item.Rating, 0);
+      const averageRating = totalRating / weekData.length || 0;
 
-    const week = `Week ${weekNumber}`;
+      if (averageRating === 0) {
+        return null;
+      }
 
-    return {
-      Label: week,
-      Rating: averageRating,
-    };
-  });
+      const week = `Week ${weekNumber}`;
+
+      return {
+        Label: week,
+        Rating: averageRating,
+      };
+    })
+    .filter(
+      (entry): entry is { Label: string; Rating: number } => entry !== null
+    );
   return averages;
 };

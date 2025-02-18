@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import {
   getRatingsforLastMonth,
   calculateWeeklyAverages,
@@ -16,7 +16,7 @@ import {
 import { Path } from "@shopify/react-native-skia";
 import { useFont } from "@shopify/react-native-skia";
 import inter from "../assets/fonts/Inter_24pt-Medium.ttf";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import Toast from "react-native-toast-message";
 
 interface TimeSeriesData extends Record<string, unknown> {
   Label: string;
@@ -36,13 +36,20 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
       <Path path={animPath} style="stroke" strokeWidth={3} color="#bae6fd" />
     );
   };
+  const showToast = (text: string) => {
+    Toast.show({
+      type: "error",
+      text1: text,
+      position: "bottom",
+    });
+  };
 
   useEffect(() => {
     switch (timerange) {
       case "Monthly":
         getRatingsforLastMonth().then((ratings) => {
           if (ratings.length === 0) {
-            console.log("no ratings for this month");
+            showToast("There is no ratings for the current month.");
             return;
           }
           const formattedData = ratings.map((item) => ({
@@ -55,11 +62,12 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
           );
           setData(weeklyAveragesData);
         });
+
         break;
       case "Weekly":
         getRatingsForLastWeek().then((ratings) => {
           if (ratings.length === 0) {
-            console.log("no ratings for this week");
+            showToast("There is no ratings for the current week.");
             return;
           }
           setData(ratings);
@@ -67,8 +75,9 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
         break;
       case "Yearly":
         getAverageRatingsPerMonth().then((ratings) => {
+          console.log("data; ", ratings);
           if (ratings.length === 0) {
-            console.log("no ratings for this week");
+            showToast("There is no ratings for the current year.");
             return;
           }
           const months = [
@@ -86,10 +95,12 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
             "Dec",
           ];
 
-          const formattedYearlyData = ratings.map((rating, index) => ({
-            Label: months[index],
-            Rating: rating,
-          }));
+          const formattedYearlyData = ratings
+            .map((rating, index) => ({
+              Label: months[index],
+              Rating: rating,
+            }))
+            .filter((datapoint) => datapoint.Rating !== 0);
 
           setData(formattedYearlyData);
         });
@@ -126,7 +137,9 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
               )}
             </CartesianChart>
           ) : (
-            <Text>Loading...</Text>
+            <View className="w-full justify-center">
+              <ActivityIndicator size={60} />
+            </View>
           )}
         </View>
       </View>

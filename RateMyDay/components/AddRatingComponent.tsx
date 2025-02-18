@@ -19,6 +19,7 @@ import { shadowStyle } from "@/constants/Colors";
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
+  const [noteText, setNoteText] = useState<string>("");
   const [note, setNote] = useState<string>("");
   const [scrollEnd, setScrollEnd] = useState(false);
   const [scrollStart, setScrollStart] = useState(false);
@@ -46,7 +47,6 @@ const AddRatingComponent: React.FC = () => {
     } else {
       setScore(selectedScore);
       Alert.alert("Success", `You submitted: ${selectedScore}`);
-      setNote("");
       setScoreSet(true);
     }
   };
@@ -93,8 +93,8 @@ const AddRatingComponent: React.FC = () => {
       <TouchableOpacity
         key={index}
         className={`aspect-square w-16 h-16 rounded-full justify-center items-center mx-2 ${
-          selectedScore === index ? "bg-sky-700" : "bg-sky-300"
-        }`}
+          selectedScore === index ? "bg-cyan-700" : "bg-cyan-300"
+        } shadow-lg`}
         onPress={() => setSelectedScore(index)}
         style={shadowStyle}
       >
@@ -103,24 +103,24 @@ const AddRatingComponent: React.FC = () => {
     ));
   };
   return (
-    <View className="flex-1 justify-center items-center">
+    <View className="flex-1 justify-center items-center px-4">
       <View className="flex-row w-full justify-between px-2.5">
         <AntDesign
           name="arrowleft"
           size={18}
-          color={scrollStart === true ? "transparent" : "#0084c7"}
+          color={scrollStart === true ? "transparent" : "#0a9396"}
         />
 
         <AntDesign
           name="arrowright"
           size={18}
-          color={scrollEnd === true ? "transparent" : "#0084c7"}
+          color={scrollEnd === true ? "transparent" : "#0a9396"}
         />
       </View>
       <ScrollView
         horizontal={true}
         showsHorizontalScrollIndicator={false}
-        className="mb-3 py-2"
+        className="mb-4 py-2"
         contentOffset={{ x: 210, y: 0 }}
         fadingEdgeLength={80}
         onScroll={handleScroll}
@@ -130,24 +130,25 @@ const AddRatingComponent: React.FC = () => {
           {renderScale()}
         </View>
       </ScrollView>
-      <View className="flex-1 w-full items-center justify-items-center">
-        <TextInput
-          className="w-full h-36  bg-sky-200 border border-gray-300 rounded-md my-4 px-2 text-center mb-3"
-          placeholder="Enter a note for the day (optional)"
-          value={note}
-          onChangeText={setNote}
-          multiline={true}
-          style={shadowStyle}
-        />
-      
-        <TouchableOpacity
-          className="w-fit h-16 rounded-full items-center justify-center mt-6 bg-sky-100"
-          onPress={handleSubmit}
-          style={shadowStyle}
-        >
-          <AntDesign name="pluscircle" size={56} color="#7dd3fc" />
-        </TouchableOpacity>
-      </View>
+
+      <TextInput
+        className="w-full h-36  bg-cyan-200 border border-gray-300 rounded-lg p-4 text-lg text-gray-700"
+        placeholder="Enter a note for the day (optional)"
+        value={noteText}
+        onChangeText={(txt) => {
+          setNoteText(txt);
+          setNote(txt);
+        }}
+        multiline={true}
+      />
+      <TouchableOpacity
+        className="w-52 h-12 bg-cyan-700 rounded-lg items-center justify-center mt-6 shadow-md"
+        onPress={handleSubmit}
+      >
+        <Text className="text-white text-lg font-semibold">
+          {updateOrAdd} Todays Rating
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };

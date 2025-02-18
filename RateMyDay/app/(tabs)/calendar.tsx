@@ -120,14 +120,17 @@ const calendar = () => {
               </TouchableOpacity>
             </View>
             <View className="flex-row justify-center self-center">
-              <TouchableOpacity className="mr-4" onPress={handleLeftArrowPress}>
+              <TouchableOpacity
+                className="mr-4 w-12 items-center"
+                onPress={handleLeftArrowPress}
+              >
                 <AntDesign name="left" size={24} color="black" />
               </TouchableOpacity>
               <Text className="align-middle w-20 text-center text-xl">
                 {timerange}
               </Text>
               <TouchableOpacity
-                className="ml-4"
+                className="ml-4 w-12 items-center"
                 onPress={handleRightArrowPress}
               >
                 <AntDesign name="right" size={24} color="black" />
