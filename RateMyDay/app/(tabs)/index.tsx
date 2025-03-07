@@ -9,6 +9,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AddRatingComponent from "@/components/AddRatingComponent";
@@ -16,10 +17,17 @@ import { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import ExportFileComponent from "@/components/ExportFileComponent";
 import { shadowStyle } from "@/constants/Colors";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
 
 export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(false);
+  const translateX = useSharedValue(300);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -39,6 +47,14 @@ export default function AddRating() {
       keyboardDidShowListener.remove();
     };
   }, []);
+
+  useEffect(() => {
+    translateX.value = withTiming(showSidePanel ? 0 : 300, { duration: 300 });
+  }, [showSidePanel, translateX]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   return (
     <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>
@@ -81,7 +97,10 @@ export default function AddRating() {
                     How has your day been?
                   </Text>
                   {/* Emoji and Progress Bar */}
-                  <View className="bg-cyan-100 flex-row justify-around items-center p-4 rounded-lg shadow-md" style={shadowStyle}>
+                  <View
+                    className="bg-cyan-100 flex-row justify-around items-center p-4 rounded-lg shadow-md"
+                    style={shadowStyle}
+                  >
                     <Text className="text-3xl">😔</Text>
                     <View className="flex-1 mx-4 bg-cyan-300 h-2 rounded-full">
                       <View className="w-1/2 h-2 bg-cyan-600 rounded-full" />
@@ -95,11 +114,20 @@ export default function AddRating() {
               </View>
             </View>
 
-            {showSidePanel && (
-              <View style={styles.sidePanel} className="max-h-screen-safe">
-                <ExportFileComponent onClose={() => setShowSidePanel(false)} />
-              </View>
-            )}
+            <Pressable
+              style={[showSidePanel ? styles.overlay : styles.overlayOff]}
+              onPress={() => {
+                translateX.value = withTiming(300, { duration: 300 }, () => {
+                  runOnJS(setShowSidePanel)(false); // 👈 Wrap it with runOnJS
+                });
+              }}
+            ></Pressable>
+            <Animated.View
+              style={[styles.sidePanel, animatedStyle]}
+              className={"h-screen"}
+            >
+              <ExportFileComponent onClose={() => setShowSidePanel(false)} />
+            </Animated.View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </SafeAreaView>
@@ -116,18 +144,36 @@ const styles = StyleSheet.create({
     resizeMode: "center",
     marginTop: 12,
   },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "flex-end",
+  },
+  overlayOff: {
+    width: 0,
+    height: 0,
+  },
   sidePanel: {
     position: "absolute",
     top: 0,
     right: 0,
-    width: "50%",
-    height: "100%",
-    backgroundColor: "#f0f0f0",
+    width: "70%",
     zIndex: 1000,
     shadowColor: "#000",
     shadowOffset: { width: -2, height: 0 },
     shadowOpacity: 0.5,
-    shadowRadius: 5,
+    shadowRadius: 8,
     elevation: 5,
+  },
+  absolute: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
   },
 });

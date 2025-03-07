@@ -1,10 +1,16 @@
-import { Tabs } from "expo-router";
-import React from "react";
+import { Tabs, Redirect } from "expo-router";
+import React, { useState } from "react";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import useAuthStore from "@/stores/AuthStateStore";
 import "../../global.css";
 
 export default function TabLayout() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { session } = useAuthStore();
+
+  if (!session) return <Redirect href="/login" />;
+
   return (
     <Tabs
       screenOptions={{
@@ -40,18 +46,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/*<Tabs.Screen
-        name="chartScreen2"
-        options={{
-          title: "Chart2",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "linechart" : "linechart"}
-              color={color}
-            />
-          ),
-        }}
-      />*/}
     </Tabs>
   );
 }

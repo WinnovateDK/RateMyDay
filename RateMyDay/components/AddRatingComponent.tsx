@@ -15,6 +15,7 @@ import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
 import { shadowStyle } from "@/constants/Colors";
+import { useWindowDimensions } from "react-native";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -26,7 +27,11 @@ const AddRatingComponent: React.FC = () => {
   const [updateOrAdd, setUpdateOrAdd] = useState("Add");
   const isFocused = useIsFocused();
   const [scoreSet, setScoreSet] = useState<boolean>();
-  const [showExportComponent, setShowExportComponent] = useState(false);
+  const { width } = useWindowDimensions();
+
+  const buttonSize = Math.ceil(width * 0.14);
+  const contentOffsetX = width / 2 + buttonSize / 2;
+
   const setScore = async (score: Number) => {
     const dateObject = new Date();
     const formattedDate = formatDate(dateObject);
@@ -92,7 +97,7 @@ const AddRatingComponent: React.FC = () => {
     return Array.from({ length: totalCircles }, (_, index) => (
       <TouchableOpacity
         key={index}
-        className={`aspect-square w-16 h-16 rounded-full justify-center items-center mx-2 ${
+        className={`aspect-square w-[${buttonSize}px] rounded-full justify-center items-center mx-2 ${
           selectedScore === index ? "bg-cyan-700" : "bg-cyan-300"
         } shadow-lg`}
         onPress={() => setSelectedScore(index)}
@@ -121,7 +126,7 @@ const AddRatingComponent: React.FC = () => {
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         className="mb-4 py-2"
-        contentOffset={{ x: 210, y: 0 }}
+        contentOffset={{ x: contentOffsetX, y: 0 }}
         fadingEdgeLength={80}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -132,7 +137,7 @@ const AddRatingComponent: React.FC = () => {
       </ScrollView>
 
       <TextInput
-        className="w-full h-36  bg-cyan-200 border border-gray-300 rounded-3xl p-4 text-lg text-gray-700"
+        className="w-full h-32 max-h-36  bg-cyan-200 border border-gray-300 rounded-3xl p-4 text-lg text-gray-700"
         placeholder="Enter a note for the day (optional)"
         value={noteText}
         onChangeText={(txt) => {
@@ -143,12 +148,12 @@ const AddRatingComponent: React.FC = () => {
         style={shadowStyle}
       />
       <TouchableOpacity
-          className="w-fit h-16 rounded-full items-center justify-center mt-6 bg-cyan-50"
-          onPress={handleSubmit}
-          style={shadowStyle}
-        >
-          <AntDesign name="pluscircle" size={56} color="#67e8f9" />
-        </TouchableOpacity>
+        className="w-1/6 max-w-xs aspect-square rounded-full items-center justify-center mt-6 bg-[#67e8f9]"
+        onPress={handleSubmit}
+        style={shadowStyle}
+      >
+        <AntDesign name="plus" size={40} color="white" />
+      </TouchableOpacity>
     </View>
   );
 };

@@ -1,53 +1,61 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import * as DocumentPicker from 'expo-document-picker';
-import { useStorageSavedDates } from '@/hooks/useStorageSavedDates';
-import { useIsFocused } from '@react-navigation/native';
-import { setItem } from '@/utills/AsyncStorage';
-import { MotiView } from 'moti';
-import { shadowStyle } from '@/constants/Colors';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import * as DocumentPicker from "expo-document-picker";
+import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
+import { useIsFocused } from "@react-navigation/native";
+import { setItem } from "@/utills/AsyncStorage";
+import { MotiView } from "moti";
+import { shadowStyle } from "@/constants/Colors";
+import { Feather } from "@expo/vector-icons";
+import useAuthStore from "@/stores/AuthStateStore";
+import { LinearGradient } from "expo-linear-gradient";
 
 const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   const [filePath, setFilePath] = useState<string | null>(null);
   const isFocused = useIsFocused();
   const userData = useStorageSavedDates(isFocused);
-  
+  const { signOut } = useAuthStore();
+
   const saveUserData = async () => {
     try {
       const path = `${FileSystem.documentDirectory}user_data.json`;
-      await FileSystem.writeAsStringAsync(path, JSON.stringify(userData, null, 2), {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
+      await FileSystem.writeAsStringAsync(
+        path,
+        JSON.stringify(userData, null, 2),
+        {
+          encoding: FileSystem.EncodingType.UTF8,
+        }
+      );
       setFilePath(path);
-      Alert.alert('Success', 'User data saved successfully.');
+      Alert.alert("Success", "User data saved successfully.");
     } catch (error) {
-      console.error('Error saving file:', error);
-      Alert.alert('Error', 'Failed to save user data.');
+      console.error("Error saving file:", error);
+      Alert.alert("Error", "Failed to save user data.");
     }
   };
 
   const shareUserData = async () => {
     if (!filePath) {
-      Alert.alert('Error', 'No file available to share.');
+      Alert.alert("Error", "No file available to share.");
       return;
     }
 
     try {
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(filePath, { mimeType: 'application/json' });
+        await Sharing.shareAsync(filePath, { mimeType: "application/json" });
       } else {
-        Alert.alert('Error', 'Sharing is not available on this device.');
+        Alert.alert("Error", "Sharing is not available on this device.");
       }
     } catch (error) {
-      console.error('Error sharing file:', error);
+      console.error("Error sharing file:", error);
     }
   };
 
   const loadUserData = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({ type: '*/*' });
+      const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
       if (result.canceled) return;
 
       const content = await FileSystem.readAsStringAsync(result.assets[0].uri, {
@@ -60,51 +68,73 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
         await setItem(key, userValue.rating, userValue.note);
       }
 
-      Alert.alert('Data Loaded', `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`);
+      Alert.alert(
+        "Data Loaded",
+        `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`
+      );
     } catch (error) {
-      console.error('Error loading file:', error);
-      Alert.alert('Error', 'Failed to load user data.');
+      console.error("Error loading file:", error);
+      Alert.alert("Error", "Failed to load user data.");
     }
   };
 
   return (
-      <View className='flex-1 justify-center items-center bg-sky-100 shadow-slate-800'>
-        <View className='flex-1 justify-center items-center bg-sky-100'>
-        <Text className='font-bold text-xl'>User Data Transfer</Text>
-        <Text className='text-m p-4'>Here you can export your ratings and notes to a file that can be sent or loaded again on another device</Text>
-        <TouchableOpacity 
-          className="bg-sky-800 px-6 py-3 m-4 rounded-full" 
-          onPress={saveUserData}
-          style={shadowStyle}
+    <LinearGradient colors={["#034f84", "#3c6e71"]} className="flex-1">
+      <View className="h-16 w-full justify-center items-center border-b-2 border-cyan-400">
+        <Text className="font-bold text-xl text-white">User Data Transfer</Text>
+      </View>
+      <View className="flex-1 w-full items-center justify-between">
+        <View className="w-full">
+          <TouchableOpacity
+            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
+            onPress={saveUserData}
           >
-          <Text className="text-sky-100 text-lg font-bold">Save Data to File</Text>
-        </TouchableOpacity>
+            <Feather
+              name="download"
+              size={25}
+              className="m-4 mr-6"
+              color="#67e8f9"
+            />
+            <Text className="text-xl text-white ">Save Data to File</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          className="bg-sky-800 px-6 py-3 m-4 rounded-full" 
-          onPress={shareUserData}
-          style={shadowStyle}
+          <TouchableOpacity
+            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
+            onPress={shareUserData}
           >
-          <Text className="text-sky-100 text-lg font-bold">Share File</Text>
-        </TouchableOpacity>
+            <Feather
+              name="share-2"
+              size={25}
+              className="m-4 mr-6"
+              color="#67e8f9"
+            />
+            <Text className=" text-xl text-white">Share File</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          className="bg-sky-800 px-6 py-3 m-4 rounded-full" 
-          onPress={loadUserData}
-          style={shadowStyle}
+          <TouchableOpacity
+            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
+            onPress={loadUserData}
           >
-          <Text className="text-sky-100 text-m font-bold">Load Data from File</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          className="bg-red-500 px-4 py-2 m-2 rounded-full" 
-          onPress={onClose}
-          style={shadowStyle}
+            <Feather
+              name="upload"
+              size={25}
+              className="m-4 mr-6"
+              color="#67e8f9"
+            />
+            <Text className="text-white text-xl ">Load Data from File</Text>
+          </TouchableOpacity>
+        </View>
+        <View className="w-full">
+          <TouchableOpacity
+            className="bg-red-500 flex-row items-center w-fit m-2 rounded-md"
+            onPress={() => signOut()}
           >
-          <Text className="text-white text-lg font-bold">Close</Text>
-        </TouchableOpacity>
+            <Feather name="log-out" size={25} className="m-4 mr-6" />
+            <Text className=" text-lg font-bold">Sign Out</Text>
+          </TouchableOpacity>
         </View>
       </View>
+    </LinearGradient>
   );
 };
 
