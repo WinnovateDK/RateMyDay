@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         .collection("users")
         .authWithPassword(email, password);
       set({ session: authData.token, isLoading: false });
-      console.log("token: ", authData.token);
+      console.log("token: ", authData);
     } catch (error) {
       console.error("Login failed: ", error);
       set({ isLoading: false });

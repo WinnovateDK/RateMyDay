@@ -108,9 +108,9 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
     }
   }, [timerange]);
   return (
-    <View className="w-full">
-      <View className="p-6 pr-9 justify-center items-center">
-        <View className="w-full h-full bg-white rounded-lg">
+    <View className="h-full w-full">
+      <View className="p-6 pr-9 items-center">
+        <View className="w-full h-full">
           {data.length > 0 ? (
             <CartesianChart
               data={data}

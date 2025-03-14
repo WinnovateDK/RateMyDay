@@ -61,7 +61,7 @@ const StatisticsBox = ({
   }, [renderCondition, timerange]);
 
   return (
-    <View className="justify-center items-center h-full">
+    <View className="justify-center items-center">
       <View className="flex items-center">
         <Text className="text-4xl text-sky-800">Average Rating</Text>
         <Text className="text-4xl font-bold text-sky-900 mt-4">

@@ -9,7 +9,7 @@ export default function TabLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { session } = useAuthStore();
 
-  if (!session) return <Redirect href="/login" />;
+  //if (!session) return <Redirect href="/login" />;
 
   return (
     <Tabs

@@ -23,11 +23,16 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
+import { scale } from "react-native-size-matters";
+import { useWindowDimensions } from "react-native";
 
 export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(false);
   const translateX = useSharedValue(300);
+  const { width, height } = useWindowDimensions();
+
+  const aspectRatio = width / height;
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -58,14 +63,17 @@ export default function AddRating() {
 
   return (
     <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>
-      <SafeAreaView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        scrollEnabled={aspectRatio < 0.6 || showSidePanel ? false : true}
+      >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            className="flexgrow-1 "
+            className="flex-1 "
             keyboardShouldPersistTaps="handled"
             scrollEnabled={keyboardVisible}
           >
-            <View className=" h-1/4 w-full justify-center pt-4 pb-2 border-b-2 border-cyan-400">
+            <View className=" h-1/4 w-full justify-center pt- pb-2 border-b-2 border-cyan-400">
               <View className="flex-row items-center justify-between px-4">
                 <View className="w-6" />
                 <Image
@@ -81,7 +89,10 @@ export default function AddRating() {
                 </TouchableOpacity>
               </View>
               <View className="justify-center items-center">
-                <Text className="text-5xl font-extrabold text-white">
+                <Text
+                  className="text-5xl font-extrabold text-white"
+                  style={{ fontSize: scale(30) }}
+                >
                   Rate My Day
                 </Text>
               </View>
@@ -113,24 +124,23 @@ export default function AddRating() {
                 </View>
               </View>
             </View>
-
-            <Pressable
-              style={[showSidePanel ? styles.overlay : styles.overlayOff]}
-              onPress={() => {
-                translateX.value = withTiming(300, { duration: 300 }, () => {
-                  runOnJS(setShowSidePanel)(false); // 👈 Wrap it with runOnJS
-                });
-              }}
-            ></Pressable>
-            <Animated.View
-              style={[styles.sidePanel, animatedStyle]}
-              className={"h-screen"}
-            >
-              <ExportFileComponent onClose={() => setShowSidePanel(false)} />
-            </Animated.View>
           </ScrollView>
         </TouchableWithoutFeedback>
-      </SafeAreaView>
+      </ScrollView>
+      <Pressable
+        style={[showSidePanel ? styles.overlay : styles.overlayOff]}
+        onPress={() => {
+          translateX.value = withTiming(300, { duration: 300 }, () => {
+            runOnJS(setShowSidePanel)(false); // 👈 Wrap it with runOnJS
+          });
+        }}
+      ></Pressable>
+      <Animated.View
+        style={[styles.sidePanel, animatedStyle]}
+        className="h-full"
+      >
+        <ExportFileComponent onClose={() => setShowSidePanel(false)} />
+      </Animated.View>
     </LinearGradient>
   );
 }
@@ -162,12 +172,6 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     width: "70%",
-    zIndex: 1000,
-    shadowColor: "#000",
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 5,
   },
   absolute: {
     position: "absolute",

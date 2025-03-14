@@ -36,15 +36,18 @@ const login = () => {
           />
           <TextInput />
           <TextInput
-            className="w-full h-12 rounded-lg px-4 border-2 border-gray-300 text-base"
+            className="w-full h-12 rounded-lg px-4 border-2 border-gray-300 text-base -mb-7"
             placeholder="Password"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
           />
           <TextInput />
+          <TouchableOpacity className="mb-6">
+            <Text className="underline text-sky-400">Continue as guest.</Text>
+          </TouchableOpacity>
           <TouchableOpacity
-            className="w-1/2 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700"
+            className="w-1/2 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 mb-2"
             onPress={() => {
               handleLogin(email, password);
             }}

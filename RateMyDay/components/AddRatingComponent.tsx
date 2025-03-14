@@ -73,7 +73,6 @@ const AddRatingComponent: React.FC = () => {
       setScrollStart(isStartReached);
     }
   };
-
   // useEffect(() => {
   //   const date = new Date();
   //   const formatteddate = formatDate(date);
@@ -97,11 +96,11 @@ const AddRatingComponent: React.FC = () => {
     return Array.from({ length: totalCircles }, (_, index) => (
       <TouchableOpacity
         key={index}
-        className={`aspect-square w-[${buttonSize}px] rounded-full justify-center items-center mx-2 ${
+        className={`aspect-square rounded-full justify-center items-center mx-2 ${
           selectedScore === index ? "bg-cyan-700" : "bg-cyan-300"
         } shadow-lg`}
         onPress={() => setSelectedScore(index)}
-        style={shadowStyle}
+        style={{ width: buttonSize, height: buttonSize }}
       >
         <Text className="text-2xl text-white font-bold">{index}</Text>
       </TouchableOpacity>
