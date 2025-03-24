@@ -36,6 +36,26 @@ export function getDatesInCurrentWeek(): string[] {
   return dates;
 }
 
+export function getDatesInCurrentWeekPb(): Date[] {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+
+  const adjustedDayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - adjustedDayOfWeek);
+
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const currentDay = new Date(monday);
+    currentDay.setDate(monday.getDate() + i);
+
+    dates.push(currentDay);
+  }
+
+  return dates;
+}
+
 export async function handleGetTodaysRating() {
   const date = new Date();
   const formattedDate = formatDate(date);
@@ -78,6 +98,21 @@ export function getDatesInCurrentMonth(): string[] {
   return dates;
 }
 
+export function getDatesInCurrentMonthPb(): Date[] {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const dates: Date[] = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const currentDate = new Date(year, month, day);
+    dates.push(currentDate);
+  }
+  return dates;
+}
+
 export function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -107,6 +142,22 @@ export function getDatesInCurrentYear(): string[] {
     for (let day = 1; day <= daysInMonth; day++) {
       const formattedDate = formatDate(new Date(year, month, day));
       dates.push(formattedDate);
+    }
+  }
+
+  return dates;
+}
+
+export function getDatesInCurrentYearPb(): Date[] {
+  const today = new Date();
+  const year = today.getFullYear();
+  const dates: Date[] = [];
+
+  for (let month = 0; month < 12; month++) {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const Dates = new Date(year, month, day);
+      dates.push(Dates);
     }
   }
 

@@ -5,6 +5,7 @@ import {
   calculateWeeklyAverages,
   getRatingsForLastWeek,
   getAverageRatingsPerMonth,
+  getAverageRatingsPerMonthPb,
 } from "@/utills/RatingService";
 import {
   CartesianChart,
@@ -17,6 +18,11 @@ import { Path } from "@shopify/react-native-skia";
 import { useFont } from "@shopify/react-native-skia";
 import inter from "../assets/fonts/Inter_24pt-Medium.ttf";
 import Toast from "react-native-toast-message";
+import useAuthStore from "@/stores/AuthStateStore";
+import {
+  getRatingsForLastWeekPb,
+  getRatingsforLastMonthPb,
+} from "@/utills/PocketBase";
 
 interface TimeSeriesData extends Record<string, unknown> {
   Label: string;
@@ -27,6 +33,7 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
   const [data, setData] = useState<TimeSeriesData[]>([]);
   const currentDate = new Date();
   const font = useFont(inter, 12);
+  const { session } = useAuthStore();
 
   const CustomLine = ({ points }: { points: PointsArray }) => {
     const { path } = useLinePath(points, { curveType: "cardinal" });
@@ -45,66 +52,76 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
   };
 
   useEffect(() => {
-    switch (timerange) {
-      case "Monthly":
-        getRatingsforLastMonth().then((ratings) => {
-          if (ratings.length === 0) {
-            showToast("There is no ratings for the current month.");
-            return;
-          }
-          const formattedData = ratings.map((item) => ({
-            ...item,
-            Label: new Date(item.Label),
-          }));
-          const weeklyAveragesData = calculateWeeklyAverages(
-            formattedData,
-            currentDate.getFullYear()
-          );
-          setData(weeklyAveragesData);
-        });
+    if (session) {
+      switch (timerange) {
+        case "Monthly":
+          getRatingsforLastMonthPb(session.record.id).then((ratings) => {
+            if (ratings.length === 0) {
+              showToast("There is no ratings for the current month.");
+              return;
+            }
 
-        break;
-      case "Weekly":
-        getRatingsForLastWeek().then((ratings) => {
-          if (ratings.length === 0) {
-            showToast("There is no ratings for the current week.");
-            return;
-          }
-          setData(ratings);
-        });
-        break;
-      case "Yearly":
-        getAverageRatingsPerMonth().then((ratings) => {
-          console.log("data; ", ratings);
-          if (ratings.length === 0) {
-            showToast("There is no ratings for the current year.");
-            return;
-          }
-          const months = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ];
+            const formattedData = ratings.map((item) => {
+              const [day, month] = item.Label.split("-");
+              const currentYear = new Date().getFullYear();
+              const formattedDateString = `${currentYear}-${month}-${day}`;
+              const formattedDate = new Date(formattedDateString);
+              return {
+                ...item,
+                Label: formattedDate,
+              };
+            });
 
-          const formattedYearlyData = ratings
-            .map((rating, index) => ({
-              Label: months[index],
-              Rating: rating,
-            }))
-            .filter((datapoint) => datapoint.Rating !== 0);
+            const weeklyAveragesData = calculateWeeklyAverages(
+              formattedData,
+              currentDate.getFullYear()
+            );
+            setData(weeklyAveragesData);
+          });
 
-          setData(formattedYearlyData);
-        });
-        break;
+          break;
+        case "Weekly":
+          getRatingsForLastWeekPb(session.record.id).then((ratings) => {
+            if (ratings.length === 0) {
+              showToast("There is no ratings for the current week.");
+              return;
+            }
+            setData(ratings);
+          });
+          break;
+        case "Yearly":
+          getAverageRatingsPerMonthPb(session.record.id).then((ratings) => {
+            console.log("data; ", ratings);
+            if (ratings.length === 0) {
+              showToast("There is no ratings for the current year.");
+              return;
+            }
+            const months = [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ];
+
+            const formattedYearlyData = ratings
+              .map((rating, index) => ({
+                Label: months[index],
+                Rating: rating,
+              }))
+              .filter((datapoint) => datapoint.Rating !== 0);
+
+            setData(formattedYearlyData);
+          });
+          break;
+      }
     }
   }, [timerange]);
   return (

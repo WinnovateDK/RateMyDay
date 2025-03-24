@@ -3,9 +3,15 @@ import { View, Text } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import {
   calculateAverageRatingForWeek,
+  calculateAverageRatingForWeekPb,
   calculateAverageRatingForMonth,
   calculateAverageRatingForYear,
 } from "@/utills/RatingService";
+import useAuthStore from "@/stores/AuthStateStore";
+import {
+  calculateAverageRatingForMonthPb,
+  calculateAverageRatingForYearPb,
+} from "@/utills/PocketBase";
 
 type Stats = {
   averageRating: number;
@@ -26,37 +32,47 @@ const StatisticsBox = ({
     lowestRating: 0,
   });
 
+  const { session } = useAuthStore();
   useEffect(() => {
-    switch (timerange) {
-      case "Weekly":
-        calculateAverageRatingForWeek().then((avgRatings) => {
-          setStats({
-            averageRating: avgRatings.averageRating,
-            highestRating: avgRatings.highestRating,
-            lowestRating: avgRatings.lowestRating,
-          });
-        });
-        break;
+    if (session) {
+      switch (timerange) {
+        case "Weekly":
+          calculateAverageRatingForWeekPb(session.record.id).then(
+            (avgRatings) => {
+              setStats({
+                averageRating: avgRatings.averageRating,
+                highestRating: avgRatings.highestRating,
+                lowestRating: avgRatings.lowestRating,
+              });
+            }
+          );
 
-      case "Monthly":
-        calculateAverageRatingForMonth().then((avgRatings) => {
-          setStats({
-            averageRating: avgRatings.averageRating,
-            highestRating: avgRatings.highestRating,
-            lowestRating: avgRatings.lowestRating,
-          });
-        });
-        break;
+          break;
 
-      case "Yearly":
-        calculateAverageRatingForYear().then((avgRatings) => {
-          setStats({
-            averageRating: avgRatings.averageRating,
-            highestRating: avgRatings.highestRating,
-            lowestRating: avgRatings.lowestRating,
-          });
-        });
-        break;
+        case "Monthly":
+          calculateAverageRatingForMonthPb(session.record.id).then(
+            (avgRatings) => {
+              setStats({
+                averageRating: avgRatings.averageRating,
+                highestRating: avgRatings.highestRating,
+                lowestRating: avgRatings.lowestRating,
+              });
+            }
+          );
+          break;
+
+        case "Yearly":
+          calculateAverageRatingForYearPb(session.record.id).then(
+            (avgRatings) => {
+              setStats({
+                averageRating: avgRatings.averageRating,
+                highestRating: avgRatings.highestRating,
+                lowestRating: avgRatings.lowestRating,
+              });
+            }
+          );
+          break;
+      }
     }
   }, [renderCondition, timerange]);
 

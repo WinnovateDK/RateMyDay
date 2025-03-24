@@ -8,11 +8,16 @@ import { Router, useRouter } from "expo-router";
 const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, signOut, session, isLoading } = useAuthStore();
+  const { signIn, session, setIsGuest } = useAuthStore();
   const router = useRouter();
 
   const handleLogin = (email: string, password: string) => {
     signIn(email, password);
+  };
+
+  const handleGuest = () => {
+    setIsGuest(true);
+    router.replace("/");
   };
 
   useEffect(() => {
@@ -43,17 +48,27 @@ const login = () => {
             onChangeText={setPassword}
           />
           <TextInput />
-          <TouchableOpacity className="mb-6">
+          <TouchableOpacity className="mb-6" onPress={() => handleGuest()}>
             <Text className="underline text-sky-400">Continue as guest.</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            className="w-1/2 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 mb-2"
-            onPress={() => {
-              handleLogin(email, password);
-            }}
-          >
-            <Text className="text-white text-lg font-semibold">Login</Text>
-          </TouchableOpacity>
+          <View className="flex-row justify-between w-full">
+            <TouchableOpacity
+              className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 ml-6"
+              onPress={() => {
+                handleLogin(email, password);
+              }}
+            >
+              <Text className="text-white text-lg font-semibold">Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 mr-6"
+              onPress={() => {
+                router.replace("/SignUp");
+              }}
+            >
+              <Text className="text-white text-lg font-semibold">Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </LinearGradient>

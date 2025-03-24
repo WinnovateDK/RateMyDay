@@ -127,7 +127,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
         <View className="w-full">
           <TouchableOpacity
             className="bg-red-500 flex-row items-center w-fit m-2 rounded-md"
-            onPress={() => ""}
+            onPress={() => signOut()}
           >
             <Feather name="log-out" size={25} className="m-4 mr-6" />
             <Text className=" text-lg font-bold">Sign Out</Text>

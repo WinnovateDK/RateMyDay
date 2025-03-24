@@ -18,20 +18,68 @@ import { useEffect } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
 import GraphComponent from "@/components/GraphComponent";
+import { getAllRatingsForUser } from "@/utills/PocketBase";
+import useAuthStore from "@/stores/AuthStateStore";
+import { RecordModel } from "pocketbase";
+import useStore from "@/stores/isRatingSetStore";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [dateRatings, setDateRatings] = useState<
+    Record<
+      string,
+      {
+        note: string;
+        rating: number;
+        selected: boolean;
+        selectedColor: string;
+      }
+    >
+  >({});
+  const [hasLoaded, setHasLoaded] = useState(false);
   const storedDateRatings = useRatingStore((state) => state.savedRatings);
   const isFocused = useIsFocused();
   const storageSavedDates = useStorageSavedDates(isFocused);
   const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
+  const { session } = useAuthStore();
+  const { isRatingUpdated } = useStore();
+
+  const transformRatingsData = async () => {
+    if (session) {
+      const ratingsData = await getAllRatingsForUser(session?.record.id);
+
+      const Data: Record<string, any> = {};
+
+      ratingsData.forEach((rating) => {
+        const date = rating.date.split(" ")[0];
+        Data[date] = {
+          note: rating.note,
+          rating: rating.rating,
+          selected: true,
+          selectedColor: CalendarColors[rating.rating],
+        };
+      });
+      return Data;
+    }
+    return {};
+  };
 
   useEffect(() => {
     setStoredDateRatings(storageSavedDates);
   }, [storageSavedDates]);
+
+  useEffect(() => {
+    const fetchRatings = async () => {
+      const transformedData = await transformRatingsData();
+      setDateRatings(transformedData);
+      setHasLoaded(true);
+    };
+
+    fetchRatings();
+  }, [isRatingUpdated]);
 
   const getRatingForDate = useMemo(() => {
     const ratingForDate =
@@ -84,7 +132,7 @@ const calendar = () => {
         <View className="flex-1">
           <View className="flex-shrink px-2">
             <Calendar
-              markedDates={storedDateRatings}
+              markedDates={dateRatings}
               onDayPress={onDayPress}
               firstDay={1}
               theme={{
@@ -133,13 +181,15 @@ const calendar = () => {
               </View>
             </View>
             <View className="flex-1 justify-center w-full">
-              {statsType === "Numbers" ? (
+              {statsType === "Numbers" && hasLoaded ? (
                 <StatisticsBox
                   renderCondition={storedDateRatings}
                   timerange={timerange}
                 />
-              ) : (
+              ) : statsType === "Graph" && hasLoaded ? (
                 <GraphComponent timerange={timerange} />
+              ) : (
+                <Text className="text-center text-gray-500">Loading...</Text>
               )}
             </View>
           </View>
@@ -162,19 +212,19 @@ const calendar = () => {
                 className="text-4xl font-bold mb-4"
                 style={{
                   color:
-                    selectedDate && getRatingForDate !== null
-                      ? CalendarColors[getRatingForDate - 1]
+                    selectedDate && dateRatings[selectedDate] !== undefined
+                      ? CalendarColors[dateRatings[selectedDate].rating]
                       : "#3b82f6",
                 }}
               >
-                {selectedDate && getRatingForDate !== null
-                  ? getRatingForDate
+                {selectedDate && dateRatings[selectedDate] !== undefined
+                  ? dateRatings[selectedDate].rating
                   : "No rating"}
               </Text>
               <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
                 <Text className="text-lg text-gray-600">
-                  {selectedDate && getNoteForDate !== null
-                    ? getNoteForDate
+                  {selectedDate && dateRatings[selectedDate] !== undefined
+                    ? dateRatings[selectedDate].note
                     : ""}
                 </Text>
               </ScrollView>

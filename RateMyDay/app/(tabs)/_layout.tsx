@@ -7,9 +7,9 @@ import "../../global.css";
 
 export default function TabLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { session } = useAuthStore();
+  const { session, isGuest } = useAuthStore();
 
-  //if (!session) return <Redirect href="/login" />;
+  if (!session && !isGuest) return <Redirect href="/login" />;
 
   return (
     <Tabs

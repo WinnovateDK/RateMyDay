@@ -4,15 +4,39 @@ import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "@/stores/AuthStateStore";
 import PocketBase from "pocketbase";
 import { Router, useRouter } from "expo-router";
+import { createUser } from "@/utills/PocketBase";
+import { Alert } from "react-native";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { signIn, signOut, session, isLoading } = useAuthStore();
   const router = useRouter();
 
-  const handleLogin = (email: string, password: string) => {
-    signIn(email, password);
+  const handleSignUp = async (
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) => {
+    if (!email.includes("@")) {
+      Alert.alert("Invalid Email", "Please enter a valid email adress");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Password Mismatch", "Passwords do not match.");
+      return;
+    }
+
+    try {
+      await createUser(email, password, confirmPassword);
+      Alert.alert("Seccess", "Account created successfully!", [
+        { text: "OK", onPress: () => router.replace("/login") },
+      ]);
+    } catch (e) {
+      Alert.alert("Sign Up Failed", "Something went wrong.");
+      return;
+    }
   };
 
   useEffect(() => {
@@ -25,7 +49,7 @@ const SignUp = () => {
     <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>
       <View className="flex-1 justify-center items-center px-8">
         <View className="w-full bg-white p-4 rounded-lg justify-center items-center">
-          <Text className="text-3xl font-bold mb-5">Login</Text>
+          <Text className="text-3xl font-bold mb-5">Create new user</Text>
           <TextInput
             className="w-full h-12 rounded-lg px-4 border-2 border-gray-300 text-base"
             placeholder="Email"
@@ -43,13 +67,21 @@ const SignUp = () => {
             onChangeText={setPassword}
           />
           <TextInput />
+          <TextInput
+            className="w-full h-12 rounded-lg px-4 border-2 border-gray-300 text-base"
+            placeholder="Confirm Password"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TextInput />
           <TouchableOpacity
             className="w-1/2 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700"
             onPress={() => {
-              handleLogin(email, password);
+              handleSignUp(email, password, confirmPassword);
             }}
           >
-            <Text className="text-white text-lg font-semibold">Login</Text>
+            <Text className="text-white text-lg font-semibold">Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>

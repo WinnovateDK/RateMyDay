@@ -16,6 +16,14 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
 import { shadowStyle } from "@/constants/Colors";
 import { useWindowDimensions } from "react-native";
+import {
+  createRating,
+  getRatingByDate,
+  updateRating,
+} from "@/utills/PocketBase";
+import useAuthStore from "@/stores/AuthStateStore";
+import { RecordModel } from "pocketbase";
+import useStore from "@/stores/isRatingSetStore";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -28,6 +36,9 @@ const AddRatingComponent: React.FC = () => {
   const isFocused = useIsFocused();
   const [scoreSet, setScoreSet] = useState<boolean>();
   const { width } = useWindowDimensions();
+  const { session } = useAuthStore();
+  const today = new Date();
+  const { setRatingUpdated } = useStore();
 
   const buttonSize = Math.ceil(width * 0.14);
   const contentOffsetX = width / 2 + buttonSize / 2;
@@ -46,11 +57,34 @@ const AddRatingComponent: React.FC = () => {
     updateSavedRating(key, newRating);
   };
 
+  const setRatingPb = async () => {
+    if (session && selectedScore) {
+      await createRating(session?.record.id, selectedScore, note);
+      setRatingUpdated();
+    }
+  };
+
+  const updateRatingPb = async (todaysRating: RecordModel) => {
+    if (session && selectedScore) {
+      await updateRating(todaysRating.id, selectedScore, note);
+      setRatingUpdated();
+    }
+  };
+
+  const handleSubmitPb = async () => {
+    if (session && selectedScore) {
+      const todaysRating = await getRatingByDate(session.record.id, today);
+      if (!todaysRating) setRatingPb();
+      else updateRatingPb(todaysRating);
+    }
+  };
+
   const handleSubmit = () => {
     if (selectedScore === null) {
       Alert.alert("Error", "Please select a value before submitting.");
     } else {
       setScore(selectedScore);
+      setRatingPb();
       Alert.alert("Success", `You submitted: ${selectedScore}`);
       setScoreSet(true);
     }
@@ -148,7 +182,7 @@ const AddRatingComponent: React.FC = () => {
       />
       <TouchableOpacity
         className="w-1/6 max-w-xs aspect-square rounded-full items-center justify-center mt-6 bg-[#67e8f9]"
-        onPress={handleSubmit}
+        onPress={handleSubmitPb}
         style={shadowStyle}
       >
         <AntDesign name="plus" size={40} color="white" />
