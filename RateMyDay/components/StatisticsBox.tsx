@@ -12,6 +12,7 @@ import {
   calculateAverageRatingForMonthPb,
   calculateAverageRatingForYearPb,
 } from "@/utills/PocketBase";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
 
 type Stats = {
   averageRating: number;
@@ -32,45 +33,23 @@ const StatisticsBox = ({
     lowestRating: 0,
   });
 
+  const { weeklyRatings, monthlyRatings, yearlyRatings } = useRatingStorePb();
+
   const { session } = useAuthStore();
   useEffect(() => {
     if (session) {
       switch (timerange) {
         case "Weekly":
-          calculateAverageRatingForWeekPb(session.record.id).then(
-            (avgRatings) => {
-              setStats({
-                averageRating: avgRatings.averageRating,
-                highestRating: avgRatings.highestRating,
-                lowestRating: avgRatings.lowestRating,
-              });
-            }
-          );
+          setStats(weeklyRatings);
 
           break;
 
         case "Monthly":
-          calculateAverageRatingForMonthPb(session.record.id).then(
-            (avgRatings) => {
-              setStats({
-                averageRating: avgRatings.averageRating,
-                highestRating: avgRatings.highestRating,
-                lowestRating: avgRatings.lowestRating,
-              });
-            }
-          );
+          setStats(monthlyRatings);
           break;
 
         case "Yearly":
-          calculateAverageRatingForYearPb(session.record.id).then(
-            (avgRatings) => {
-              setStats({
-                averageRating: avgRatings.averageRating,
-                highestRating: avgRatings.highestRating,
-                lowestRating: avgRatings.lowestRating,
-              });
-            }
-          );
+          setStats(yearlyRatings);
           break;
       }
     }

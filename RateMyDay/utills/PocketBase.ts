@@ -1,8 +1,7 @@
 import PocketBase from "pocketbase";
 import { daysPassedThisWeek, getDatesInCurrentWeekPb } from "./CalendarUtills";
 import { rateDatePair } from "./RatingService";
-
-const pb = new PocketBase("https://winnovate.pockethost.io");
+import { pb } from "./pbClient";
 
 export const createUser = async (
   email: string,
@@ -107,7 +106,6 @@ export async function calculateAverageRatingForMonthPb(userId: string) {
     const allRatings = await pb.collection("ratings").getFullList({
       filter: `user_id = "${userId}" && date >= "${startOfMonth.toISOString()}" && date <= "${today.toISOString()}"`,
     });
-
     if (allRatings.length === 0) {
       return {
         averageRating: 0,

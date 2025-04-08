@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import PocketBase, { RecordModel } from "pocketbase";
+import { useRatingStorePb } from "./RatingStorePb";
 
 const pb = new PocketBase("https://winnovate.pockethost.io");
 
@@ -31,7 +32,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         .collection("users")
         .authWithPassword(email, password);
       set({ session: authData, isGuest: false, isLoading: false });
-      console.log("token: ", authData);
+      console.log("token: ", authData.record.id);
+
+      const ratingStore = useRatingStorePb.getState();
+      await ratingStore.setWeeklyRatings(authData.record.id);
+      await ratingStore.setMonthlyRatings(authData.record.id);
+      await ratingStore.setYearlyRatings(authData.record.id);
     } catch (error) {
       console.error("Login failed: ", error);
       set({ isLoading: false });
