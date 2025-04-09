@@ -1,18 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import useAuthStore from "@/stores/AuthStateStore";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
+import useStore from "@/stores/isRatingSetStore";
 import {
-  calculateAverageRatingForWeek,
-  calculateAverageRatingForWeekPb,
   calculateAverageRatingForMonth,
+  calculateAverageRatingForWeek,
   calculateAverageRatingForYear,
 } from "@/utills/RatingService";
-import useAuthStore from "@/stores/AuthStateStore";
-import {
-  calculateAverageRatingForMonthPb,
-  calculateAverageRatingForYearPb,
-} from "@/utills/PocketBase";
-import { useRatingStorePb } from "@/stores/RatingStorePb";
 
 type Stats = {
   averageRating: number;
@@ -34,10 +29,11 @@ const StatisticsBox = ({
   });
 
   const { weeklyRatings, monthlyRatings, yearlyRatings } = useRatingStorePb();
+  const { isRatingUpdated } = useStore();
 
-  const { session } = useAuthStore();
+  const { session, isGuest } = useAuthStore();
   useEffect(() => {
-    if (session) {
+    if (session && !isGuest) {
       switch (timerange) {
         case "Weekly":
           setStats(weeklyRatings);
@@ -52,8 +48,40 @@ const StatisticsBox = ({
           setStats(yearlyRatings);
           break;
       }
+    } else {
+      switch (timerange) {
+        case "Weekly":
+          calculateAverageRatingForWeek().then((avgRatings) => {
+            setStats({
+              averageRating: avgRatings.averageRating,
+              highestRating: avgRatings.highestRating,
+              lowestRating: avgRatings.lowestRating,
+            });
+          });
+          break;
+
+        case "Monthly":
+          calculateAverageRatingForMonth().then((avgRatings) => {
+            setStats({
+              averageRating: avgRatings.averageRating,
+              highestRating: avgRatings.highestRating,
+              lowestRating: avgRatings.lowestRating,
+            });
+          });
+          break;
+
+        case "Yearly":
+          calculateAverageRatingForYear().then((avgRatings) => {
+            setStats({
+              averageRating: avgRatings.averageRating,
+              highestRating: avgRatings.highestRating,
+              lowestRating: avgRatings.lowestRating,
+            });
+          });
+          break;
+      }
     }
-  }, [renderCondition, timerange]);
+  }, [renderCondition, timerange, isRatingUpdated]);
 
   return (
     <View className="justify-center items-center">

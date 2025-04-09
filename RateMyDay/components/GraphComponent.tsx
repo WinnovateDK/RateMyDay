@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import {
-  getRatingsforLastMonth,
   calculateWeeklyAverages,
-  getRatingsForLastWeek,
   getAverageRatingsPerMonth,
-  getAverageRatingsPerMonthPb,
+  getRatingsforLastMonth,
+  getRatingsForLastWeek,
 } from "@/utills/RatingService";
 import {
   CartesianChart,
@@ -19,10 +18,8 @@ import { useFont } from "@shopify/react-native-skia";
 import inter from "../assets/fonts/Inter_24pt-Medium.ttf";
 import Toast from "react-native-toast-message";
 import useAuthStore from "@/stores/AuthStateStore";
-import {
-  getRatingsForLastWeekPb,
-  getRatingsforLastMonthPb,
-} from "@/utills/PocketBase";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
+import useStore from "@/stores/isRatingSetStore";
 
 interface TimeSeriesData extends Record<string, unknown> {
   Label: string;
@@ -33,8 +30,10 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
   const [data, setData] = useState<TimeSeriesData[]>([]);
   const currentDate = new Date();
   const font = useFont(inter, 12);
-  const { session } = useAuthStore();
-
+  const { session, isGuest } = useAuthStore();
+  const { isRatingUpdated } = useStore();
+  const { graphWeeklyRatings, graphMonthlyRatings, graphYearlyRatings } =
+    useRatingStorePb();
   const CustomLine = ({ points }: { points: PointsArray }) => {
     const { path } = useLinePath(points, { curveType: "cardinal" });
     const animPath = useAnimatedPath(path);
@@ -52,26 +51,79 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
   };
 
   useEffect(() => {
-    if (session) {
+    if (session && !isGuest) {
       switch (timerange) {
         case "Monthly":
-          getRatingsforLastMonthPb(session.record.id).then((ratings) => {
+          const formattedData = graphMonthlyRatings.map((item) => {
+            const [day, month] = item.Label.split("-");
+            const currentYear = new Date().getFullYear();
+            const formattedDateString = `${currentYear}-${month}-${day}`;
+            const formattedDate = new Date(formattedDateString);
+            return {
+              ...item,
+              Label: formattedDate,
+            };
+          });
+
+          const weeklyAveragesData = calculateWeeklyAverages(
+            formattedData,
+            currentDate.getFullYear()
+          );
+          setData(weeklyAveragesData);
+
+          break;
+        case "Weekly":
+          if (graphWeeklyRatings.length === 0) {
+            showToast("There is no ratings for the current week.");
+            return;
+          }
+          setData(graphWeeklyRatings);
+
+          break;
+        case "Yearly":
+          console.log("data; ", graphYearlyRatings);
+          if (graphYearlyRatings.length === 0) {
+            showToast("There is no ratings for the current year.");
+            return;
+          }
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+
+          const formattedYearlyData = graphYearlyRatings
+            .map((rating, index) => ({
+              Label: months[index],
+              Rating: rating,
+            }))
+            .filter((datapoint) => datapoint.Rating !== 0);
+
+          setData(formattedYearlyData);
+
+          break;
+      }
+    } else {
+      switch (timerange) {
+        case "Monthly":
+          getRatingsforLastMonth().then((ratings) => {
             if (ratings.length === 0) {
               showToast("There is no ratings for the current month.");
               return;
             }
-
-            const formattedData = ratings.map((item) => {
-              const [day, month] = item.Label.split("-");
-              const currentYear = new Date().getFullYear();
-              const formattedDateString = `${currentYear}-${month}-${day}`;
-              const formattedDate = new Date(formattedDateString);
-              return {
-                ...item,
-                Label: formattedDate,
-              };
-            });
-
+            const formattedData = ratings.map((item) => ({
+              ...item,
+              Label: new Date(item.Label),
+            }));
             const weeklyAveragesData = calculateWeeklyAverages(
               formattedData,
               currentDate.getFullYear()
@@ -81,7 +133,7 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
 
           break;
         case "Weekly":
-          getRatingsForLastWeekPb(session.record.id).then((ratings) => {
+          getRatingsForLastWeek().then((ratings) => {
             if (ratings.length === 0) {
               showToast("There is no ratings for the current week.");
               return;
@@ -90,7 +142,7 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
           });
           break;
         case "Yearly":
-          getAverageRatingsPerMonthPb(session.record.id).then((ratings) => {
+          getAverageRatingsPerMonth().then((ratings) => {
             console.log("data; ", ratings);
             if (ratings.length === 0) {
               showToast("There is no ratings for the current year.");
@@ -123,7 +175,7 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
           break;
       }
     }
-  }, [timerange]);
+  }, [timerange, isRatingUpdated]);
   return (
     <View className="h-full w-full">
       <View className="p-6 pr-9 items-center">

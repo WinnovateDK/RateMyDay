@@ -54,7 +54,6 @@ export const updateRating = async (
     if (newNote !== undefined) data.note = newNote;
 
     const updatedRecord = await pb.collection("ratings").update(ratingId, data);
-    console.log("Rating updated: ", updateRating);
     return updatedRecord;
   } catch (e) {
     console.error("Error updating rating: ", e);
@@ -64,7 +63,6 @@ export const updateRating = async (
 export const getRatingByDate = async (userId: string, date: Date) => {
   try {
     const formattedDate = date.toISOString().split("T")[0];
-    console.log("formatteed: ", formattedDate);
 
     const records = await pb.collection("ratings").getList(1, 1, {
       filter: `user_id = "${userId}" && date >= "${formattedDate} 00:00:00" && date <= "${formattedDate} 23:59:59"`,

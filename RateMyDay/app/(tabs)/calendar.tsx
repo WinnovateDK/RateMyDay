@@ -5,6 +5,7 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useMemo, useState } from "react";
@@ -44,7 +45,7 @@ const calendar = () => {
   const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
-  const { session } = useAuthStore();
+  const { session, isGuest } = useAuthStore();
   const { isRatingUpdated } = useStore();
 
   const transformRatingsData = async () => {
@@ -132,7 +133,7 @@ const calendar = () => {
         <View className="flex-1">
           <View className="flex-shrink px-2">
             <Calendar
-              markedDates={dateRatings}
+              markedDates={!isGuest ? dateRatings : storedDateRatings}
               onDayPress={onDayPress}
               firstDay={1}
               theme={{
@@ -189,57 +190,104 @@ const calendar = () => {
               ) : statsType === "Graph" && hasLoaded ? (
                 <GraphComponent timerange={timerange} />
               ) : (
-                <Text className="text-center text-gray-500">Loading...</Text>
+                <ActivityIndicator size={60} />
               )}
             </View>
           </View>
         </View>
-
-        <Modal
-          visible={isModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="bg-white p-6 rounded-lg items-center w-4/5">
-              <Text className="text-lg font-bold text-gray-700 mb-4">
-                {selectedDate
-                  ? `Rating for ${selectedDate}`
-                  : "No Date Selected"}
-              </Text>
-              <Text
-                className="text-4xl font-bold mb-4"
-                style={{
-                  color:
-                    selectedDate && dateRatings[selectedDate] !== undefined
-                      ? CalendarColors[dateRatings[selectedDate].rating]
-                      : "#3b82f6",
-                }}
-              >
-                {selectedDate && dateRatings[selectedDate] !== undefined
-                  ? dateRatings[selectedDate].rating
-                  : "No rating"}
-              </Text>
-              <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
-                <Text className="text-lg text-gray-600">
-                  {selectedDate && dateRatings[selectedDate] !== undefined
-                    ? dateRatings[selectedDate].note
-                    : ""}
+        {!isGuest ? (
+          <Modal
+            visible={isModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View className="flex-1 justify-center items-center bg-black/50">
+              <View className="bg-white p-6 rounded-lg items-center w-4/5">
+                <Text className="text-lg font-bold text-gray-700 mb-4">
+                  {selectedDate
+                    ? `Rating for ${selectedDate}`
+                    : "No Date Selected"}
                 </Text>
-              </ScrollView>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  setSelectedDate(null);
-                }}
-                className="bg-sky-800 px-4 py-2 rounded-md"
-              >
-                <Text className="text-white text-lg">Close</Text>
-              </TouchableOpacity>
+                <Text
+                  className="text-4xl font-bold mb-4"
+                  style={{
+                    color:
+                      selectedDate && dateRatings[selectedDate] !== undefined
+                        ? CalendarColors[dateRatings[selectedDate].rating]
+                        : "#3b82f6",
+                  }}
+                >
+                  {selectedDate && dateRatings[selectedDate] !== undefined
+                    ? dateRatings[selectedDate].rating
+                    : "No rating"}
+                </Text>
+                <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
+                  <Text className="text-lg text-gray-600">
+                    {selectedDate && dateRatings[selectedDate] !== undefined
+                      ? dateRatings[selectedDate].note
+                      : ""}
+                  </Text>
+                </ScrollView>
+                <TouchableOpacity
+                  onPress={() => {
+                    setModalVisible(false);
+                    setSelectedDate(null);
+                  }}
+                  className="bg-sky-800 px-4 py-2 rounded-md"
+                >
+                  <Text className="text-white text-lg">Close</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        ) : (
+          <Modal
+            visible={isModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View className="flex-1 justify-center items-center bg-black/50">
+              <View className="bg-white p-6 rounded-lg items-center w-4/5">
+                <Text className="text-lg font-bold text-gray-700 mb-4">
+                  {selectedDate
+                    ? `Rating for ${selectedDate}`
+                    : "No Date Selected"}
+                </Text>
+                <Text
+                  className="text-4xl font-bold mb-4"
+                  style={{
+                    color:
+                      selectedDate && getRatingForDate !== null
+                        ? CalendarColors[getRatingForDate - 1]
+                        : "#3b82f6",
+                  }}
+                >
+                  {selectedDate && getRatingForDate !== null
+                    ? getRatingForDate
+                    : "No rating"}
+                </Text>
+                <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
+                  <Text className="text-lg text-gray-600">
+                    {selectedDate && getNoteForDate !== null
+                      ? getNoteForDate
+                      : ""}
+                  </Text>
+                </ScrollView>
+                <TouchableOpacity
+                  onPress={() => {
+                    setModalVisible(false);
+                    setSelectedDate(null);
+                  }}
+                  className="bg-sky-800 px-4 py-2 rounded-md"
+                >
+                  <Text className="text-white text-lg">Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -2,17 +2,30 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "@/stores/AuthStateStore";
+import Toast from "react-native-toast-message";
 import PocketBase from "pocketbase";
 import { Router, useRouter } from "expo-router";
+import { ActivityIndicator } from "react-native";
 
 const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, session, setIsGuest } = useAuthStore();
+  const { signIn, session, setIsGuest, isLoading } = useAuthStore();
   const router = useRouter();
 
-  const handleLogin = (email: string, password: string) => {
-    signIn(email, password);
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      await signIn(email, password);
+    } catch (e: any) {
+      showToast(e.message);
+    }
+  };
+  const showToast = (text: string) => {
+    Toast.show({
+      type: "error",
+      text1: text,
+      position: "bottom",
+    });
   };
 
   const handleGuest = () => {
@@ -58,7 +71,11 @@ const login = () => {
                 handleLogin(email, password);
               }}
             >
-              <Text className="text-white text-lg font-semibold">Login</Text>
+              {isLoading ? (
+                <ActivityIndicator size="large" />
+              ) : (
+                <Text className="text-white text-lg font-semibold">Login</Text>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 mr-6"

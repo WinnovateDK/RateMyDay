@@ -15,7 +15,7 @@ import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useIsFocused } from "@react-navigation/native";
 import { shadowStyle } from "@/constants/Colors";
-import { useWindowDimensions } from "react-native";
+import { useWindowDimensions, ActivityIndicator } from "react-native";
 import {
   createRating,
   getRatingByDate,
@@ -24,6 +24,7 @@ import {
 import useAuthStore from "@/stores/AuthStateStore";
 import { RecordModel } from "pocketbase";
 import useStore from "@/stores/isRatingSetStore";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -36,9 +37,18 @@ const AddRatingComponent: React.FC = () => {
   const isFocused = useIsFocused();
   const [scoreSet, setScoreSet] = useState<boolean>();
   const { width } = useWindowDimensions();
-  const { session } = useAuthStore();
+  const { session, isGuest } = useAuthStore();
+  const {
+    setWeeklyRatings,
+    setMonthlyRatings,
+    setYearlyRatings,
+    setGraphWeeklyRatings,
+    setGraphMonthlyRatings,
+    setGraphYearlyRatings,
+  } = useRatingStorePb();
   const today = new Date();
   const { setRatingUpdated } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
 
   const buttonSize = Math.ceil(width * 0.14);
   const contentOffsetX = width / 2 + buttonSize / 2;
@@ -60,22 +70,29 @@ const AddRatingComponent: React.FC = () => {
   const setRatingPb = async () => {
     if (session && selectedScore) {
       await createRating(session?.record.id, selectedScore, note);
-      setRatingUpdated();
     }
   };
 
   const updateRatingPb = async (todaysRating: RecordModel) => {
     if (session && selectedScore) {
       await updateRating(todaysRating.id, selectedScore, note);
-      setRatingUpdated();
     }
   };
 
   const handleSubmitPb = async () => {
     if (session && selectedScore) {
+      setIsLoading(true);
       const todaysRating = await getRatingByDate(session.record.id, today);
       if (!todaysRating) setRatingPb();
       else updateRatingPb(todaysRating);
+      await setWeeklyRatings(session.record.id);
+      await setMonthlyRatings(session.record.id);
+      await setYearlyRatings(session.record.id);
+      await setGraphWeeklyRatings(session.record.id);
+      await setGraphMonthlyRatings(session.record.id);
+      await setGraphYearlyRatings(session.record.id);
+      setRatingUpdated();
+      setIsLoading(false);
     }
   };
 
@@ -84,7 +101,6 @@ const AddRatingComponent: React.FC = () => {
       Alert.alert("Error", "Please select a value before submitting.");
     } else {
       setScore(selectedScore);
-      setRatingPb();
       Alert.alert("Success", `You submitted: ${selectedScore}`);
       setScoreSet(true);
     }
@@ -182,10 +198,14 @@ const AddRatingComponent: React.FC = () => {
       />
       <TouchableOpacity
         className="w-1/6 max-w-xs aspect-square rounded-full items-center justify-center mt-6 bg-[#67e8f9]"
-        onPress={handleSubmitPb}
+        onPress={!isGuest ? handleSubmitPb : handleSubmit}
         style={shadowStyle}
       >
-        <AntDesign name="plus" size={40} color="white" />
+        {isLoading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <AntDesign name="plus" size={40} color="white" />
+        )}
       </TouchableOpacity>
     </View>
   );

@@ -38,9 +38,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       await ratingStore.setWeeklyRatings(authData.record.id);
       await ratingStore.setMonthlyRatings(authData.record.id);
       await ratingStore.setYearlyRatings(authData.record.id);
+      await ratingStore.setGraphWeeklyRatings(authData.record.id);
+      await ratingStore.setGraphMonthlyRatings(authData.record.id);
+      await ratingStore.setGraphYearlyRatings(authData.record.id);
     } catch (error) {
       console.error("Login failed: ", error);
       set({ isLoading: false });
+      throw new Error("Login failed: Wrong email or password.");
     }
   },
   signOut: () => {

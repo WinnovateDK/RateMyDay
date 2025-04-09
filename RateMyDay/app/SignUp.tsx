@@ -75,14 +75,22 @@ const SignUp = () => {
             onChangeText={setConfirmPassword}
           />
           <TextInput />
-          <TouchableOpacity
-            className="w-1/2 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700"
-            onPress={() => {
-              handleSignUp(email, password, confirmPassword);
-            }}
-          >
-            <Text className="text-white text-lg font-semibold">Sign Up</Text>
-          </TouchableOpacity>
+          <View className="flex-row">
+            <TouchableOpacity
+              className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 mr-2"
+              onPress={() => {
+                handleSignUp(email, password, confirmPassword);
+              }}
+            >
+              <Text className="text-white text-lg font-semibold">Sign Up</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="w-2/5 h-12 bg-red-400 rounded-lg justify-center items-center active:bg-blue-700"
+              onPress={() => router.replace("/login")}
+            >
+              <Text className="text-white text-lg font-semibold">Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </LinearGradient>
