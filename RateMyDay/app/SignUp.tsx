@@ -6,6 +6,10 @@ import PocketBase from "pocketbase";
 import { Router, useRouter } from "expo-router";
 import { createUser } from "@/utills/PocketBase";
 import { Alert } from "react-native";
+import { s } from "react-native-size-matters";
+import parseErrorStack from "react-native/Libraries/Core/Devtools/parseErrorStack";
+import { deriveEncryptionKey } from "@/utills/EncryptionService";
+import { saveBackupToRemote } from "@/utills/PocketBaseBackupService";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -30,11 +34,12 @@ const SignUp = () => {
 
     try {
       await createUser(email, password, confirmPassword);
-      Alert.alert("Seccess", "Account created successfully!", [
+      Alert.alert("Success", "Account created successfully!", [
         { text: "OK", onPress: () => router.replace("/login") },
       ]);
-    } catch (e) {
-      Alert.alert("Sign Up Failed", "Something went wrong.");
+    } catch (error) {
+      console.error("Sign Up Error: ", error);
+      Alert.alert("Sign Up Failed", `Something went wrong: ${error}`);
       return;
     }
   };

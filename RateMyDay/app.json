@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RateMyDay",
-    "slug": "ratemyday",
+    "slug": "RateMyDay",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,14 +13,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "dk.winnovate.ratemyday",
+      "buildNumber": "1.0.0",
+      "supportsTablet": true,
+      "icon": "./assets/images/adaptive-icon.png"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.RateMyDay"
+      "package": "dk.winnovate.RateMyDay"
     },
     "web": {
       "bundler": "metro",
@@ -31,13 +34,13 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "tromborg",
+    "owner": "dulda",
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "5f6bfc42-c699-4191-82a8-2ac8cf795edf"
+        "projectId": "3576a9b3-952e-4db9-9843-84d0217683f2"
       }
     }
   }

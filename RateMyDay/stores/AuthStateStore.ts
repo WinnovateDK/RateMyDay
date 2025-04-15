@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import PocketBase, { RecordModel } from "pocketbase";
+import Config from 'react-native-config';
 import { useRatingStorePb } from "./RatingStorePb";
 
 const pb = new PocketBase("https://winnovate.pockethost.io");

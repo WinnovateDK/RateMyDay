@@ -1,6 +1,9 @@
 import PocketBase from "pocketbase";
 import { daysPassedThisWeek, getDatesInCurrentWeekPb } from "./CalendarUtills";
 import { rateDatePair } from "./RatingService";
+import Config from 'react-native-config';
+import { deriveEncryptionKey, encryptData, getOrCreateEncryptionKey, getOrCreateSalt } from "./EncryptionService";
+import { saveBackupToRemote } from "./PocketBaseBackupService";
 import { pb } from "./pbClient";
 
 export const createUser = async (
@@ -14,7 +17,12 @@ export const createUser = async (
       password: password,
       passwordConfirm: confirmPassword,
     });
+    console.log("User created: ", user);
 
+    const userEncryptionKey = await deriveEncryptionKey(user.id);
+    console.log("User encryption key: ", userEncryptionKey);
+    await saveBackupToRemote(userEncryptionKey, user.id);
+    
     return user;
   } catch (e) {
     console.error("Error creating user: ", e);
@@ -28,10 +36,15 @@ export const createRating = async (
   note: string
 ) => {
   try {
+    const encryptionKey = await getOrCreateEncryptionKey();
+    if (!encryptionKey) {
+      throw new Error("Encryption key not found or created.");
+    }
+    const encryptedNote = await encryptData(note, encryptionKey);
     const data = {
       user_id: userId,
       rating: rating,
-      note: note,
+      note: encryptedNote,
       date: new Date().toISOString(),
     };
 
@@ -49,10 +62,16 @@ export const updateRating = async (
 ) => {
   try {
     const data: Record<string, any> = {};
-
+    const encryptionKey = await getOrCreateEncryptionKey();
+    if (!encryptionKey) {
+      throw new Error("Encryption key not found or created.");
+    }    
     if (newRating !== undefined) data.rating = newRating;
     if (newNote !== undefined) data.note = newNote;
-
+    if (newNote) {
+      const encryptedNote = await encryptData(newNote, encryptionKey);
+      data.note = encryptedNote;
+    }
     const updatedRecord = await pb.collection("ratings").update(ratingId, data);
     return updatedRecord;
   } catch (e) {
