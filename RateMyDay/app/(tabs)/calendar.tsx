@@ -121,7 +121,7 @@ const calendar = () => {
   return (
     <SafeAreaView className="flex-1 bg-sky-900">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="justify-center items-center pt-10">
+        <View className="justify-center items-center pt-4">
           <Text className="text-4xl font-bold text-teal-50">
             Overview of your days
           </Text>
@@ -214,7 +214,7 @@ const calendar = () => {
                   style={{
                     color:
                       selectedDate && dateRatings[selectedDate] !== undefined
-                        ? CalendarColors[dateRatings[selectedDate].rating]
+                        ? CalendarColors[dateRatings[selectedDate].rating - 1]
                         : "#3b82f6",
                   }}
                 >

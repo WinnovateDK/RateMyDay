@@ -34,10 +34,10 @@ const login = () => {
   };
 
   useEffect(() => {
-    if (session) {
+    if (session && !isLoading) {
       router.replace("/");
     }
-  }, [session]);
+  }, [session, isLoading]);
 
   return (
     <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>

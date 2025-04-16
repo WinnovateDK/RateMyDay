@@ -36,7 +36,7 @@ const AddRatingComponent: React.FC = () => {
   const [updateOrAdd, setUpdateOrAdd] = useState("Add");
   const isFocused = useIsFocused();
   const [scoreSet, setScoreSet] = useState<boolean>();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const { session, isGuest } = useAuthStore();
   const {
     setWeeklyRatings,
@@ -52,6 +52,7 @@ const AddRatingComponent: React.FC = () => {
 
   const buttonSize = Math.ceil(width * 0.14);
   const contentOffsetX = width / 2 + buttonSize / 2;
+  const aspectRatio = width / height;
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
@@ -157,56 +158,65 @@ const AddRatingComponent: React.FC = () => {
     ));
   };
   return (
-    <View className="flex-1 justify-center items-center px-4">
-      <View className="flex-row w-full justify-between px-2.5">
-        <AntDesign
-          name="arrowleft"
-          size={18}
-          color={scrollStart === true ? "transparent" : "#0a9396"}
-        />
+    <View className="flex-1 items-center px-4 pb-8">
+      <View style={{ height: aspectRatio < 0.6 ? "50%" : 130 }}>
+        <View className="flex-row w-full justify-between px-2.5">
+          <AntDesign
+            name="arrowleft"
+            size={18}
+            color={scrollStart === true ? "transparent" : "#0a9396"}
+          />
 
-        <AntDesign
-          name="arrowright"
-          size={18}
-          color={scrollEnd === true ? "transparent" : "#0a9396"}
+          <AntDesign
+            name="arrowright"
+            size={18}
+            color={scrollEnd === true ? "transparent" : "#0a9396"}
+          />
+        </View>
+        <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          className="mb-4 py-2"
+          contentOffset={{ x: contentOffsetX, y: 0 }}
+          fadingEdgeLength={80}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          <View className="flex-row justify-center items-center pb-6">
+            {renderScale()}
+          </View>
+        </ScrollView>
+      </View>
+
+      <View className="w-full">
+        <TextInput
+          className="h-32  bg-cyan-200 border border-gray-300 rounded-3xl p-4 text-lg text-gray-700"
+          placeholder="Enter a note for the day (optional)"
+          value={noteText}
+          onChangeText={(txt) => {
+            setNoteText(txt);
+            setNote(txt);
+          }}
+          multiline={true}
+          style={shadowStyle}
         />
       </View>
-      <ScrollView
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-        className="mb-4 py-2"
-        contentOffset={{ x: contentOffsetX, y: 0 }}
-        fadingEdgeLength={80}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        <View className="flex-row justify-center items-center pb-6">
-          {renderScale()}
-        </View>
-      </ScrollView>
 
-      <TextInput
-        className="w-full h-32 max-h-36  bg-cyan-200 border border-gray-300 rounded-3xl p-4 text-lg text-gray-700"
-        placeholder="Enter a note for the day (optional)"
-        value={noteText}
-        onChangeText={(txt) => {
-          setNoteText(txt);
-          setNote(txt);
-        }}
-        multiline={true}
-        style={shadowStyle}
-      />
-      <TouchableOpacity
-        className="w-1/6 max-w-xs aspect-square rounded-full items-center justify-center mt-6 bg-[#67e8f9]"
-        onPress={!isGuest ? handleSubmitPb : handleSubmit}
-        style={shadowStyle}
+      <View
+        className="justify-center w-full items-center"
+        style={{ height: aspectRatio < 0.6 ? "40%" : 90 }}
       >
-        {isLoading ? (
-          <ActivityIndicator size="large" />
-        ) : (
-          <AntDesign name="plus" size={40} color="white" />
-        )}
-      </TouchableOpacity>
+        <TouchableOpacity
+          className="w-1/6 aspect-square rounded-full items-center justify-center bg-[#67e8f9]"
+          onPress={!isGuest ? handleSubmitPb : handleSubmit}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            <AntDesign name="plus" size={40} color="white" />
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

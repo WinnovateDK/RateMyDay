@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Image,
   View,
@@ -31,6 +31,7 @@ export default function AddRating() {
   const [showSidePanel, setShowSidePanel] = useState(false);
   const translateX = useSharedValue(300);
   const { width, height } = useWindowDimensions();
+  const scrollRef = useRef<ScrollView>(null);
 
   const aspectRatio = width / height;
 
@@ -63,18 +64,16 @@ export default function AddRating() {
 
   return (
     <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>
-      <ScrollView
-        className="flex-1"
-        scrollEnabled={aspectRatio < 0.6 || showSidePanel ? false : true}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            className="flex-1 "
-            keyboardShouldPersistTaps="handled"
-            scrollEnabled={keyboardVisible}
-          >
-            <View className=" h-1/4 w-full justify-center pt- pb-2 border-b-2 border-cyan-400">
-              <View className="flex-row items-center justify-between px-4">
+      {aspectRatio < 0.6 ? (
+        <TouchableWithoutFeedback
+          onPress={() => {
+            Keyboard.dismiss();
+            scrollRef.current?.scrollTo({ y: 0, animated: true });
+          }}
+        >
+          <View className="flex-1">
+            <View className=" h-1/4 w-full border-b-2 border-cyan-400">
+              <View className="flex-row items-center justify-between">
                 <View className="w-6" />
                 <Image
                   source={require("@/assets/images/logo.png")}
@@ -82,7 +81,7 @@ export default function AddRating() {
                   className="absolute left-1/2 -translate-x-1/2"
                 />
                 <TouchableOpacity
-                  className="pt-10 pb-16"
+                  className="pt-10 pb-16 pr-4"
                   onPress={() => setShowSidePanel(true)}
                 >
                   <Ionicons name="settings" size={24} color="#0084c7" />
@@ -98,13 +97,13 @@ export default function AddRating() {
               </View>
             </View>
             {/* Main Content */}
-            <View className="flexgrow p-6">
-              <View className="gap-3">
+            <View className="flex-1 p-6">
+              <View className="flex-1 gap-3">
                 <Text className="text-center text-3xl text-white font-semibold">
                   Add todays rating
                 </Text>
-                <View className="gap-8 mb-8">
-                  <Text className="text-center text-xl text-cyan-200 mb-6">
+                <View className="flex-1 gap-8 mb-8">
+                  <Text className="text-center text-xl text-cyan-200 ">
                     How has your day been?
                   </Text>
                   {/* Emoji and Progress Bar */}
@@ -118,15 +117,78 @@ export default function AddRating() {
                     </View>
                     <Text className="text-3xl">😊</Text>
                   </View>
-                  <View className="flex-row mt-2 mb-2">
-                    <AddRatingComponent />
-                  </View>
+                  <AddRatingComponent />
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </View>
         </TouchableWithoutFeedback>
-      </ScrollView>
+      ) : (
+        <ScrollView
+          className="flex-1"
+          scrollEnabled={aspectRatio < 0.6 || showSidePanel ? false : true}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              className="flex-1 "
+              keyboardShouldPersistTaps="handled"
+              scrollEnabled={keyboardVisible}
+            >
+              <View className=" h-1/4 w-full justify-center pt- pb-2 border-b-2 border-cyan-400">
+                <View className="flex-row items-center justify-between px-4">
+                  <View className="w-6" />
+                  <Image
+                    source={require("@/assets/images/logo.png")}
+                    style={styles.reactLogo}
+                    className="absolute left-1/2 -translate-x-1/2"
+                  />
+                  <TouchableOpacity
+                    className="pt-10 pb-16"
+                    onPress={() => setShowSidePanel(true)}
+                  >
+                    <Ionicons name="settings" size={24} color="#0084c7" />
+                  </TouchableOpacity>
+                </View>
+                <View className="justify-center items-center">
+                  <Text
+                    className="text-5xl font-extrabold text-white"
+                    style={{ fontSize: scale(30) }}
+                  >
+                    Rate My Day
+                  </Text>
+                </View>
+              </View>
+              {/* Main Content */}
+              <View className="flexgrow p-6">
+                <View className="gap-3">
+                  <Text className="text-center text-3xl text-white font-semibold">
+                    Add todays rating
+                  </Text>
+                  <View className="gap-8 mb-8">
+                    <Text className="text-center text-xl text-cyan-200 mb-6">
+                      How has your day been?
+                    </Text>
+                    {/* Emoji and Progress Bar */}
+                    <View
+                      className="bg-cyan-100 flex-row justify-around items-center p-4 rounded-lg shadow-md"
+                      style={shadowStyle}
+                    >
+                      <Text className="text-3xl">😔</Text>
+                      <View className="flex-1 mx-4 bg-cyan-300 h-2 rounded-full">
+                        <View className="w-1/2 h-2 bg-cyan-600 rounded-full" />
+                      </View>
+                      <Text className="text-3xl">😊</Text>
+                    </View>
+                    <View className="flex-row mt-2 mb-2">
+                      <AddRatingComponent />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      )}
       <Pressable
         style={[showSidePanel ? styles.overlay : styles.overlayOff]}
         onPress={() => {
