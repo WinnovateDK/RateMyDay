@@ -1,8 +1,5 @@
-import PocketBase from "pocketbase";
-import { daysPassedThisWeek, getDatesInCurrentWeekPb } from "./CalendarUtills";
 import { rateDatePair } from "./RatingService";
-import Config from 'react-native-config';
-import { deriveEncryptionKey, encryptData, getOrCreateEncryptionKey, getOrCreateSalt } from "./EncryptionService";
+import { deriveEncryptionKey, encryptData, getOrCreateEncryptionKey } from "./EncryptionService";
 import { saveBackupToRemote } from "./PocketBaseBackupService";
 import { pb } from "./pbClient";
 
@@ -18,9 +15,7 @@ export const createUser = async (
       passwordConfirm: confirmPassword,
     });
     console.log("User created: ", user);
-
     const userEncryptionKey = await deriveEncryptionKey(user.id);
-    console.log("User encryption key: ", userEncryptionKey);
     await saveBackupToRemote(userEncryptionKey, user.id);
     
     return user;
@@ -36,18 +31,17 @@ export const createRating = async (
   note: string
 ) => {
   try {
-    const encryptionKey = await getOrCreateEncryptionKey();
+    const encryptionKey = await getOrCreateEncryptionKey(userId);
     if (!encryptionKey) {
       throw new Error("Encryption key not found or created.");
     }
     const encryptedNote = await encryptData(note, encryptionKey);
     const data = {
-      user_id: userId,
+      userId: userId,
       rating: rating,
       note: encryptedNote,
       date: new Date().toISOString(),
     };
-
     const record = await pb.collection("ratings").create(data);
     console.log("rating created: ", data);
   } catch (e) {
@@ -56,13 +50,14 @@ export const createRating = async (
 };
 
 export const updateRating = async (
+  userId: string,
   ratingId: string,
   newRating?: number,
   newNote?: string
 ) => {
   try {
     const data: Record<string, any> = {};
-    const encryptionKey = await getOrCreateEncryptionKey();
+    const encryptionKey = await getOrCreateEncryptionKey(userId);
     if (!encryptionKey) {
       throw new Error("Encryption key not found or created.");
     }    
@@ -72,6 +67,7 @@ export const updateRating = async (
       const encryptedNote = await encryptData(newNote, encryptionKey);
       data.note = encryptedNote;
     }
+    data.userId = userId;
     const updatedRecord = await pb.collection("ratings").update(ratingId, data);
     return updatedRecord;
   } catch (e) {
@@ -84,7 +80,7 @@ export const getRatingByDate = async (userId: string, date: Date) => {
     const formattedDate = date.toISOString().split("T")[0];
 
     const records = await pb.collection("ratings").getList(1, 1, {
-      filter: `user_id = "${userId}" && date >= "${formattedDate} 00:00:00" && date <= "${formattedDate} 23:59:59"`,
+      filter: `userId = "${userId}" && date >= "${formattedDate} 00:00:00" && date <= "${formattedDate} 23:59:59"`,
     });
 
     if (records.items.length > 0) {
@@ -102,7 +98,7 @@ export const getRatingByDate = async (userId: string, date: Date) => {
 export const getAllRatingsForUser = async (userId: string) => {
   try {
     const ratings = await pb.collection("ratings").getFullList({
-      filter: `user_id = "${userId}"`,
+      filter: `userId = "${userId}"`,
     });
     return ratings;
   } catch (e) {
@@ -121,7 +117,7 @@ export async function calculateAverageRatingForMonthPb(userId: string) {
     today.setHours(23, 59, 59, 999);
 
     const allRatings = await pb.collection("ratings").getFullList({
-      filter: `user_id = "${userId}" && date >= "${startOfMonth.toISOString()}" && date <= "${today.toISOString()}"`,
+      filter: `userId = "${userId}" && date >= "${startOfMonth.toISOString()}" && date <= "${today.toISOString()}"`,
     });
     if (allRatings.length === 0) {
       return {
@@ -161,7 +157,7 @@ export async function calculateAverageRatingForYearPb(userId: string) {
     today.setHours(23, 59, 59, 999);
 
     const allRatings = await pb.collection("ratings").getFullList({
-      filter: `user_id = "${userId}" && date >= "${startOfYear.toISOString()}" && date <= "${today.toISOString()}"`,
+      filter: `userId = "${userId}" && date >= "${startOfYear.toISOString()}" && date <= "${today.toISOString()}"`,
     });
 
     if (allRatings.length === 0) {
@@ -212,7 +208,7 @@ export async function getRatingsForLastWeekPb(
   const todayStr = today.toISOString().replace("T", " ").split(".")[0];
 
   const allRatings = await pb.collection("ratings").getFullList({
-    filter: `user_id = "${userId}" && date >= "${startOfWeekStr}" && date <= "${todayStr}"`,
+    filter: `userId = "${userId}" && date >= "${startOfWeekStr}" && date <= "${todayStr}"`,
   });
 
   const pastWeeksRatings: rateDatePair[] = allRatings
@@ -253,7 +249,7 @@ export async function getRatingsforLastMonthPb(
     .split(".")[0];
 
   const allRatings = await pb.collection("ratings").getFullList({
-    filter: `user_id = "${userId}" && date >= "${firstDayStr}" && date <= "${lastDayStr}"`,
+    filter: `userId = "${userId}" && date >= "${firstDayStr}" && date <= "${lastDayStr}"`,
   });
 
   const pastMonthRatings: rateDatePair[] = allRatings
@@ -281,7 +277,7 @@ export async function getRatingsForThisYearPb(
 
   // Fetch all ratings from the database (adjust this if your database supports range queries)
   const allRatings = await pb.collection("ratings").getList(1, 100, {
-    filter: `user_id = "${userId}" && date >= "${startOfYear.toISOString()}" && date <= "${today.toISOString()}"`,
+    filter: `userId = "${userId}" && date >= "${startOfYear.toISOString()}" && date <= "${today.toISOString()}"`,
   });
 
   const ratingsForThisYear: rateDatePair[] = allRatings.items.map((rating) => {

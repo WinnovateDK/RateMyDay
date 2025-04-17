@@ -23,6 +23,8 @@ import { getAllRatingsForUser } from "@/utills/PocketBase";
 import useAuthStore from "@/stores/AuthStateStore";
 import { RecordModel } from "pocketbase";
 import useStore from "@/stores/isRatingSetStore";
+import { decryptData, getOrCreateEncryptionKey } from "@/utills/EncryptionService";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -47,6 +49,14 @@ const calendar = () => {
   const [statsType, setStatsType] = useState("Numbers");
   const { session, isGuest } = useAuthStore();
   const { isRatingUpdated } = useStore();
+  
+  const decryptNote = async (note: string) => {
+    if (!session) return note;
+    const key = await getOrCreateEncryptionKey(session?.record.id);
+    if (!key) return note;
+    const decryptedNote = await decryptData(note, key);
+    return decryptedNote;
+  }
 
   const transformRatingsData = async () => {
     if (session) {
@@ -55,15 +65,18 @@ const calendar = () => {
       const Data: Record<string, any> = {};
 
       ratingsData.forEach((rating) => {
-        const date = rating.date.split(" ")[0];
-        Data[date] = {
-          note: rating.note,
-          rating: rating.rating,
-          selected: true,
-          selectedColor: CalendarColors[rating.rating],
-        };
-      });
+        decryptNote(rating.note).then((decrypted) => {
+          const date = rating.date.split(" ")[0];
+          Data[date] = {
+            note: decrypted,
+            rating: rating.rating,
+            selected: true,
+            selectedColor: CalendarColors[rating.rating],
+          };
+        });
+      })
       return Data;
+      
     }
     return {};
   };

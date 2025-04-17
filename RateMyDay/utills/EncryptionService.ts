@@ -1,7 +1,10 @@
 import * as ExpoCrypto from 'expo-crypto';
 import * as Keychain from 'react-native-keychain';
 import 'react-native-get-random-values';
+import CryptoJS from 'crypto-js';
 import { getBackupFromRemote } from './PocketBaseBackupService';
+import { pb } from './pbClient';
+
 
 const ENCRYPTION_KEY_STORAGE_KEY = 'dk.ratemyday.userEncryptionKey';
 
@@ -43,14 +46,10 @@ export const encryptData = async (plainText: string, encryptionKeyHex: string): 
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
     
-    // Encrypt the data using the concatenated values
-    const encrypted = await ExpoCrypto.digestStringAsync(
-      ExpoCrypto.CryptoDigestAlgorithm.SHA256,
-      ivHex + encryptionKeyHex + btoa(plainText),
-      {
-        encoding: ExpoCrypto.CryptoEncoding.HEX,
-      }
-    );
+    // Use AES encryption
+    const encrypted = CryptoJS.AES.encrypt(plainText, encryptionKeyHex, {
+      iv: CryptoJS.enc.Hex.parse(ivHex),
+    }).toString();
     
     // Return IV and encrypted data concatenated
     return `${ivHex}:${encrypted}`;
@@ -67,27 +66,19 @@ export const decryptData = async (cipherText: string, encryptionKeyHex: string):
       throw new Error('Invalid ciphertext format');
     }
     
-    // Decrypt using the same method as encryption
-    const decrypted = await ExpoCrypto.digestStringAsync(
-      ExpoCrypto.CryptoDigestAlgorithm.SHA256,
-      ivHex + encryptionKeyHex,
-      {
-        encoding: ExpoCrypto.CryptoEncoding.HEX,
-      }
-    );
+    // Decrypt using AES
+    const bytes = CryptoJS.AES.decrypt(encrypted, encryptionKeyHex, {
+      iv: CryptoJS.enc.Hex.parse(ivHex),
+    });
     
-    try {
-      return atob(decrypted);
-    } catch {
-      return decrypted;
-    }
+    return bytes.toString(CryptoJS.enc.Utf8);
   } catch (error) {
     console.error('Error decrypting data:', error);
     throw error;
   }
 };
 
-export const getOrCreateEncryptionKey = async (): Promise<string | null> => {
+export const getOrCreateEncryptionKey = async (userId: string): Promise<string | null> => {
   try {
     /*
     const stored = await Keychain.getGenericPassword({ service: ENCRYPTION_KEY_STORAGE_KEY });
@@ -107,7 +98,9 @@ export const getOrCreateEncryptionKey = async (): Promise<string | null> => {
       service: ENCRYPTION_KEY_STORAGE_KEY 
     });
     */
-    const key = getBackupFromRemote();
+    
+    const key = await getBackupFromRemote(userId);
+    console.log('key: ', key);
     return key;
   } catch (error) {
     console.error('Error getting encryption key:', error);

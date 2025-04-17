@@ -74,9 +74,9 @@ const AddRatingComponent: React.FC = () => {
     }
   };
 
-  const updateRatingPb = async (todaysRating: RecordModel) => {
+  const updateRatingPb = async (userId: string, todaysRating: RecordModel) => {
     if (session && selectedScore) {
-      await updateRating(todaysRating.id, selectedScore, note);
+      await updateRating(userId, todaysRating.id, selectedScore, note);
     }
   };
 
@@ -85,7 +85,7 @@ const AddRatingComponent: React.FC = () => {
       setIsLoading(true);
       const todaysRating = await getRatingByDate(session.record.id, today);
       if (!todaysRating) setRatingPb();
-      else updateRatingPb(todaysRating);
+      else updateRatingPb(session.record.id, todaysRating);
       await setWeeklyRatings(session.record.id);
       await setMonthlyRatings(session.record.id);
       await setYearlyRatings(session.record.id);

@@ -42,14 +42,11 @@ export const saveBackupToRemote = async (backupRecord: string, userid: string | 
  *  - Retrieves the backup record from the "key_backups" collection for the current user.
  *  - Returns the backup string if found, otherwise null.
  */
-export const getBackupFromRemote = async (): Promise<string | null> => {
-  const userId = getCurrentUserId();
-  // The filter ensures that only records for the authenticated user are returned.
-  const records = await pb.collection('key_backups').getFullList({
-    filter: `userId = "${userId}"`,
-  });
+export const getBackupFromRemote = async (userId: string): Promise<string | null> => {
+  const records = await pb.collection('key_backups').getFullList({ filter: `userId="${userId}"` });
+  console.log('Records:', records);
   if (records && records.length > 0) {
-    return records[0].backup;
+    return records[0].backupRecord;
   }
   return null;
 };
