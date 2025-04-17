@@ -64,7 +64,9 @@
     "react-native-web": "~0.19.10",
     "tailwindcss-animate": "^1.0.7",
     "victory-native": "^41.14.0",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.2",
+    "expo-notifications": "~0.28.19",
+    "@react-native-community/datetimepicker": "8.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
