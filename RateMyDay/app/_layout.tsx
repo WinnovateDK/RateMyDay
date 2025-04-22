@@ -10,9 +10,10 @@ import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Toast, { ErrorToast } from "react-native-toast-message";
+import { configureNotifications } from '@/utills/ConfigureNotifications';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+configureNotifications();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

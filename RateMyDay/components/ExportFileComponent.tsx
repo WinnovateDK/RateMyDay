@@ -3,17 +3,14 @@ import { View, Text, TouchableOpacity, Alert, Platform, Modal } from "react-nati
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import * as Notifications from "expo-notifications";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
 import { useIsFocused } from "@react-navigation/native";
 import { setItem } from "@/utills/AsyncStorage";
-import { MotiView } from "moti";
-import { shadowStyle } from "@/constants/Colors";
 import { Feather } from "@expo/vector-icons";
 import useAuthStore from "@/stores/AuthStateStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import NotificationComponent from "./NotificationComponent";
 
 const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   const [filePath, setFilePath] = useState<string | null>(null);
@@ -23,8 +20,6 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [reminderTime, setReminderTime] = useState(new Date());
-  const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
 
   const saveUserData = async () => {
     try {
@@ -86,102 +81,6 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
     }
   };
 
-  const scheduleNotification = async (time: Date) => {
-    try {
-      await Notifications.requestPermissionsAsync();
-      const { status } = await Notifications.getPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission needed",
-          "You need to grant notification permissions to set reminders."
-        );
-        return;
-      }
-
-      const trigger = new Date(time);
-      trigger.setDate(trigger.getDate() + 1); 
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Rate My Day Reminder",
-          body: "Don't forget to rate your day!",
-          sound: true,
-        },
-        trigger: {
-          hour: trigger.getHours(),
-          minute: trigger.getMinutes(),
-          repeats: true,
-        },
-      });
-
-      Alert.alert("Success", "Daily reminder set successfully!");
-      setShowNotificationModal(false);
-    } catch (error) {
-      console.error("Error scheduling notification:", error);
-      Alert.alert("Error", "Failed to set notification reminder");
-    }
-  };
-
-  const onTimeChange = (event: any, selectedTime?: Date) => {
-    setIsTimePickerVisible(Platform.OS === "ios");
-    if (selectedTime) {
-      setReminderTime(selectedTime);
-      if (Platform.OS === "android") {
-        scheduleNotification(selectedTime);
-      }
-    }
-  };
-
-  const NotificationModal = () => (
-    <Modal
-      visible={showNotificationModal}
-      transparent
-      animationType="slide"
-      onRequestClose={() => setShowNotificationModal(false)}
-    >
-      <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-cyan-600 p-6 rounded-lg w-4/5">
-          <Text className="text-xl font-bold mb-4 text-white">Set Daily Reminder</Text>
-          <Text className="mb-4 text-white">
-            Choose when you'd like to be reminded to rate your day:
-          </Text>
-
-          {Platform.OS === "ios" ? (
-            <>
-              <DateTimePicker
-                value={reminderTime}
-                mode="time"
-                display="spinner"
-                onChange={onTimeChange}
-              />
-              <View className="flex-row justify-end gap-4 mt-4">
-                <TouchableOpacity
-                  className="px-4 py-2 rounded-md bg-gray-300"
-                  onPress={() => setShowNotificationModal(false)}
-                >
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="px-4 py-2 rounded-md bg-blue-500"
-                  onPress={() => scheduleNotification(reminderTime)}
-                >
-                  <Text className="text-white">Set Reminder</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <TouchableOpacity
-              className="px-4 py-2 rounded-md bg-cyan-950"
-              onPress={() => setIsTimePickerVisible(true)}
-            >
-              <Text className="text-white text-center">Select Time</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
 
   return (
     <LinearGradient colors={["#034f84", "#3c6e71"]} className="flex-1">
@@ -229,7 +128,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
             <Text className="text-white text-xl ">Load Data from File</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
+            className="w-fit flex-row items-center rounded-md my-1 mx-2"
             onPress={() => setShowNotificationModal(true)}
           >
             <Feather
@@ -238,7 +137,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
               className="m-4 mr-6"
               color="#67e8f9"
             />
-            <Text className="text-white text-xl ">Notification Reminder</Text>
+            <Text className="text-white text-xl">Notification Reminder</Text>
           </TouchableOpacity>
         </View>
         <View className="w-full">
@@ -269,15 +168,10 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
           )}
         </View>
       </View>
-      <NotificationModal />
-      {Platform.OS === "android" && isTimePickerVisible && (
-        <DateTimePicker
-          value={reminderTime}
-          mode="time"
-          display="default"
-          onChange={onTimeChange}
-        />
-      )}
+      <NotificationComponent 
+        showModal={showNotificationModal}
+        onCloseModal={() => setShowNotificationModal(false)}
+      />
     </LinearGradient>
   );
 };
