@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import PocketBase, { RecordModel } from "pocketbase";
 import Config from 'react-native-config';
 import { useRatingStorePb } from "./RatingStorePb";
+import { getBackupFromRemote } from "@/utills/PocketBaseBackupService";
 
 const pb = new PocketBase("https://winnovate.pockethost.io");
 
@@ -32,6 +33,8 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   setIsGuest: (isGuest: boolean) => void;
+  encryptionKey: string | null;
+  setEncryptionKey: (encryptionKey: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -45,6 +48,10 @@ export const useAuthStore = create<AuthState>()(
         : null,
       isGuest: false,
       isLoading: false,
+      encryptionKey: null,
+      setEncryptionKey: (key: string) => {
+        set({ encryptionKey: key });
+      },
       signIn: async (email, password) => {
         set({ isLoading: true });
         try {
@@ -52,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
             .collection("users")
             .authWithPassword(email, password);
           set({ session: authData, isGuest: false });
-
+          pb.authStore.save(authData.token, authData.record as RecordModel);
           const ratingStore = useRatingStorePb.getState();
           await ratingStore.setWeeklyRatings(authData.record.id);
           await ratingStore.setMonthlyRatings(authData.record.id);
@@ -60,7 +67,10 @@ export const useAuthStore = create<AuthState>()(
           await ratingStore.setGraphWeeklyRatings(authData.record.id);
           await ratingStore.setGraphMonthlyRatings(authData.record.id);
           await ratingStore.setGraphYearlyRatings(authData.record.id);
-
+          const key = await getBackupFromRemote(authData.record.id);
+          if(key) {
+            set({ encryptionKey: key });
+          }
           set({ isLoading: false });
         } catch (error) {
           console.error("Login failed: ", error);

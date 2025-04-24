@@ -397,7 +397,6 @@ export async function getAverageRatingsPerMonthPb(
   userId: string
 ): Promise<number[]> {
   const ratings = await getRatingsForThisYearPb(userId);
-  console.log("ratins: ", ratings);
   const monthlyRatings: { [key: string]: number[] } = {};
   ratings.forEach(({ Label, Rating }) => {
     const month = new Date(Label).getMonth();
@@ -431,65 +430,6 @@ export function getAmountOfDaysInCurrentMonth(): number {
   const month: number = now.getMonth();
 
   return new Date(year, month + 1, 0).getDate();
-}
-
-export async function interpolateRating(
-  ratings: { rating: number | null; date: string }[],
-  index: number,
-  dates: string[]
-): Promise<number> {
-  const maxRange = 3;
-  let previousValue: number | null = null;
-  let nextValue: number | null = null;
-
-  // Search for previous value within the range
-  try {
-    for (let i = 1; i <= maxRange; i++) {
-      if (
-        index - i >= 0 &&
-        ratings[index - i].rating !== null &&
-        ratings[index - i].rating !== undefined &&
-        ratings[index - i].rating !== 0
-      ) {
-        previousValue = ratings[index - i].rating!;
-        break;
-      }
-    }
-  } catch (error) {
-    console.log("Error in previous interpolation value: ", error);
-  }
-
-  // Search for next value within the range
-  try {
-    for (let i = 1; i <= maxRange; i++) {
-      if (index + i < dates.length && dates[index + i] !== null) {
-        const nextRating = await getItem(dates[index + i]).then((rating) => {
-          return rating;
-        });
-        if (nextRating !== null && nextRating !== undefined) {
-          nextValue = nextRating;
-          break;
-        }
-      }
-    }
-  } catch (error) {
-    console.log("Error in finding next interpolation value: ", error);
-  }
-
-  // Interpolate if both previous and next values are found
-  if (previousValue !== null && nextValue !== null) {
-    return (previousValue + nextValue) / 2;
-  }
-
-  // Return previous or next value if only one is found
-  if (previousValue !== null) {
-    return previousValue;
-  }
-  if (nextValue !== null) {
-    return nextValue;
-  }
-  // Return 0 if no values are found within the range
-  return 0;
 }
 
 const getISOWeekStart = (year: number, weekNumber: number) => {

@@ -47,14 +47,19 @@ const calendar = () => {
   const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
-  const { session, isGuest } = useAuthStore();
+  const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
   const { isRatingUpdated } = useStore();
   
   const decryptNote = async (note: string) => {
     if (!session) return note;
-    const key = await getOrCreateEncryptionKey(session?.record.id);
-    if (!key) return note;
-    const decryptedNote = await decryptData(note, key);
+    if(!encryptionKey){
+      console.log("No encryption key found, Getting from backup...");
+      const key = await getOrCreateEncryptionKey(session?.record.id);
+      if (!key) return note;
+      setEncryptionKey(key);
+    }
+    
+    const decryptedNote = await decryptData(note, encryptionKey!);
     return decryptedNote;
   }
 

@@ -44,7 +44,6 @@ export const saveBackupToRemote = async (backupRecord: string, userid: string | 
  */
 export const getBackupFromRemote = async (userId: string): Promise<string | null> => {
   const records = await pb.collection('key_backups').getFullList({ filter: `userId="${userId}"` });
-  console.log('Records:', records);
   if (records && records.length > 0) {
     return records[0].backupRecord;
   }

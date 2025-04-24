@@ -37,7 +37,7 @@ const AddRatingComponent: React.FC = () => {
   const isFocused = useIsFocused();
   const [scoreSet, setScoreSet] = useState<boolean>();
   const { width, height } = useWindowDimensions();
-  const { session, isGuest } = useAuthStore();
+  const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
   const {
     setWeeklyRatings,
     setMonthlyRatings,
@@ -70,13 +70,13 @@ const AddRatingComponent: React.FC = () => {
 
   const setRatingPb = async () => {
     if (session && selectedScore) {
-      await createRating(session?.record.id, selectedScore, note);
+      await createRating(session?.record.id, selectedScore, note, encryptionKey);
     }
   };
 
   const updateRatingPb = async (userId: string, todaysRating: RecordModel) => {
     if (session && selectedScore) {
-      await updateRating(userId, todaysRating.id, selectedScore, note);
+      await updateRating(userId, todaysRating.id, selectedScore, note, encryptionKey);
     }
   };
 

@@ -3,6 +3,7 @@ import { deriveEncryptionKey, encryptData, getOrCreateEncryptionKey } from "./En
 import { saveBackupToRemote } from "./PocketBaseBackupService";
 import { pb } from "./pbClient";
 
+
 export const createUser = async (
   email: string,
   password: string,
@@ -28,12 +29,12 @@ export const createUser = async (
 export const createRating = async (
   userId: string,
   rating: number,
-  note: string
+  note: string,
+  encryptionKey: string | null = null 
 ) => {
   try {
-    const encryptionKey = await getOrCreateEncryptionKey(userId);
-    if (!encryptionKey) {
-      throw new Error("Encryption key not found or created.");
+    if (!encryptionKey) {      
+      throw new Error("Encryption key not found");
     }
     const encryptedNote = await encryptData(note, encryptionKey);
     const data = {
@@ -53,11 +54,11 @@ export const updateRating = async (
   userId: string,
   ratingId: string,
   newRating?: number,
-  newNote?: string
+  newNote?: string,
+  encryptionKey: string | null = null
 ) => {
   try {
     const data: Record<string, any> = {};
-    const encryptionKey = await getOrCreateEncryptionKey(userId);
     if (!encryptionKey) {
       throw new Error("Encryption key not found or created.");
     }    
