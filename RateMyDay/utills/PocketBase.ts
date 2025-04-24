@@ -36,13 +36,20 @@ export const createRating = async (
     if (!encryptionKey) {      
       throw new Error("Encryption key not found");
     }
-    const encryptedNote = await encryptData(note, encryptionKey);
+    
     const data = {
       userId: userId,
       rating: rating,
-      note: encryptedNote,
+      note: note,
       date: new Date().toISOString(),
     };
+    if (note) {
+      const encryptedNote = await encryptData(note, encryptionKey);
+      data.note = encryptedNote;
+    } else {
+      const encryptedNote = await encryptData("No note was given this day", encryptionKey);
+      data.note = encryptedNote;
+    }
     const record = await pb.collection("ratings").create(data);
     console.log("rating created: ", data);
   } catch (e) {
@@ -63,9 +70,11 @@ export const updateRating = async (
       throw new Error("Encryption key not found or created.");
     }    
     if (newRating !== undefined) data.rating = newRating;
-    if (newNote !== undefined) data.note = newNote;
     if (newNote) {
       const encryptedNote = await encryptData(newNote, encryptionKey);
+      data.note = encryptedNote;
+    } else {
+      const encryptedNote = await encryptData("No note was given this day", encryptionKey);
       data.note = encryptedNote;
     }
     data.userId = userId;
@@ -264,7 +273,7 @@ export async function getRatingsforLastMonthPb(
         Rating: parseInt(rating.rating),
       };
     });
-
+  console.log("pastmonths ratings: ", pastMonthRatings);
   return pastMonthRatings;
 }
 
