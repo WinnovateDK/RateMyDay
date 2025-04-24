@@ -62,7 +62,7 @@ export const useRatingStorePb = create<RatingsState>((set) => ({
   },
   setMonthlyRatings: async (userId: string) => {
     try {
-      console.log("userid: ", userId);
+      
       const result = await calculateAverageRatingForMonthPb(userId);
       set({ monthlyRatings: result });
     } catch (error) {
@@ -71,7 +71,7 @@ export const useRatingStorePb = create<RatingsState>((set) => ({
   },
   setYearlyRatings: async (userId: string) => {
     try {
-      console.log("userid: ", userId);
+      
       const result = await calculateAverageRatingForYearPb(userId);
       set({ yearlyRatings: result });
     } catch (error) {
@@ -80,7 +80,7 @@ export const useRatingStorePb = create<RatingsState>((set) => ({
   },
   setGraphWeeklyRatings: async (userId: string) => {
     try {
-      console.log("userid: ", userId);
+      
       const result = await getRatingsForLastWeekPb(userId);
       set({ graphWeeklyRatings: result });
     } catch (error) {
@@ -89,7 +89,7 @@ export const useRatingStorePb = create<RatingsState>((set) => ({
   },
   setGraphMonthlyRatings: async (userId: string) => {
     try {
-      console.log("userid: ", userId);
+      
       const result = await getRatingsforLastMonthPb(userId);
       set({ graphMonthlyRatings: result });
     } catch (error) {
@@ -98,7 +98,7 @@ export const useRatingStorePb = create<RatingsState>((set) => ({
   },
   setGraphYearlyRatings: async (userId: string) => {
     try {
-      console.log("userid: ", userId);
+      
       const result = await getAverageRatingsPerMonthPb(userId);
       set({ graphYearlyRatings: result });
     } catch (error) {

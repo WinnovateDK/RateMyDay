@@ -85,7 +85,6 @@ export const getRatingByDate = async (userId: string, date: Date) => {
     });
 
     if (records.items.length > 0) {
-      console.log("Rating found: ", records.items[0]);
       return records.items[0];
     } else {
       console.log("No rating found for this date.");
@@ -265,7 +264,7 @@ export async function getRatingsforLastMonthPb(
         Rating: parseInt(rating.rating),
       };
     });
-  console.log("pastmonths ratings: ", pastMonthRatings);
+
   return pastMonthRatings;
 }
 

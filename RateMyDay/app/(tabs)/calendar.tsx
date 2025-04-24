@@ -24,7 +24,6 @@ import useAuthStore from "@/stores/AuthStateStore";
 import { RecordModel } from "pocketbase";
 import useStore from "@/stores/isRatingSetStore";
 import { decryptData, getOrCreateEncryptionKey } from "@/utills/EncryptionService";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -48,7 +47,7 @@ const calendar = () => {
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
   const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
-  const { isRatingUpdated } = useStore();
+  const { isRatingUpdated, setRatingUpdated } = useStore();
   
   const decryptNote = async (note: string) => {
     if (!session) return note;
@@ -87,17 +86,15 @@ const calendar = () => {
   };
 
   useEffect(() => {
-    setStoredDateRatings(storageSavedDates);
-  }, [storageSavedDates]);
-
-  useEffect(() => {
     const fetchRatings = async () => {
       const transformedData = await transformRatingsData();
       setDateRatings(transformedData);
-      setHasLoaded(true);
+      
     };
 
-    fetchRatings();
+    fetchRatings().then(() => {
+      setHasLoaded(true);
+    });
   }, [isRatingUpdated]);
 
   const getRatingForDate = useMemo(() => {
@@ -150,25 +147,31 @@ const calendar = () => {
 
         <View className="flex-1">
           <View className="flex-shrink px-2">
-            <Calendar
-              markedDates={!isGuest ? dateRatings : storedDateRatings}
-              onDayPress={onDayPress}
-              firstDay={1}
-              theme={{
-                calendarBackground: "white",
-                textSectionTitleColor: "#b6c1cd",
-                selectedDayBackgroundColor: "#037A4B",
-                selectedDayTextColor: "#ffffff",
-                todayTextColor: "#00D382",
-                dayTextColor: "#2d4150",
-                dotColor: "red",
-                arrowColor: "#0084c7",
-              }}
-              style={{
-                borderRadius: 10,
-                marginVertical: 10,
-              }}
-            />
+            {hasLoaded ? (
+              <Calendar
+                markedDates={!isGuest ? dateRatings : storedDateRatings}
+                onDayPress={onDayPress}
+                firstDay={1}
+                theme={{
+                  calendarBackground: "white",
+                  textSectionTitleColor: "#b6c1cd",
+                  selectedDayBackgroundColor: "#037A4B",
+                  selectedDayTextColor: "#ffffff",
+                  todayTextColor: "#00D382",
+                  dayTextColor: "#2d4150",
+                  dotColor: "red",
+                  arrowColor: "#0084c7",
+                }}
+                style={{
+                  borderRadius: 10,
+                  marginVertical: 10,
+                }}
+              />
+            ) : (
+              <View className="bg-white rounded-lg my-2.5 p-4 flex items-center justify-center" style={{ height: 350 }}>
+                <ActivityIndicator size={60} color="#0084c7" />
+              </View>
+            )}
           </View>
           <View className="flex-1 px-4 py-3.5 rounded-t-3xl items-center bg-white">
             <View className="flex-row w-full justify-center">
@@ -202,7 +205,7 @@ const calendar = () => {
             <View className="flex-1 justify-center w-full">
               {statsType === "Numbers" && hasLoaded ? (
                 <StatisticsBox
-                  renderCondition={storedDateRatings}
+                  renderCondition={!isGuest ? dateRatings : storedDateRatings}
                   timerange={timerange}
                 />
               ) : statsType === "Graph" && hasLoaded ? (

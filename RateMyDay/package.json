@@ -19,6 +19,7 @@
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/blur": "^4.4.1",
+    "@react-native-community/datetimepicker": "8.0.1",
     "@react-native-picker/picker": "^2.9.0",
     "@react-navigation/native": "^6.0.2",
     "@shopify/react-native-skia": "^1.7.6",
@@ -32,12 +33,14 @@
     "expo-font": "~12.0.9",
     "expo-linear-gradient": "~13.0.2",
     "expo-linking": "~6.3.1",
+    "expo-notifications": "~0.28.19",
     "expo-router": "~3.5.23",
     "expo-sharing": "~12.0.1",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
     "expo-web-browser": "~13.0.3",
+    "moment-timezone": "^0.5.48",
     "moti": "^0.30.0",
     "nativewind": "^4.1.23",
     "pocketbase": "^0.25.1",
@@ -64,9 +67,7 @@
     "react-native-web": "~0.19.10",
     "tailwindcss-animate": "^1.0.7",
     "victory-native": "^41.14.0",
-    "zustand": "^5.0.2",
-    "expo-notifications": "~0.28.19",
-    "@react-native-community/datetimepicker": "8.0.1"
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -140,7 +140,7 @@ const AddRatingComponent: React.FC = () => {
         setUpdateOrAdd("Add");
       }
     });
-  }, [isFocused, scoreSet]);
+  }, [scoreSet]);
 
   const renderScale = () => {
     const totalCircles = 11;
