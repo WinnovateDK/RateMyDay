@@ -21,7 +21,7 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const router = useRouter();
-
+  
   const toastConfig = {
     error: (props: any) => (
       <ErrorToast {...props} style={{ borderLeftColor: "#bae6fd" }} />
@@ -29,6 +29,7 @@ export default function RootLayout() {
   };
 
   useEffect(() => {
+
     if (loaded) {
       SplashScreen.hideAsync();
     }

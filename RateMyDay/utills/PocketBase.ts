@@ -88,7 +88,6 @@ export const updateRating = async (
 export const getRatingByDate = async (userId: string, date: Date) => {
   try {
     const formattedDate = date.toISOString().split("T")[0];
-
     const records = await pb.collection("ratings").getList(1, 1, {
       filter: `userId = "${userId}" && date >= "${formattedDate} 00:00:00" && date <= "${formattedDate} 23:59:59"`,
     });
@@ -96,7 +95,7 @@ export const getRatingByDate = async (userId: string, date: Date) => {
     if (records.items.length > 0) {
       return records.items[0];
     } else {
-      console.log("No rating found for this date.");
+      console.log("No rating found for this date: ", formattedDate);
       return null;
     }
   } catch (e) {
@@ -273,7 +272,6 @@ export async function getRatingsforLastMonthPb(
         Rating: parseInt(rating.rating),
       };
     });
-  console.log("pastmonths ratings: ", pastMonthRatings);
   return pastMonthRatings;
 }
 

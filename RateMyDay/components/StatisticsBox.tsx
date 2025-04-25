@@ -30,14 +30,12 @@ const StatisticsBox = ({
 
   const { weeklyRatings, monthlyRatings, yearlyRatings } = useRatingStorePb();
   const { isRatingUpdated } = useStore();
-
   const { session, isGuest } = useAuthStore();
   useEffect(() => {
     if (session && !isGuest) {
       switch (timerange) {
         case "Weekly":
           setStats(weeklyRatings);
-
           break;
 
         case "Monthly":
