@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   NativeScrollEvent,
+  Animated,
 } from "react-native";
 import { setItem, removeItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
@@ -49,6 +50,9 @@ const AddRatingComponent: React.FC = () => {
   const today = new Date();
   const { setRatingUpdated } = useStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [fadeAnim] = useState(new Animated.Value(1));
+  const [currentIcon, setCurrentIcon] = useState('plus');
 
   const buttonSize = Math.ceil(width * 0.14);
   const contentOffsetX = width / 2 + buttonSize / 2;
@@ -80,6 +84,25 @@ const AddRatingComponent: React.FC = () => {
     }
   };
 
+  const animateIcon = (toCheck: boolean) => {
+    Animated.sequence([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setTimeout(() => {
+      setCurrentIcon(toCheck ? 'check' : 'plus');
+    }, 200);
+  };
+
   const handleSubmitPb = async () => {
     if (session && selectedScore) {
       setIsLoading(true);
@@ -94,6 +117,12 @@ const AddRatingComponent: React.FC = () => {
       await setGraphYearlyRatings(session.record.id);
       setRatingUpdated();
       setIsLoading(false);
+      setIsSubmitted(true);
+      animateIcon(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        animateIcon(false);
+      }, 3000);
     }
   };
 
@@ -104,6 +133,12 @@ const AddRatingComponent: React.FC = () => {
       setScore(selectedScore);
       Alert.alert("Success", `You submitted: ${selectedScore}`);
       setScoreSet(true);
+      setIsSubmitted(true);
+      animateIcon(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        animateIcon(false);
+      }, 3000);
     }
   };
 
@@ -207,13 +242,21 @@ const AddRatingComponent: React.FC = () => {
         style={{ height: aspectRatio < 0.6 ? "40%" : 90 }}
       >
         <TouchableOpacity
-          className="w-1/6 aspect-square rounded-full items-center justify-center bg-[#67e8f9]"
+          className={`w-1/6 aspect-square rounded-full items-center justify-center ${
+            isSubmitted ? 'bg-green-300' : 'bg-[#67e8f9]'
+          }`}
           onPress={!isGuest ? handleSubmitPb : handleSubmit}
         >
           {isLoading ? (
             <ActivityIndicator size="large" />
           ) : (
-            <AntDesign name="plus" size={40} color="white" />
+            <Animated.View style={{ opacity: fadeAnim }}>
+              <AntDesign 
+                name={currentIcon as any} 
+                size={40} 
+                color="white" 
+              />
+            </Animated.View>
           )}
         </TouchableOpacity>
       </View>
