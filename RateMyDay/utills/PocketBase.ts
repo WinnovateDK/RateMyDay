@@ -118,12 +118,10 @@ export const getAllRatingsForUser = async (userId: string) => {
 export async function calculateAverageRatingForMonthPb(userId: string) {
   try {
     const startOfMonth = new Date();
-    startOfMonth.setDate(1);
+    startOfMonth.setDate(2);
     startOfMonth.setHours(0, 0, 0, 0);
-
     const today = new Date();
     today.setHours(23, 59, 59, 999);
-
     const allRatings = await pb.collection("ratings").getFullList({
       filter: `userId = "${userId}" && date >= "${startOfMonth.toISOString()}" && date <= "${today.toISOString()}"`,
     });
@@ -136,7 +134,6 @@ export async function calculateAverageRatingForMonthPb(userId: string) {
     }
 
     const ratings = allRatings.map((record) => parseInt(record.rating));
-
     const highestRating = Math.max(...ratings);
     const lowestRating = Math.min(...ratings);
     const sumOfRatings = ratings.reduce((acc, num) => acc + num, 0);

@@ -4,6 +4,7 @@ import moment from "moment";
 export function daysPassedThisWeek(): number {
   const today = new Date();
   let currentDayOfWeek = today.getDay();
+  
   currentDayOfWeek = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
   return currentDayOfWeek;
 }

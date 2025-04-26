@@ -69,25 +69,20 @@ export async function calculateAverageRatingForWeek() {
 export async function calculateAverageRatingForWeekPb(userId: string) {
   let daysPassed = daysPassedThisWeek();
   const datesInPastWeek = getDatesInCurrentWeekPb();
-  const isRatingTodaySet = await isRatingSetToday();
   const pastWeeksRatings: number[] = [];
   let daysWithoutARating = 0;
   const today = new Date();
   const todayRating = await getRatingByDate(userId, today);
-
   if (todayRating) {
     daysPassed += 1;
   }
-
   if (daysPassed > 0) {
     for (let i = 0; i < daysPassed; i++) {
       const rating = await getRatingByDate(userId, datesInPastWeek[i]);
-
       if (rating === null) {
         daysWithoutARating += 1;
         continue;
       }
-
       pastWeeksRatings.push(parseInt(rating?.rating));
     }
 
