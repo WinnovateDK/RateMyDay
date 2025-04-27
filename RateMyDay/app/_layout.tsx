@@ -6,11 +6,12 @@ import {
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Toast, { ErrorToast } from "react-native-toast-message";
 import { configureNotifications } from '@/utills/ConfigureNotifications';
+import { Background } from '@/components/Background';
 
 SplashScreen.preventAutoHideAsync();
 configureNotifications();
@@ -41,10 +42,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ title: "Main App" }} />
-      </Stack>
-      <Toast config={toastConfig} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ title: "Main App" }} />
+        </Stack>
+        <Toast config={toastConfig} />
     </ThemeProvider>
   );
 }

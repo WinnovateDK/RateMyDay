@@ -7,8 +7,6 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useAuthStore from "@/stores/AuthStateStore";
 import PocketBase from "pocketbase";
 import "../../global.css";
-import Toast, { ErrorToast } from "react-native-toast-message";
-import { useRatingStorePb } from "@/stores/RatingStorePb";
 
 const pb = new PocketBase("https://winnovate.pockethost.io");
 

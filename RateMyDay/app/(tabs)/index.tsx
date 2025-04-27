@@ -14,7 +14,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AddRatingComponent from "@/components/AddRatingComponent";
 import { useState, useEffect } from "react";
-import { LinearGradient } from "expo-linear-gradient";
 import ExportFileComponent from "@/components/ExportFileComponent";
 import { shadowStyle } from "@/constants/Colors";
 import Animated, {
@@ -25,6 +24,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scale } from "react-native-size-matters";
 import { useWindowDimensions } from "react-native";
+import { Background } from "@/components/Background";
 
 export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -63,7 +63,7 @@ export default function AddRating() {
   }));
 
   return (
-    <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>
+    <Background>
       {aspectRatio < 0.6 ? (
         <TouchableWithoutFeedback
           onPress={() => {
@@ -72,7 +72,7 @@ export default function AddRating() {
           }}
         >
           <View className="flex-1">
-            <View className=" h-1/4 w-full border-b-2 border-cyan-400">
+            <View className=" h-1/4 w-full">
               <View className="flex-row items-center justify-between">
                 <View className="w-6" />
                 <Image
@@ -81,20 +81,13 @@ export default function AddRating() {
                   className="absolute left-1/2 -translate-x-1/2"
                 />
                 <TouchableOpacity
-                  className="pt-10 pb-16 pr-4"
+                  className="pb-16 pr-4"
                   onPress={() => setShowSidePanel(true)}
                 >
                   <Ionicons name="settings" size={24} color="#0084c7" />
                 </TouchableOpacity>
               </View>
-              <View className="justify-center items-center">
-                <Text
-                  className="text-5xl font-extrabold text-white"
-                  style={{ fontSize: scale(30) }}
-                >
-                  Rate My Day
-                </Text>
-              </View>
+              
             </View>
             {/* Main Content */}
             <View className="flex-1 p-6">
@@ -203,18 +196,18 @@ export default function AddRating() {
       >
         <ExportFileComponent onClose={() => setShowSidePanel(false)} />
       </Animated.View>
-    </LinearGradient>
+    </Background>
   );
 }
 
 const styles = StyleSheet.create({
   reactLogo: {
-    height: 100,
-    width: 100,
+    height: 200,
+    width: 200,
     alignSelf: "center",
     position: "relative",
     resizeMode: "center",
-    marginTop: 12,
+    marginTop: 18,
   },
   overlay: {
     position: "absolute",
