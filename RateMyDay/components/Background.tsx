@@ -39,23 +39,6 @@ export function Background({ children }: { children: ReactNode }) {
   const cloudAnims = useRef(CLOUDS.map(() => new Animated.Value(-200))).current
   const sunX = useRef(new Animated.Value(0)).current
 
-  // Sun animation
-  useEffect(() => {
-    const now = new Date()
-    const hour = now.getHours() + now.getMinutes() / 60
-    const progress = (hour - 6) / 12 // Assuming 6AM to 6PM day
-    const startX = progress * width
-
-    sunX.setValue(startX)
-    Animated.timing(sunX, {
-      toValue: width + 50,
-      duration: (1 - progress) * 12 * 60 * 60 * 1000, // Remaining daylight in ms
-      easing: Easing.linear,
-      useNativeDriver: true,
-    }).start()
-  }, [])
-
-  // Cloud animations
   useEffect(() => {
     const animations = CLOUDS.map((cloud, index) => {
       const anim = cloudAnims[index]
@@ -87,13 +70,6 @@ export function Background({ children }: { children: ReactNode }) {
   return (
     <LinearGradient colors={["#034f84", "#3c6e71"]} style={{ flex: 1 }}>
       <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
-        <Animated.Image
-          source={require('../assets/sun.png')}
-          className="absolute w-16 h-16 top-12"
-          style={{ transform: [{ translateX: sunX }] }}
-          resizeMode="contain"
-        />
-
         {CLOUDS.map((cloud, i) => (
           <Animated.Image
             key={i}
