@@ -1,8 +1,11 @@
 import { rateDatePair } from "./RatingService";
-import { deriveEncryptionKey, encryptData, getOrCreateEncryptionKey } from "./EncryptionService";
+import {
+  deriveEncryptionKey,
+  encryptData,
+  getOrCreateEncryptionKey,
+} from "./EncryptionService";
 import { saveBackupToRemote } from "./PocketBaseBackupService";
-import { pb } from "./pbClient";
-
+import pb from "./pbClient";
 
 export const createUser = async (
   email: string,
@@ -18,7 +21,7 @@ export const createUser = async (
     console.log("User created: ", user);
     const userEncryptionKey = await deriveEncryptionKey(user.id);
     await saveBackupToRemote(userEncryptionKey, user.id);
-    
+
     return user;
   } catch (e) {
     console.error("Error creating user: ", e);
@@ -30,13 +33,13 @@ export const createRating = async (
   userId: string,
   rating: number,
   note: string,
-  encryptionKey: string | null = null 
+  encryptionKey: string | null = null
 ) => {
   try {
-    if (!encryptionKey) {      
+    if (!encryptionKey) {
       throw new Error("Encryption key not found");
     }
-    
+
     const data = {
       userId: userId,
       rating: rating,
@@ -47,7 +50,10 @@ export const createRating = async (
       const encryptedNote = await encryptData(note, encryptionKey);
       data.note = encryptedNote;
     } else {
-      const encryptedNote = await encryptData("No note was given this day", encryptionKey);
+      const encryptedNote = await encryptData(
+        "No note was given this day",
+        encryptionKey
+      );
       data.note = encryptedNote;
     }
     const record = await pb.collection("ratings").create(data);
@@ -68,13 +74,16 @@ export const updateRating = async (
     const data: Record<string, any> = {};
     if (!encryptionKey) {
       throw new Error("Encryption key not found or created.");
-    }    
+    }
     if (newRating !== undefined) data.rating = newRating;
     if (newNote) {
       const encryptedNote = await encryptData(newNote, encryptionKey);
       data.note = encryptedNote;
     } else {
-      const encryptedNote = await encryptData("No note was given this day", encryptionKey);
+      const encryptedNote = await encryptData(
+        "No note was given this day",
+        encryptionKey
+      );
       data.note = encryptedNote;
     }
     data.userId = userId;
@@ -105,6 +114,8 @@ export const getRatingByDate = async (userId: string, date: Date) => {
 
 export const getAllRatingsForUser = async (userId: string) => {
   try {
+    console.log("User ID:", pb.authStore.model?.id);
+    console.log("Auth token:", pb.authStore.token);
     const ratings = await pb.collection("ratings").getFullList({
       filter: `userId = "${userId}"`,
     });

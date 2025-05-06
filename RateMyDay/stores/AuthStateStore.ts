@@ -1,13 +1,11 @@
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import PocketBase, { RecordModel } from "pocketbase";
-import Config from 'react-native-config';
+import Config from "react-native-config";
 import { useRatingStorePb } from "./RatingStorePb";
 import { getBackupFromRemote } from "@/utills/PocketBaseBackupService";
 import { zustandAsyncStorage } from "@/utills/ZustandAsyncStorage";
-
-const pb = new PocketBase("https://winnovate.pockethost.io");
+import pb from "@/utills/pbClient";
 
 interface AuthData {
   record: RecordModel;
@@ -56,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
           await ratingStore.setGraphMonthlyRatings(authData.record.id);
           await ratingStore.setGraphYearlyRatings(authData.record.id);
           const key = await getBackupFromRemote(authData.record.id);
-          if(key) {
+          if (key) {
             set({ encryptionKey: key });
           }
           set({ isLoading: false });

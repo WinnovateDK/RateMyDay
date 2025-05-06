@@ -7,8 +7,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useAuthStore from "@/stores/AuthStateStore";
 import PocketBase from "pocketbase";
 import "../../global.css";
-
-const pb = new PocketBase("https://winnovate.pockethost.io");
+import pb from "@/utills/pbClient";
 
 export default function TabLayout() {
   const { session, isGuest } = useAuthStore();
