@@ -99,7 +99,6 @@ export const getRatingByDate = async (userId: string, date: Date) => {
     if (records.items.length > 0) {
       return records.items[0];
     } else {
-      console.log("No rating found for this date: ", formattedDate);
       return null;
     }
   } catch (e) {
@@ -109,8 +108,6 @@ export const getRatingByDate = async (userId: string, date: Date) => {
 
 export const getAllRatingsForUser = async (userId: string) => {
   try {
-    console.log("User ID:", pb.authStore.model?.id);
-    console.log("Auth token:", pb.authStore.token);
     const ratings = await pb.collection("ratings").getFullList({
       filter: `userId = "${userId}"`,
     });
@@ -213,7 +210,6 @@ export async function getRatingsForLastWeekPb(
 
   const today = new Date();
   today.setUTCHours(23, 59, 59, 999);
-  console.log("today: ", today, "start of week: ", startOfWeek);
   const startOfWeekStr = startOfWeek
     .toISOString()
     .replace("T", " ")

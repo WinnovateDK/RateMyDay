@@ -37,7 +37,6 @@ const CLOUDS = [
 
 export function Background({ children }: { children: ReactNode }) {
   const cloudAnims = useRef(CLOUDS.map(() => new Animated.Value(-200))).current
-  const sunX = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     const animations = CLOUDS.map((cloud, index) => {

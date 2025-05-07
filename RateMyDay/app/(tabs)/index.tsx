@@ -152,7 +152,7 @@ export default function AddRating() {
                 </View>
               </View>
               {/* Main Content */}
-              <View className="flexgrow p-6">
+              <View className="flexgrow p-12 mt-6">
                 <View className="gap-3">
                   <Text className="text-center text-3xl text-white font-semibold">
                     Add todays rating

@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   Alert,
   TextInput,
+  Text,
   ScrollView,
   NativeScrollEvent,
   Animated,
 } from "react-native";
-import { setItem, removeItem } from "@/utills/AsyncStorage";
+import { setItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
 import { CalendarColors } from "@/constants/Colors";
 import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useIsFocused } from "@react-navigation/native";
 import { shadowStyle } from "@/constants/Colors";
 import { useWindowDimensions, ActivityIndicator } from "react-native";
 import {
@@ -30,16 +29,16 @@ import {
   decryptData,
   getOrCreateEncryptionKey,
 } from "@/utills/EncryptionService";
+import { Dialog, DialogContent } from "./Dialog";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
   const [noteText, setNoteText] = useState<string>("");
-  const [note, setNote] = useState<string>("");
   const [scrollEnd, setScrollEnd] = useState(false);
   const [scrollStart, setScrollStart] = useState(false);
   const [updateOrAdd, setUpdateOrAdd] = useState("Add");
-  const isFocused = useIsFocused();
+  const [showNote, setShowNote] = useState(false);
   const [scoreSet, setScoreSet] = useState<boolean>();
   const { width, height } = useWindowDimensions();
   const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
@@ -56,21 +55,22 @@ const AddRatingComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
-  const [currentIcon, setCurrentIcon] = useState("plus");
+  const [currentAddIcon, setCurrentAddIcon] = useState('check');
+  const [currentNoteIcon, setCurrentNoteIcon] = useState('edit');
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
-
-  const buttonSize = Math.ceil(width * 0.14);
+  const buttonSize = Math.ceil(width * 0.15);
   const contentOffsetX = width / 2 + buttonSize / 2;
   const aspectRatio = width / height;
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
     const formattedDate = formatDate(dateObject);
-    await setItem(`${formattedDate}`, selectedScore, note);
+    await setItem(`${formattedDate}`, selectedScore, noteText);
     const key = formattedDate;
     const newRating = {
       rating: selectedScore!,
-      note: note,
+      note: noteText,
       selected: true,
       selectedColor: CalendarColors[selectedScore! - 1],
     };
@@ -110,7 +110,7 @@ const AddRatingComponent: React.FC = () => {
       await createRating(
         session?.record.id,
         selectedScore,
-        note,
+        noteText,
         encryptionKey
       );
     }
@@ -123,13 +123,13 @@ const AddRatingComponent: React.FC = () => {
         userId,
         todaysRating.id,
         selectedScore,
-        note,
+        noteText,
         encryptionKey
       );
     }
   };
 
-  const animateIcon = (toCheck: boolean) => {
+  const animateAddIcon = (toCheck: boolean) => {
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -144,46 +144,49 @@ const AddRatingComponent: React.FC = () => {
     ]).start();
 
     setTimeout(() => {
-      setCurrentIcon(toCheck ? "check" : "plus");
-    }, 200);
-  };
-
-  const handleSubmitPb = async () => {
-    if (session && selectedScore !== null) {
-      console.log("todays rating", todaysRating);
-      setIsLoading(true);
-      if (!todaysRating) await setRatingPb();
-      else await updateRatingPb(session.record.id, todaysRating);
-      await fetchTodaysRating();
-      await setWeeklyRatings(session.record.id);
-      await setMonthlyRatings(session.record.id);
-      await setYearlyRatings(session.record.id);
-      await setGraphWeeklyRatings(session.record.id);
-      await setGraphMonthlyRatings(session.record.id);
-      await setGraphYearlyRatings(session.record.id);
-      setRatingUpdated();
-      setIsLoading(false);
-      setIsSubmitted(true);
-      animateIcon(true);
-      setTimeout(() => {
-        setIsSubmitted(false);
-        animateIcon(false);
-      }, 3000);
-    }
+      setCurrentAddIcon(toCheck ? 'check' : 'check');    }, 200);
   };
 
   const handleSubmit = () => {
     if (selectedScore === null) {
       Alert.alert("Error", "Please select a value before submitting.");
     } else {
-      setScore(selectedScore);
-      Alert.alert("Success", `You submitted: ${selectedScore}`);
-      setScoreSet(true);
+      setIsNoteDialogOpen(true);
+    }
+  };
+
+  const handleSubmitPb = async () => {
+    if (session && selectedScore) {
+      setIsNoteDialogOpen(true);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    setIsNoteDialogOpen(false);
+    if(session && selectedScore){
+      if (!isGuest) {
+        setIsLoading(true);
+        const todaysRating = await getRatingByDate(session.record.id, today);
+        if (!todaysRating) setRatingPb();
+        else updateRatingPb(session.record.id, todaysRating);
+        await setWeeklyRatings(session.record.id);
+        await setMonthlyRatings(session.record.id);
+        await setYearlyRatings(session.record.id);
+        await setGraphWeeklyRatings(session.record.id);
+        await setGraphMonthlyRatings(session.record.id);
+        await setGraphYearlyRatings(session.record.id);
+        setRatingUpdated();
+        setIsLoading(false);
+      } else {
+        setScore(selectedScore);
+        Alert.alert("Success", `You submitted: ${selectedScore}`);
+        setScoreSet(true);
+      }
       setIsSubmitted(true);
-      animateIcon(true);
+      animateAddIcon(true);
       setTimeout(() => {
         setIsSubmitted(false);
-        animateIcon(false);
+        animateAddIcon(false);
       }, 3000);
     }
   };
@@ -205,13 +208,10 @@ const AddRatingComponent: React.FC = () => {
       setScrollStart(isStartReached);
     }
   };
-  // useEffect(() => {
-  //   const date = new Date();
-  //   const formatteddate = formatDate(date);
-  //   removeItem(`${formatteddate}`);
 
-  //   console.log("removed item");
-  // }, []);
+  const handleNote = () => {
+    setShowNote(!showNote);
+  }
 
   useEffect(() => {
     isRatingSetToday().then((isSet) => {
@@ -235,10 +235,13 @@ const AddRatingComponent: React.FC = () => {
         className={`aspect-square rounded-full justify-center items-center mx-2 ${
           selectedScore === index ? "bg-cyan-700" : "bg-cyan-300"
         } shadow-lg`}
-        onPress={() => setSelectedScore(index)}
+        onPress={() => {
+          setSelectedScore(index);
+          setShowNote(true);
+        }}
         style={{ width: buttonSize, height: buttonSize }}
       >
-        <Text className="text-2xl text-white font-bold">{index}</Text>
+        <Text className="text-3xl text-white font-bold">{index}</Text>
       </TouchableOpacity>
     ));
   };
@@ -271,29 +274,14 @@ const AddRatingComponent: React.FC = () => {
             {renderScale()}
           </View>
         </ScrollView>
-      </View>
-
-      <View className="w-full">
-        <TextInput
-          className="h-32  bg-cyan-200 border border-gray-300 rounded-3xl p-4 text-lg text-gray-700"
-          placeholder="Enter a note for the day (optional)"
-          value={noteText}
-          onChangeText={(txt) => {
-            setNoteText(txt);
-            setNote(txt);
-          }}
-          multiline={true}
-          style={shadowStyle}
-        />
-      </View>
-
+        </View>
       <View
-        className="justify-center w-full items-center"
-        style={{ height: aspectRatio < 0.6 ? "40%" : 90 }}
+        className="justify-center w-full items-center "
+        style={{ height: aspectRatio < 0.6 ? "80%" : 90 }}
       >
         <TouchableOpacity
-          className={`w-1/6 aspect-square rounded-full items-center justify-center ${
-            isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
+          className={`w-1/5 aspect-square rounded-full items-center justify-center m-6 ${
+            isSubmitted ? 'bg-green-300' : 'bg-[#67e8f9]'
           }`}
           onPress={!isGuest ? handleSubmitPb : handleSubmit}
         >
@@ -301,11 +289,59 @@ const AddRatingComponent: React.FC = () => {
             <ActivityIndicator size="large" />
           ) : (
             <Animated.View style={{ opacity: fadeAnim }}>
-              <AntDesign name={currentIcon as any} size={40} color="white" />
+              <AntDesign 
+                name={currentAddIcon as any} 
+                size={40} 
+                color="white" 
+              />
             </Animated.View>
           )}
         </TouchableOpacity>
       </View>
+      <Dialog
+        visible={isNoteDialogOpen}
+        onClose={() => setIsNoteDialogOpen(false)}
+      >
+        <DialogContent>
+          <View className="w-full bg-[#034f84] p-6 rounded-3xl">
+            <Text className="text-white text-2xl font-bold mb-4 text-center">
+              Add a note for today
+            </Text>
+
+            <TextInput
+              className="h-32 bg-white/90 border-2 border-cyan-300 rounded-3xl p-4 text-lg text-gray-700"
+              placeholder="Enter a note for the day (optional)"
+              placeholderTextColor="#94a3b8"
+              value={noteText}
+              onChangeText={txt => {
+                setNoteText(txt);
+              }}
+              multiline
+              style={[shadowStyle, { elevation: 2 }]}
+            />
+
+            <View className="flex-row justify-end space-x-3 mt-6">
+              <TouchableOpacity
+                className="flex-1 p-3 rounded-2xl bg-gray-500/20"
+                onPress={() => setIsNoteDialogOpen(false)}
+              >
+                <Text style={{ color: 'white', textAlign: 'center', fontSize: 18, fontWeight: '600' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 p-3 rounded-2xl bg-white"
+                onPress={handleFinalSubmit}
+              >
+                <Text style={{ color: '#034f84', textAlign: 'center', fontSize: 18, fontWeight: '600' }}>
+                  Submit
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </DialogContent>
+      </Dialog>
     </View>
   );
 };

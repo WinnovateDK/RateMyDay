@@ -76,7 +76,6 @@ export async function calculateAverageRatingForWeekPb(userId: string) {
 
   const today = new Date();
   today.setUTCHours(23, 59, 59, 999);
-  console.log("today: ", today, "start of week: ", startOfWeek);
   const startOfWeekStr = startOfWeek
     .toISOString()
     .replace("T", " ")

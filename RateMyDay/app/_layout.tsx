@@ -11,7 +11,6 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Toast, { ErrorToast } from "react-native-toast-message";
 import { configureNotifications } from '@/utills/ConfigureNotifications';
-import { Background } from '@/components/Background';
 
 SplashScreen.preventAutoHideAsync();
 configureNotifications();
