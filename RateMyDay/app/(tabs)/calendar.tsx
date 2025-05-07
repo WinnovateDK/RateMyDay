@@ -23,7 +23,10 @@ import { getAllRatingsForUser } from "@/utills/PocketBase";
 import useAuthStore from "@/stores/AuthStateStore";
 import { RecordModel } from "pocketbase";
 import useStore from "@/stores/isRatingSetStore";
-import { decryptData, getOrCreateEncryptionKey } from "@/utills/EncryptionService";
+import {
+  decryptData,
+  getOrCreateEncryptionKey,
+} from "@/utills/EncryptionService";
 
 const calendar = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -48,19 +51,19 @@ const calendar = () => {
   const [statsType, setStatsType] = useState("Numbers");
   const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
   const { isRatingUpdated, setRatingUpdated } = useStore();
-  
+
   const decryptNote = async (note: string) => {
     if (!session) return note;
-    if(!encryptionKey){
+    if (!encryptionKey) {
       console.log("No encryption key found, Getting from backup...");
       const key = await getOrCreateEncryptionKey(session?.record.id);
       if (!key) return note;
       setEncryptionKey(key);
     }
-    
+
     const decryptedNote = await decryptData(note, encryptionKey!);
     return decryptedNote;
-  }
+  };
 
   const transformRatingsData = async () => {
     if (session) {
@@ -78,9 +81,8 @@ const calendar = () => {
             selectedColor: CalendarColors[rating.rating],
           };
         });
-      })
+      });
       return Data;
-      
     }
     return {};
   };
@@ -89,7 +91,6 @@ const calendar = () => {
     const fetchRatings = async () => {
       const transformedData = await transformRatingsData();
       setDateRatings(transformedData);
-      
     };
 
     fetchRatings().then(() => {
@@ -168,7 +169,10 @@ const calendar = () => {
                 }}
               />
             ) : (
-              <View className="bg-white rounded-lg my-2.5 p-4 flex items-center justify-center" style={{ height: 350 }}>
+              <View
+                className="bg-white rounded-lg my-2.5 p-4 flex items-center justify-center"
+                style={{ height: 350 }}
+              >
                 <ActivityIndicator size={60} color="#0084c7" />
               </View>
             )}
@@ -235,7 +239,7 @@ const calendar = () => {
                   style={{
                     color:
                       selectedDate && dateRatings[selectedDate] !== undefined
-                        ? CalendarColors[dateRatings[selectedDate].rating - 1]
+                        ? CalendarColors[dateRatings[selectedDate].rating]
                         : "#3b82f6",
                   }}
                 >
@@ -245,9 +249,11 @@ const calendar = () => {
                 </Text>
                 <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
                   <Text className="text-lg text-gray-600">
-                    {selectedDate && dateRatings[selectedDate] !== undefined
+                    {selectedDate &&
+                    dateRatings[selectedDate] !== undefined &&
+                    dateRatings[selectedDate].note !== ""
                       ? dateRatings[selectedDate].note
-                      : ""}
+                      : "No note was given for this day"}
                   </Text>
                 </ScrollView>
                 <TouchableOpacity
@@ -255,7 +261,7 @@ const calendar = () => {
                     setModalVisible(false);
                     setSelectedDate(null);
                   }}
-                  className="bg-sky-800 px-4 py-2 rounded-md"
+                  className="bg-sky-800 px-4 py-2 rounded-md mt-4"
                 >
                   <Text className="text-white text-lg">Close</Text>
                 </TouchableOpacity>

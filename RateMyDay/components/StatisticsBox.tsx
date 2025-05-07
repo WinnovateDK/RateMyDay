@@ -27,7 +27,6 @@ const StatisticsBox = ({
     highestRating: 0,
     lowestRating: 0,
   });
-
   const { weeklyRatings, monthlyRatings, yearlyRatings } = useRatingStorePb();
   const { isRatingUpdated } = useStore();
   const { session, isGuest } = useAuthStore();

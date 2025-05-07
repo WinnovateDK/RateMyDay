@@ -13,6 +13,7 @@ import {
   getDatesInCurrentYearPb,
 } from "@/utills/CalendarUtills";
 import { getRatingByDate, getRatingsForThisYearPb } from "./PocketBase";
+import pb from "./pbClient";
 
 export type rateDatePair = {
   Label: string;
@@ -67,43 +68,61 @@ export async function calculateAverageRatingForWeek() {
 }
 
 export async function calculateAverageRatingForWeekPb(userId: string) {
-  let daysPassed = daysPassedThisWeek();
-  const datesInPastWeek = getDatesInCurrentWeekPb();
-  const pastWeeksRatings: number[] = [];
-  let daysWithoutARating = 0;
+  const startOfWeek = new Date();
+  const day = startOfWeek.getUTCDay();
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  startOfWeek.setUTCDate(startOfWeek.getUTCDate() - diffToMonday);
+  startOfWeek.setUTCHours(0, 0, 0, 0);
+
   const today = new Date();
-  const todayRating = await getRatingByDate(userId, today);
-  if (todayRating) {
-    daysPassed += 1;
-  }
-  if (daysPassed > 0) {
-    for (let i = 0; i < daysPassed; i++) {
-      const rating = await getRatingByDate(userId, datesInPastWeek[i]);
-      if (rating === null) {
-        daysWithoutARating += 1;
-        continue;
-      }
-      pastWeeksRatings.push(parseInt(rating?.rating));
+  today.setUTCHours(23, 59, 59, 999);
+  console.log("today: ", today, "start of week: ", startOfWeek);
+  const startOfWeekStr = startOfWeek
+    .toISOString()
+    .replace("T", " ")
+    .split(".")[0];
+  const todayStr = today.toISOString().replace("T", " ").split(".")[0];
+
+  try {
+    const records = await pb.collection("ratings").getFullList({
+      filter: `userId.id = "${userId}" && date >= "${startOfWeekStr}" && date <= "${todayStr}"`,
+    });
+
+    if (records.length === 0) {
+      return {
+        averageRating: 0,
+        lowestRating: 0,
+        highestRating: 0,
+      };
     }
 
-    const highestRating = Math.max(...pastWeeksRatings);
-    const lowestRating = Math.min(...pastWeeksRatings);
-    const sumOfRatings = pastWeeksRatings.reduce((acc, num) => acc + num, 0);
+    const ratings = records.map((r) => parseInt(r.rating));
     const averageRating =
-      Math.round((sumOfRatings / (daysPassed - daysWithoutARating)) * 100) /
+      Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 100) /
       100;
+    const highestRating = Math.max(...ratings);
+    const lowestRating = Math.min(...ratings);
+    console.log(
+      "Weekly ratings records:",
+      records.map((r) => ({
+        date: r.date,
+        rating: r.rating,
+      }))
+    );
+
     return {
-      averageRating: averageRating,
+      averageRating,
       lowestRating: lowestRating < 11 ? lowestRating : 0,
       highestRating: highestRating > 0 ? highestRating : 0,
     };
+  } catch (e) {
+    console.error("Error fetching ratings for the week:", e);
+    return {
+      averageRating: 0,
+      lowestRating: 0,
+      highestRating: 0,
+    };
   }
-
-  return {
-    averageRating: 0,
-    lowestRating: 0,
-    highestRating: 0,
-  };
 }
 
 export async function calculateAverageRatingForMonth() {

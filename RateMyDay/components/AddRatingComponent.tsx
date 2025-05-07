@@ -26,6 +26,10 @@ import useAuthStore from "@/stores/AuthStateStore";
 import { RecordModel } from "pocketbase";
 import useStore from "@/stores/isRatingSetStore";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
+import {
+  decryptData,
+  getOrCreateEncryptionKey,
+} from "@/utills/EncryptionService";
 
 const AddRatingComponent: React.FC = () => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
@@ -52,7 +56,8 @@ const AddRatingComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
-  const [currentIcon, setCurrentIcon] = useState('plus');
+  const [currentIcon, setCurrentIcon] = useState("plus");
+  const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
 
   const buttonSize = Math.ceil(width * 0.14);
   const contentOffsetX = width / 2 + buttonSize / 2;
@@ -72,15 +77,55 @@ const AddRatingComponent: React.FC = () => {
     updateSavedRating(key, newRating);
   };
 
+  const decryptNote = async (note: string) => {
+    if (!session) return note;
+    if (!encryptionKey) {
+      console.log("No encryption key found, Getting from backup...");
+      const key = await getOrCreateEncryptionKey(session?.record.id);
+      if (!key) return note;
+      setEncryptionKey(key);
+    }
+
+    const decryptedNote = await decryptData(note, encryptionKey!);
+    return decryptedNote;
+  };
+
+  const fetchTodaysRating = async () => {
+    if (session) {
+      const todaysRating = await getRatingByDate(session.record.id, today);
+      if (todaysRating) {
+        setTodaysRating(todaysRating);
+        decryptNote(todaysRating.note).then((decrypted) => {
+          setNoteText(decrypted);
+        });
+      } else {
+        setTodaysRating(null);
+        setNoteText("");
+      }
+    }
+  };
+
   const setRatingPb = async () => {
-    if (session && selectedScore) {
-      await createRating(session?.record.id, selectedScore, note, encryptionKey);
+    if (session && selectedScore !== null) {
+      await createRating(
+        session?.record.id,
+        selectedScore,
+        note,
+        encryptionKey
+      );
     }
   };
 
   const updateRatingPb = async (userId: string, todaysRating: RecordModel) => {
-    if (session && selectedScore) {
-      await updateRating(userId, todaysRating.id, selectedScore, note, encryptionKey);
+    if (session && selectedScore !== null) {
+      console.log("score", selectedScore);
+      await updateRating(
+        userId,
+        todaysRating.id,
+        selectedScore,
+        note,
+        encryptionKey
+      );
     }
   };
 
@@ -99,16 +144,17 @@ const AddRatingComponent: React.FC = () => {
     ]).start();
 
     setTimeout(() => {
-      setCurrentIcon(toCheck ? 'check' : 'plus');
+      setCurrentIcon(toCheck ? "check" : "plus");
     }, 200);
   };
 
   const handleSubmitPb = async () => {
-    if (session && selectedScore) {
+    if (session && selectedScore !== null) {
+      console.log("todays rating", todaysRating);
       setIsLoading(true);
-      const todaysRating = await getRatingByDate(session.record.id, today);
-      if (!todaysRating) setRatingPb();
-      else updateRatingPb(session.record.id, todaysRating);
+      if (!todaysRating) await setRatingPb();
+      else await updateRatingPb(session.record.id, todaysRating);
+      await fetchTodaysRating();
       await setWeeklyRatings(session.record.id);
       await setMonthlyRatings(session.record.id);
       await setYearlyRatings(session.record.id);
@@ -177,6 +223,10 @@ const AddRatingComponent: React.FC = () => {
     });
   }, [scoreSet]);
 
+  useEffect(() => {
+    fetchTodaysRating();
+  }, []);
+
   const renderScale = () => {
     const totalCircles = 11;
     return Array.from({ length: totalCircles }, (_, index) => (
@@ -243,7 +293,7 @@ const AddRatingComponent: React.FC = () => {
       >
         <TouchableOpacity
           className={`w-1/6 aspect-square rounded-full items-center justify-center ${
-            isSubmitted ? 'bg-green-300' : 'bg-[#67e8f9]'
+            isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
           }`}
           onPress={!isGuest ? handleSubmitPb : handleSubmit}
         >
@@ -251,11 +301,7 @@ const AddRatingComponent: React.FC = () => {
             <ActivityIndicator size="large" />
           ) : (
             <Animated.View style={{ opacity: fadeAnim }}>
-              <AntDesign 
-                name={currentIcon as any} 
-                size={40} 
-                color="white" 
-              />
+              <AntDesign name={currentIcon as any} size={40} color="white" />
             </Animated.View>
           )}
         </TouchableOpacity>

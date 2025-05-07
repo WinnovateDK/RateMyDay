@@ -50,10 +50,7 @@ export const createRating = async (
       const encryptedNote = await encryptData(note, encryptionKey);
       data.note = encryptedNote;
     } else {
-      const encryptedNote = await encryptData(
-        "No note was given this day",
-        encryptionKey
-      );
+      const encryptedNote = await encryptData("", encryptionKey);
       data.note = encryptedNote;
     }
     const record = await pb.collection("ratings").create(data);
@@ -80,14 +77,12 @@ export const updateRating = async (
       const encryptedNote = await encryptData(newNote, encryptionKey);
       data.note = encryptedNote;
     } else {
-      const encryptedNote = await encryptData(
-        "No note was given this day",
-        encryptionKey
-      );
+      const encryptedNote = await encryptData("", encryptionKey);
       data.note = encryptedNote;
     }
     data.userId = userId;
     const updatedRecord = await pb.collection("ratings").update(ratingId, data);
+    console.log("updated record", updatedRecord);
     return updatedRecord;
   } catch (e) {
     console.error("Error updating rating: ", e);
@@ -211,12 +206,14 @@ export async function getRatingsForLastWeekPb(
   userId: string
 ): Promise<rateDatePair[]> {
   const startOfWeek = new Date();
-  startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
+  const day = startOfWeek.getUTCDay();
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  startOfWeek.setUTCDate(startOfWeek.getUTCDate() - diffToMonday);
   startOfWeek.setUTCHours(0, 0, 0, 0);
 
   const today = new Date();
   today.setUTCHours(23, 59, 59, 999);
-
+  console.log("today: ", today, "start of week: ", startOfWeek);
   const startOfWeekStr = startOfWeek
     .toISOString()
     .replace("T", " ")
@@ -287,10 +284,9 @@ export async function getRatingsForThisYearPb(
   userId: string
 ): Promise<rateDatePair[]> {
   const currentYear = new Date().getFullYear();
-  const startOfYear = new Date(currentYear, 0, 1); // Start of the current year
-  const today = new Date(); // Current date
+  const startOfYear = new Date(currentYear, 0, 1);
+  const today = new Date();
 
-  // Fetch all ratings from the database (adjust this if your database supports range queries)
   const allRatings = await pb.collection("ratings").getList(1, 100, {
     filter: `userId = "${userId}" && date >= "${startOfYear.toISOString()}" && date <= "${today.toISOString()}"`,
   });
