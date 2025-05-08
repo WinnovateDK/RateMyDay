@@ -133,6 +133,7 @@ export async function calculateAverageRatingForMonthPb(userId: string) {
         averageRating: 0,
         lowestRating: 0,
         highestRating: 0,
+        count: 0,
       };
     }
 
@@ -147,6 +148,7 @@ export async function calculateAverageRatingForMonthPb(userId: string) {
       averageRating,
       lowestRating,
       highestRating,
+      count: ratings.length,
     };
   } catch (error) {
     console.error("Error calculating monthly average rating:", error);
@@ -154,6 +156,7 @@ export async function calculateAverageRatingForMonthPb(userId: string) {
       averageRating: 0,
       lowestRating: 0,
       highestRating: 0,
+      count: 0,
     };
   }
 }
@@ -173,6 +176,8 @@ export async function calculateAverageRatingForYearPb(userId: string) {
         averageRating: 0,
         lowestRating: 0,
         highestRating: 0,
+        count: 0,
+        allRatings: [],
       };
     }
 
@@ -188,6 +193,8 @@ export async function calculateAverageRatingForYearPb(userId: string) {
       averageRating,
       lowestRating,
       highestRating,
+      count: ratings.length,
+      allRatings: ratings,
     };
   } catch (error) {
     console.error("Error calculating yearly average rating:", error);
@@ -195,6 +202,8 @@ export async function calculateAverageRatingForYearPb(userId: string) {
       averageRating: 0,
       lowestRating: 0,
       highestRating: 0,
+      count: 0,
+      allRatings: [],
     };
   }
 }

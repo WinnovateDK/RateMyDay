@@ -49,14 +49,15 @@ const AddRatingComponent: React.FC = () => {
     setGraphWeeklyRatings,
     setGraphMonthlyRatings,
     setGraphYearlyRatings,
+    addNewRatingLocally,
   } = useRatingStorePb();
   const today = new Date();
   const { setRatingUpdated } = useStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
-  const [currentAddIcon, setCurrentAddIcon] = useState('check');
-  const [currentNoteIcon, setCurrentNoteIcon] = useState('edit');
+  const [currentAddIcon, setCurrentAddIcon] = useState("check");
+  const [currentNoteIcon, setCurrentNoteIcon] = useState("edit");
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
   const buttonSize = Math.ceil(width * 0.15);
@@ -144,7 +145,8 @@ const AddRatingComponent: React.FC = () => {
     ]).start();
 
     setTimeout(() => {
-      setCurrentAddIcon(toCheck ? 'check' : 'check');    }, 200);
+      setCurrentAddIcon(toCheck ? "check" : "check");
+    }, 200);
   };
 
   const handleSubmit = () => {
@@ -163,18 +165,14 @@ const AddRatingComponent: React.FC = () => {
 
   const handleFinalSubmit = async () => {
     setIsNoteDialogOpen(false);
-    if(session && selectedScore){
+    if (session && selectedScore) {
       if (!isGuest) {
         setIsLoading(true);
         const todaysRating = await getRatingByDate(session.record.id, today);
-        if (!todaysRating) setRatingPb();
-        else updateRatingPb(session.record.id, todaysRating);
-        await setWeeklyRatings(session.record.id);
-        await setMonthlyRatings(session.record.id);
-        await setYearlyRatings(session.record.id);
-        await setGraphWeeklyRatings(session.record.id);
-        await setGraphMonthlyRatings(session.record.id);
-        await setGraphYearlyRatings(session.record.id);
+        if (!todaysRating) await setRatingPb();
+        else await updateRatingPb(session.record.id, todaysRating);
+        console.log("lol");
+        addNewRatingLocally(selectedScore);
         setRatingUpdated();
         setIsLoading(false);
       } else {
@@ -211,7 +209,7 @@ const AddRatingComponent: React.FC = () => {
 
   const handleNote = () => {
     setShowNote(!showNote);
-  }
+  };
 
   useEffect(() => {
     isRatingSetToday().then((isSet) => {
@@ -274,26 +272,24 @@ const AddRatingComponent: React.FC = () => {
             {renderScale()}
           </View>
         </ScrollView>
-        </View>
+      </View>
       <View
         className="justify-center w-full items-center "
         style={{ height: aspectRatio < 0.6 ? "80%" : 90 }}
       >
         <TouchableOpacity
           className={`w-1/5 aspect-square rounded-full items-center justify-center m-6 ${
-            isSubmitted ? 'bg-green-300' : 'bg-[#67e8f9]'
+            isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
           }`}
-          onPress={!isGuest ? handleSubmitPb : handleSubmit}
+          onPress={
+            !isGuest && selectedScore ? () => handleSubmitPb() : handleSubmit
+          }
         >
           {isLoading ? (
             <ActivityIndicator size="large" />
           ) : (
             <Animated.View style={{ opacity: fadeAnim }}>
-              <AntDesign 
-                name={currentAddIcon as any} 
-                size={40} 
-                color="white" 
-              />
+              <AntDesign name={currentAddIcon as any} size={40} color="white" />
             </Animated.View>
           )}
         </TouchableOpacity>
@@ -313,7 +309,7 @@ const AddRatingComponent: React.FC = () => {
               placeholder="Enter a note for the day (optional)"
               placeholderTextColor="#94a3b8"
               value={noteText}
-              onChangeText={txt => {
+              onChangeText={(txt) => {
                 setNoteText(txt);
               }}
               multiline
@@ -325,7 +321,14 @@ const AddRatingComponent: React.FC = () => {
                 className="flex-1 p-3 rounded-2xl bg-gray-500/20"
                 onPress={() => setIsNoteDialogOpen(false)}
               >
-                <Text style={{ color: 'white', textAlign: 'center', fontSize: 18, fontWeight: '600' }}>
+                <Text
+                  style={{
+                    color: "white",
+                    textAlign: "center",
+                    fontSize: 18,
+                    fontWeight: "600",
+                  }}
+                >
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -334,7 +337,14 @@ const AddRatingComponent: React.FC = () => {
                 className="flex-1 p-3 rounded-2xl bg-white"
                 onPress={handleFinalSubmit}
               >
-                <Text style={{ color: '#034f84', textAlign: 'center', fontSize: 18, fontWeight: '600' }}>
+                <Text
+                  style={{
+                    color: "#034f84",
+                    textAlign: "center",
+                    fontSize: 18,
+                    fontWeight: "600",
+                  }}
+                >
                   Submit
                 </Text>
               </TouchableOpacity>

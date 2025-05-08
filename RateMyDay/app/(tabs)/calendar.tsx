@@ -50,7 +50,7 @@ const calendar = () => {
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
   const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
-  const { isRatingUpdated, setRatingUpdated } = useStore();
+  const { isRatingUpdated } = useStore();
 
   const decryptNote = async (note: string) => {
     if (!session) return note;
@@ -70,7 +70,6 @@ const calendar = () => {
       const ratingsData = await getAllRatingsForUser(session?.record.id);
 
       const Data: Record<string, any> = {};
-
       ratingsData.forEach((rating) => {
         decryptNote(rating.note).then((decrypted) => {
           const date = rating.date.split(" ")[0];

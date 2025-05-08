@@ -92,10 +92,12 @@ export async function calculateAverageRatingForWeekPb(userId: string) {
         averageRating: 0,
         lowestRating: 0,
         highestRating: 0,
+        count: 0,
       };
     }
 
     const ratings = records.map((r) => parseInt(r.rating));
+    const count = ratings.length;
     const averageRating =
       Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 100) /
       100;
@@ -113,6 +115,7 @@ export async function calculateAverageRatingForWeekPb(userId: string) {
       averageRating,
       lowestRating: lowestRating < 11 ? lowestRating : 0,
       highestRating: highestRating > 0 ? highestRating : 0,
+      count: count,
     };
   } catch (e) {
     console.error("Error fetching ratings for the week:", e);
@@ -120,6 +123,7 @@ export async function calculateAverageRatingForWeekPb(userId: string) {
       averageRating: 0,
       lowestRating: 0,
       highestRating: 0,
+      count: 0,
     };
   }
 }

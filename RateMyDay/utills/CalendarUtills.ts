@@ -4,7 +4,7 @@ import moment from "moment";
 export function daysPassedThisWeek(): number {
   const today = new Date();
   let currentDayOfWeek = today.getDay();
-  
+
   currentDayOfWeek = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
   return currentDayOfWeek;
 }
@@ -185,3 +185,26 @@ export const getWeekNumbersForCurrentMonth = (): number[] => {
 
   return [...new Set(weekNumbers)]; // Return unique week numbers
 };
+
+export function isSameWeek(date1: Date, date2: Date) {
+  const getWeekStart = (d: Date) => {
+    const day = d.getUTCDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const start = new Date(d);
+    start.setUTCDate(d.getUTCDate() + diff);
+    start.setUTCHours(0, 0, 0, 0);
+    return start.toISOString();
+  };
+  return getWeekStart(date1) === getWeekStart(date2);
+}
+
+export function isSameMonth(date1: Date, date2: Date) {
+  return (
+    date1.getUTCFullYear() === date2.getUTCFullYear() &&
+    date1.getUTCMonth() === date2.getUTCMonth()
+  );
+}
+
+export function isSameYear(date1: Date, date2: Date) {
+  return date1.getUTCFullYear() === date2.getUTCFullYear();
+}
