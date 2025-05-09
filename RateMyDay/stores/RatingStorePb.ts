@@ -62,38 +62,6 @@ function updateOrAppendRating(
   return [...graphData, { Label: label, Rating: rating }];
 }
 
-function updateStatsWithPossibleReplace(
-  existing: Ratings,
-  newRating: number,
-  oldRating: number | null
-): Ratings {
-  let total = existing.averageRating * existing.count;
-  let count = existing.count;
-
-  if (oldRating !== null) {
-    total = total - oldRating + newRating;
-  } else {
-    total += newRating;
-    count += 1;
-  }
-
-  const newAverage = Math.round((total / count) * 100) / 100;
-  const newHighest = Math.max(existing.highestRating, newRating);
-  const newLowest =
-    existing.lowestRating === 0
-      ? newRating
-      : oldRating !== null && oldRating === existing.lowestRating
-      ? Math.min(newRating, ...[])
-      : Math.min(existing.lowestRating, newRating);
-
-  return {
-    averageRating: newAverage,
-    highestRating: newHighest,
-    lowestRating: newLowest,
-    count,
-  };
-}
-
 export const useRatingStorePb = create<RatingsState>()(
   persist(
     (set, get) => ({
@@ -184,13 +152,12 @@ export const useRatingStorePb = create<RatingsState>()(
       addNewRatingLocally(newRating: number) {
         const current = get();
         const now = new Date();
-        const lastDate = current.lastDate;
         const day = now.getDate().toString().padStart(2, "0");
         const month = (now.getMonth() + 1).toString().padStart(2, "0");
         const label = `${day}-${month}`;
         const monthIndex = now.getMonth();
 
-        const isStillSameWeek = isSameWeek(now, lastDate);
+        const isStillSameWeek = isSameWeek(now, current.lastDate);
 
         const isStillSameMonth = isSameMonth(now, current.lastDate);
 
@@ -301,6 +268,11 @@ export const useRatingStorePb = create<RatingsState>()(
     {
       name: "ratings-storage",
       storage: zustandAsyncStorage,
+      onRehydrateStorage: () => (state) => {
+        if (state && typeof state.lastDate === "string") {
+          state.lastDate = new Date(state.lastDate);
+        }
+      },
     }
   )
 );

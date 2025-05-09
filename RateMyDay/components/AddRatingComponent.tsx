@@ -42,15 +42,7 @@ const AddRatingComponent: React.FC = () => {
   const [scoreSet, setScoreSet] = useState<boolean>();
   const { width, height } = useWindowDimensions();
   const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
-  const {
-    setWeeklyRatings,
-    setMonthlyRatings,
-    setYearlyRatings,
-    setGraphWeeklyRatings,
-    setGraphMonthlyRatings,
-    setGraphYearlyRatings,
-    addNewRatingLocally,
-  } = useRatingStorePb();
+  const { addNewRatingLocally } = useRatingStorePb();
   const today = new Date();
   const { setRatingUpdated } = useStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -278,7 +270,7 @@ const AddRatingComponent: React.FC = () => {
         style={{ height: aspectRatio < 0.6 ? "80%" : 90 }}
       >
         <TouchableOpacity
-          className={`w-1/5 aspect-square rounded-full items-center justify-center m-6 ${
+          className={`w-1/5 aspect-square rounded-full items-center justify-center m-6 mt-24 ${
             isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
           }`}
           onPress={

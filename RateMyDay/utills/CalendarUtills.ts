@@ -189,6 +189,7 @@ export const getWeekNumbersForCurrentMonth = (): number[] => {
 export function isSameWeek(date1: Date, date2: Date) {
   const getWeekStart = (d: Date) => {
     const day = d.getUTCDay();
+    console.log("date", day);
     const diff = day === 0 ? -6 : 1 - day;
     const start = new Date(d);
     start.setUTCDate(d.getUTCDate() + diff);
