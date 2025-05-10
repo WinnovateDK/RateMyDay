@@ -153,7 +153,7 @@ const calendar = () => {
                 onDayPress={onDayPress}
                 firstDay={1}
                 theme={{
-                  calendarBackground: "white",
+                  calendarBackground: "#f1f5f9",
                   textSectionTitleColor: "#b6c1cd",
                   selectedDayBackgroundColor: "#037A4B",
                   selectedDayTextColor: "#ffffff",
@@ -176,7 +176,7 @@ const calendar = () => {
               </View>
             )}
           </View>
-          <View className="flex-1 px-4 py-3.5 rounded-t-3xl items-center bg-white">
+          <View className="flex-1 px-4 py-3.5 rounded-t-3xl items-center bg-slate-100">
             <View className="flex-row w-full justify-center">
               <View className="absolute left-0 ">
                 <TouchableOpacity className="w-8" onPress={handleIconPress}>

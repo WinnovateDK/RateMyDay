@@ -32,8 +32,11 @@ export default function AddRating() {
   const translateX = useSharedValue(300);
   const { width, height } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
+  const [selectedScore, setSelectedScore] = useState<number | null>(null);
 
   const aspectRatio = width / height;
+
+  const widthArray = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -87,7 +90,6 @@ export default function AddRating() {
                   <Ionicons name="settings" size={24} color="#0084c7" />
                 </TouchableOpacity>
               </View>
-              
             </View>
             {/* Main Content */}
             <View className="flex-1 p-6">
@@ -106,11 +108,21 @@ export default function AddRating() {
                   >
                     <Text className="text-3xl">😔</Text>
                     <View className="flex-1 mx-4 bg-cyan-300 h-2 rounded-full">
-                      <View className="w-1/2 h-2 bg-cyan-600 rounded-full" />
+                      <View
+                        className="h-2 bg-cyan-600 rounded-full"
+                        style={{
+                          width: `${
+                            selectedScore ? widthArray[selectedScore] : 0
+                          }%`,
+                        }}
+                      />
                     </View>
                     <Text className="text-3xl">😊</Text>
                   </View>
-                  <AddRatingComponent />
+                  <AddRatingComponent
+                    selectedScore={selectedScore}
+                    setSelectedScore={setSelectedScore}
+                  />
                 </View>
               </View>
             </View>
@@ -173,7 +185,10 @@ export default function AddRating() {
                       <Text className="text-3xl">😊</Text>
                     </View>
                     <View className="flex-row mt-2 mb-2">
-                      <AddRatingComponent />
+                      <AddRatingComponent
+                        selectedScore={selectedScore}
+                        setSelectedScore={setSelectedScore}
+                      />
                     </View>
                   </View>
                 </View>

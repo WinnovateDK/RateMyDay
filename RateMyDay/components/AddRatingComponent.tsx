@@ -31,8 +31,10 @@ import {
 } from "@/utills/EncryptionService";
 import { Dialog, DialogContent } from "./Dialog";
 
-const AddRatingComponent: React.FC = () => {
-  const [selectedScore, setSelectedScore] = useState<number | null>(null);
+const AddRatingComponent: React.FC<{
+  selectedScore: number | null;
+  setSelectedScore: (score: number) => void;
+}> = ({ selectedScore, setSelectedScore }) => {
   const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
   const [noteText, setNoteText] = useState<string>("");
   const [scrollEnd, setScrollEnd] = useState(false);
@@ -157,7 +159,7 @@ const AddRatingComponent: React.FC = () => {
 
   const handleFinalSubmit = async () => {
     setIsNoteDialogOpen(false);
-    if (session && selectedScore) {
+    if (session && selectedScore !== null) {
       if (!isGuest) {
         setIsLoading(true);
         const todaysRating = await getRatingByDate(session.record.id, today);
@@ -254,7 +256,7 @@ const AddRatingComponent: React.FC = () => {
         <ScrollView
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-          className="mb-4 py-2"
+          className="mb-4"
           contentOffset={{ x: contentOffsetX, y: 0 }}
           fadingEdgeLength={80}
           onScroll={handleScroll}
