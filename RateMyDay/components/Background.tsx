@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const CLOUDS = [
   {
@@ -46,6 +46,7 @@ const CLOUDS = [
 export function Background({ children }: { children: ReactNode }) {
   const cloudAnims = useRef(CLOUDS.map(() => new Animated.Value(-200))).current;
   const bigCloudAnim = useRef(new Animated.Value(-300)).current;
+  const aspectRatio = width / height;
 
   useEffect(() => {
     const animations = CLOUDS.map((cloud, index) => {
@@ -99,9 +100,9 @@ export function Background({ children }: { children: ReactNode }) {
         <Animated.View
           style={{
             position: "absolute",
-            top: 450,
-            width: 300,
-            height: 180,
+            top: (height / 100) * 60,
+            width: 200 / aspectRatio,
+            height: 80 / aspectRatio,
             transform: [{ translateX: bigCloudAnim }],
             alignItems: "center", // centers text horizontally
             justifyContent: "center", // centers text vertically

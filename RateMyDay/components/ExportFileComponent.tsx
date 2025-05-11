@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Alert, Platform, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Alert, Image } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
@@ -81,10 +81,34 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
     }
   };
 
-
   return (
-    <LinearGradient colors={["#034f84", "#3c6e71"]} className="flex-1">
-      <View className="h-16 w-full justify-center items-center border-b-2 border-cyan-400">
+    <LinearGradient
+      colors={["#034f84", "#3c6e71"]}
+      className="flex-1 overflow-hidden"
+    >
+      <Image
+        source={require("@/assets/cloud-1.png")}
+        style={{
+          position: "absolute",
+          top: 450,
+          left: 70,
+          width: 250,
+          height: 135,
+          opacity: 0.5,
+        }}
+      />
+      <Image
+        source={require("@/assets/cloud-1.png")}
+        style={{
+          position: "absolute",
+          top: 320,
+          right: 70,
+          width: 250,
+          height: 135,
+          opacity: 0.5,
+        }}
+      />
+      <View className="h-16 w-full justify-center items-center border-b-2 border-white">
         <Text className="font-bold text-xl text-white">Settings</Text>
       </View>
       <View className="flex-1 w-full items-center justify-between">
@@ -97,7 +121,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
               name="download"
               size={25}
               className="m-4 mr-6"
-              color="#67e8f9"
+              color="white"
             />
             <Text className="text-xl text-white ">Save Data to File</Text>
           </TouchableOpacity>
@@ -110,7 +134,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
               name="share-2"
               size={25}
               className="m-4 mr-6"
-              color="#67e8f9"
+              color="white"
             />
             <Text className=" text-xl text-white">Share File</Text>
           </TouchableOpacity>
@@ -123,7 +147,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
               name="upload"
               size={25}
               className="m-4 mr-6"
-              color="#67e8f9"
+              color="white"
             />
             <Text className="text-white text-xl ">Load Data from File</Text>
           </TouchableOpacity>
@@ -131,12 +155,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
             className="w-fit flex-row items-center rounded-md my-1 mx-2"
             onPress={() => setShowNotificationModal(true)}
           >
-            <Feather
-              name="bell"
-              size={25}
-              className="m-4 mr-6"
-              color="#67e8f9"
-            />
+            <Feather name="bell" size={25} className="m-4 mr-6" color="white" />
             <Text className="text-white text-xl">Notification Reminder</Text>
           </TouchableOpacity>
         </View>
@@ -168,7 +187,7 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
           )}
         </View>
       </View>
-      <NotificationComponent 
+      <NotificationComponent
         showModal={showNotificationModal}
         onCloseModal={() => setShowNotificationModal(false)}
       />

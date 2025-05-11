@@ -54,9 +54,9 @@ const AddRatingComponent: React.FC<{
   const [currentNoteIcon, setCurrentNoteIcon] = useState("edit");
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
-  const buttonSize = Math.ceil(width * 0.15);
-  const contentOffsetX = width / 2 + buttonSize / 2;
   const aspectRatio = width / height;
+  const buttonSize = Math.ceil(width * 0.08) / aspectRatio;
+  const contentOffsetX = width / 2 + buttonSize / 2;
 
   const setScore = async (score: Number) => {
     const dateObject = new Date();
@@ -233,7 +233,12 @@ const AddRatingComponent: React.FC<{
         }}
         style={{ width: buttonSize, height: buttonSize }}
       >
-        <Text className="text-3xl text-white font-bold">{index}</Text>
+        <Text
+          className=" text-white font-bold"
+          style={{ fontSize: 14 / aspectRatio }}
+        >
+          {index}
+        </Text>
       </TouchableOpacity>
     ));
   };
@@ -272,9 +277,10 @@ const AddRatingComponent: React.FC<{
         style={{ height: aspectRatio < 0.6 ? "80%" : 90 }}
       >
         <TouchableOpacity
-          className={`w-1/5 aspect-square rounded-full items-center justify-center m-6 mt-24 ${
+          className={`aspect-square rounded-full items-center justify-center m-6 mt-24 ${
             isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
           }`}
+          style={{ width: buttonSize * 1.1, height: buttonSize * 1.1 }}
           onPress={
             !isGuest && selectedScore ? () => handleSubmitPb() : handleSubmit
           }

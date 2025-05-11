@@ -52,17 +52,18 @@ const login = () => {
             value={email}
             onChangeText={setEmail}
           />
-          <TextInput />
           <TextInput
-            className="w-full h-12 rounded-lg px-4 border-2 border-gray-300 text-base -mb-7"
+            className="w-full h-12 rounded-lg px-4 border-2 border-gray-300 text-base mt-7"
             placeholder="Password"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
           />
-          <TextInput />
+
           <TouchableOpacity className="mb-6" onPress={() => handleGuest()}>
-            <Text className="underline text-sky-400">Continue as guest.</Text>
+            <Text className="underline text-sky-400 mt-2">
+              Continue as guest.
+            </Text>
           </TouchableOpacity>
           <View className="flex-row justify-between w-full">
             <TouchableOpacity

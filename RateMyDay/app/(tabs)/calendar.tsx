@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { useMemo, useState } from "react";
@@ -51,6 +52,8 @@ const calendar = () => {
   const [statsType, setStatsType] = useState("Numbers");
   const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
   const { isRatingUpdated } = useStore();
+  const { width, height } = Dimensions.get("window");
+  const aspectRatio = width / height;
 
   const decryptNote = async (note: string) => {
     if (!session) return note;
@@ -152,6 +155,7 @@ const calendar = () => {
                 markedDates={!isGuest ? dateRatings : storedDateRatings}
                 onDayPress={onDayPress}
                 firstDay={1}
+                hideDayNames={aspectRatio < 0.6 ? false : true}
                 theme={{
                   calendarBackground: "#f1f5f9",
                   textSectionTitleColor: "#b6c1cd",
@@ -165,6 +169,7 @@ const calendar = () => {
                 style={{
                   borderRadius: 10,
                   marginVertical: 10,
+                  paddingBottom: 3,
                 }}
               />
             ) : (
