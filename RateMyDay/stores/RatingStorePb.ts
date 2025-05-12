@@ -14,6 +14,7 @@ import {
 } from "@/utills/RatingService";
 import { zustandAsyncStorage } from "@/utills/ZustandAsyncStorage";
 import { isSameWeek, isSameMonth, isSameYear } from "@/utills/CalendarUtills";
+import  pb  from "@/utills/pbClient";
 
 type Ratings = {
   averageRating: number;
@@ -38,12 +39,16 @@ interface RatingsState {
   graphMonthlyRatings: rateDatePair[];
   graphYearlyRatings: number[];
   lastDate: Date;
+  allRatings: rateDatePair[];
+  streak: number;
   setWeeklyRatings: (userId: string) => Promise<void>;
   setMonthlyRatings: (userId: string) => Promise<void>;
   setYearlyRatings: (userId: string) => Promise<void>;
   setGraphWeeklyRatings: (userId: string) => Promise<void>;
   setGraphMonthlyRatings: (userId: string) => Promise<void>;
   setGraphYearlyRatings: (userId: string) => Promise<void>;
+  setAllRatings: (userId: string) => Promise<void>;
+  calculateStreak: () => void;
   addNewRatingLocally: (newRating: number) => void;
   setLastDate: (date: Date) => void;
 }
@@ -88,6 +93,8 @@ export const useRatingStorePb = create<RatingsState>()(
       graphMonthlyRatings: [],
       graphYearlyRatings: [],
       lastDate: new Date(),
+      allRatings: [],
+      streak: 0,
       setLastDate(date: Date) {
         set({ lastDate: date });
       },
@@ -148,6 +155,63 @@ export const useRatingStorePb = create<RatingsState>()(
             error
           );
         }
+      },
+      setAllRatings: async (userId: string) => {
+        try {
+          console.log("Fetching all ratings for user:", userId);
+          const allRatings = await pb.collection("ratings").getFullList({
+            filter: `userId = "${userId}"`,
+            sort: '-date', // Sort by date descending
+          });
+
+          interface FormattedRating {
+            Label: string;
+            Rating: number;
+            fullDate: Date;
+          }
+
+                    const formattedRatings: FormattedRating[] = allRatings.map((record) => {
+                      const dateObj = new Date(record.date);
+                      const day = dateObj.getDate().toString().padStart(2, '0');
+                      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                      return {
+                        Label: `${day}-${month}`,
+                        Rating: parseInt(record.rating),
+                        fullDate: dateObj
+                      };
+                    });
+
+          set({ allRatings: formattedRatings });
+          get().calculateStreak();
+        } catch (error) {
+          console.error("Error fetching all ratings:", error);
+        }
+      },
+      calculateStreak: () => {
+        const { allRatings } = get();
+        if (!allRatings.length) {
+          set({ streak: 0 });
+          return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let streak = 0;
+        let currentDate = today;
+
+        while (true) {
+          const day = currentDate.getDate().toString().padStart(2, '0');
+          const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+          const dateString = `${day}-${month}`;
+
+          const hasRating = allRatings.some(r => r.Label === dateString);
+          if (!hasRating) break;
+
+          streak++;
+          currentDate.setDate(currentDate.getDate() - 1);
+        }
+
+        set({ streak });
       },
       addNewRatingLocally(newRating: number) {
         const current = get();
@@ -263,14 +327,22 @@ export const useRatingStorePb = create<RatingsState>()(
           graphYearlyRatings: updatedYearlyRatings,
           lastDate: now,
         });
+
+        set(state => {
+          state.calculateStreak();
+          return state;
+        });
       },
     }),
     {
       name: "ratings-storage",
       storage: zustandAsyncStorage,
       onRehydrateStorage: () => (state) => {
-        if (state && typeof state.lastDate === "string") {
-          state.lastDate = new Date(state.lastDate);
+        if (state) {
+          if (typeof state.lastDate === "string") {
+            state.lastDate = new Date(state.lastDate);
+          }
+          state.calculateStreak();
         }
       },
     }

@@ -26,6 +26,8 @@ import Animated, {
 import { scale } from "react-native-size-matters";
 import { useWindowDimensions } from "react-native";
 import { Background } from "@/components/Background";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
+import { useAuthStore } from "@/stores/AuthStateStore";
 
 const { width, height } = Dimensions.get("window");
 const aspectRatio = width / height;
@@ -34,9 +36,10 @@ export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(false);
   const translateX = useSharedValue(300);
-
   const scrollRef = useRef<ScrollView>(null);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
+  const { streak, setAllRatings } = useRatingStorePb();
+  const { session } = useAuthStore();
 
   const widthArray = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
@@ -68,7 +71,7 @@ export default function AddRating() {
   }));
 
   return (
-    <Background>
+    <Background streak={streak}>
       <View className="h-1/4 w-full">
         <View className="flex-row items-center justify-between">
           <View className="w-6" />
