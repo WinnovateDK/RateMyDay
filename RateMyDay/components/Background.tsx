@@ -132,7 +132,7 @@ export function Background({ children, streak }: { children: ReactNode, streak :
                 marginTop: 50,
               }}
             >
-              Daily rating streak: {streak}
+              Your rating streak is {streak}🔥
             </Text>
           </View>
         </Animated.View>
