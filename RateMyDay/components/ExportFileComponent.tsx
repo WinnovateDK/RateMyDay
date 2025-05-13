@@ -9,15 +9,13 @@ import { setItem } from "@/utills/AsyncStorage";
 import { Feather } from "@expo/vector-icons";
 import useAuthStore from "@/stores/AuthStateStore";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import NotificationComponent from "./NotificationComponent";
 
-const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
+export default function ExportFileComponent({ onClose }: { onClose: () => void }) {
   const [filePath, setFilePath] = useState<string | null>(null);
   const isFocused = useIsFocused();
   const userData = useStorageSavedDates(isFocused);
-  const { signOut, isGuest, setIsGuest } = useAuthStore();
-  const router = useRouter();
+  const { signOut } = useAuthStore();
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
 
@@ -160,31 +158,13 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
           </TouchableOpacity>
         </View>
         <View className="w-full">
-          {!isGuest ? (
-            <TouchableOpacity
-              className="bg-red-500 flex-row items-center w-fit m-2 rounded-md"
-              onPress={() => signOut()}
-            >
-              <Feather name="log-out" size={25} className="m-4 mr-6" />
-              <Text className=" text-lg font-bold">Sign Out</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              className="bg-blue-500 flex-row items-center w-fit m-2 rounded-md"
-              onPress={() => {
-                router.replace("/login");
-                setIsGuest(false);
-              }}
-            >
-              <Feather
-                name="log-out"
-                color="white"
-                size={25}
-                className="m-4 mr-6"
-              />
-              <Text className="text-white text-lg font-bold">Login</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            className="bg-red-500 flex-row items-center w-fit m-2 rounded-md"
+            onPress={() => signOut()}
+          >
+            <Feather name="log-out" size={25} className="m-4 mr-6" />
+            <Text className=" text-lg font-bold">Sign Out</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <NotificationComponent
@@ -193,6 +173,4 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
       />
     </LinearGradient>
   );
-};
-
-export default ExportFileComponent;
+}

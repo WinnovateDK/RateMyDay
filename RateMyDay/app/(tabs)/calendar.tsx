@@ -50,7 +50,7 @@ const calendar = () => {
   const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
-  const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
+  const { session, encryptionKey, setEncryptionKey } = useAuthStore();
   const { isRatingUpdated } = useStore();
   const { width, height } = Dimensions.get("window");
   const aspectRatio = width / height;
@@ -100,21 +100,6 @@ const calendar = () => {
     });
   }, [isRatingUpdated]);
 
-  const getRatingForDate = useMemo(() => {
-    const ratingForDate =
-      selectedDate && storedDateRatings
-        ? storedDateRatings[selectedDate]?.rating
-        : null;
-
-    return ratingForDate;
-  }, [selectedDate]);
-
-  const getNoteForDate = useMemo(() => {
-    return selectedDate && storedDateRatings
-      ? storedDateRatings[selectedDate]?.note
-      : null;
-  }, [selectedDate]);
-
   const onDayPress = (day: { dateString: string }) => {
     setSelectedDate(day.dateString);
     setModalVisible(true);
@@ -140,10 +125,16 @@ const calendar = () => {
     <SafeAreaView className="flex-1 bg-sky-900">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="justify-center items-center pt-4">
-          <Text className="text-4xl font-bold text-teal-50">
+          <Text className="text-teal-50 text-4xl"
+            style={{
+              fontFamily: 'Fredoka_700Bold'
+            }}
+          >
             Overview of your days
           </Text>
-          <Text className="text-xl text-teal-100">
+          <Text className="text-xl text-teal-100"
+            style={{fontFamily: 'Fredoka_400Regular'}}
+            >
             Track how your days have been
           </Text>
         </View>
@@ -152,7 +143,7 @@ const calendar = () => {
           <View className="flex-shrink px-2">
             {hasLoaded ? (
               <Calendar
-                markedDates={!isGuest ? dateRatings : storedDateRatings}
+                markedDates={dateRatings}
                 onDayPress={onDayPress}
                 firstDay={1}
                 hideDayNames={aspectRatio < 0.6 ? false : true}
@@ -162,14 +153,22 @@ const calendar = () => {
                   selectedDayBackgroundColor: "#037A4B",
                   selectedDayTextColor: "#ffffff",
                   todayTextColor: "#00D382",
-                  dayTextColor: "#2d4150",
+                  dayTextColor: "#0369a1",
+                  monthTextColor: "#075985",
                   dotColor: "red",
                   arrowColor: "#0084c7",
+                  textDayFontFamily: 'Fredoka_400Regular',
+                  textMonthFontFamily: 'Fredoka_700Bold',
+                  textDayHeaderFontFamily: 'Fredoka_400Regular',
+                  textDayFontSize: 16,
+                  textMonthFontSize: 18,
+                  textDayHeaderFontSize: 14
+                
                 }}
                 style={{
                   borderRadius: 10,
                   marginVertical: 10,
-                  paddingBottom: 3,
+                  paddingBottom: 3
                 }}
               />
             ) : (
@@ -188,7 +187,7 @@ const calendar = () => {
                   <Octicons
                     name={statsType === "Numbers" ? "graph" : "number"}
                     size={24}
-                    color="black"
+                    color="#075985"
                   />
                 </TouchableOpacity>
               </View>
@@ -197,23 +196,27 @@ const calendar = () => {
                   className="mr-4 w-12 items-center"
                   onPress={handleLeftArrowPress}
                 >
-                  <AntDesign name="left" size={24} color="black" />
+                  <AntDesign name="left" size={24} color="#0369a1" />
                 </TouchableOpacity>
-                <Text className="align-middle w-20 text-center text-xl">
+                <Text className="align-middle w-20 text-center text-xl text-sky-900"
+                  style={{
+                    fontFamily: 'Fredoka_700Bold'
+                  }}
+                >
                   {timerange}
                 </Text>
                 <TouchableOpacity
                   className="ml-4 w-12 items-center"
                   onPress={handleRightArrowPress}
                 >
-                  <AntDesign name="right" size={24} color="black" />
+                  <AntDesign name="right" size={24} color="#0369a1" />
                 </TouchableOpacity>
               </View>
             </View>
             <View className="flex-1 justify-center w-full">
               {statsType === "Numbers" && hasLoaded ? (
                 <StatisticsBox
-                  renderCondition={!isGuest ? dateRatings : storedDateRatings}
+                  renderCondition={dateRatings}
                   timerange={timerange}
                 />
               ) : statsType === "Graph" && hasLoaded ? (
@@ -224,101 +227,54 @@ const calendar = () => {
             </View>
           </View>
         </View>
-        {!isGuest ? (
-          <Modal
-            visible={isModalVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View className="flex-1 justify-center items-center bg-black/50">
-              <View className="bg-white p-6 rounded-lg items-center w-4/5">
-                <Text className="text-lg font-bold text-gray-700 mb-4">
-                  {selectedDate
-                    ? `Rating for ${selectedDate}`
-                    : "No Date Selected"}
+        <Modal
+          visible={isModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white p-6 rounded-lg items-center w-4/5">
+              <Text className="text-2xl text-sky-900 mb-4" style={{fontFamily: 'Fredoka_700Bold'}}>
+                {selectedDate
+                  ? `Rating for ${selectedDate}`
+                  : "No Date Selected"}
+              </Text>
+              <Text
+                className="text-4xl mb-4"
+                style={{
+                  fontFamily: 'Fredoka_700Bold',
+                  color:
+                    selectedDate && dateRatings[selectedDate] !== undefined
+                      ? CalendarColors[dateRatings[selectedDate].rating]
+                      : "#3b82f6",
+                }}
+              >
+                {selectedDate && dateRatings[selectedDate] !== undefined
+                  ? dateRatings[selectedDate].rating
+                  : "No rating"}
+              </Text>
+              <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
+                <Text style={{fontFamily: 'Fredoka_400Regular'}} className="text-lg text-gray-600">
+                  {selectedDate &&
+                  dateRatings[selectedDate] !== undefined &&
+                  dateRatings[selectedDate].note !== ""
+                    ? dateRatings[selectedDate].note
+                    : "No note was given for this day"}
                 </Text>
-                <Text
-                  className="text-4xl font-bold mb-4"
-                  style={{
-                    color:
-                      selectedDate && dateRatings[selectedDate] !== undefined
-                        ? CalendarColors[dateRatings[selectedDate].rating]
-                        : "#3b82f6",
-                  }}
-                >
-                  {selectedDate && dateRatings[selectedDate] !== undefined
-                    ? dateRatings[selectedDate].rating
-                    : "No rating"}
-                </Text>
-                <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
-                  <Text className="text-lg text-gray-600">
-                    {selectedDate &&
-                    dateRatings[selectedDate] !== undefined &&
-                    dateRatings[selectedDate].note !== ""
-                      ? dateRatings[selectedDate].note
-                      : "No note was given for this day"}
-                  </Text>
-                </ScrollView>
-                <TouchableOpacity
-                  onPress={() => {
-                    setModalVisible(false);
-                    setSelectedDate(null);
-                  }}
-                  className="bg-sky-800 px-4 py-2 rounded-md mt-4"
-                >
-                  <Text className="text-white text-lg">Close</Text>
-                </TouchableOpacity>
-              </View>
+              </ScrollView>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(false);
+                  setSelectedDate(null);
+                }}
+                className="bg-sky-800 px-4 py-2 rounded-md mt-4"
+              >
+                <Text className="text-white text-lg" style={{fontFamily: 'Fredoka_400Regular'}}>Close</Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
-        ) : (
-          <Modal
-            visible={isModalVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View className="flex-1 justify-center items-center bg-black/50">
-              <View className="bg-white p-6 rounded-lg items-center w-4/5">
-                <Text className="text-lg font-bold text-gray-700 mb-4">
-                  {selectedDate
-                    ? `Rating for ${selectedDate}`
-                    : "No Date Selected"}
-                </Text>
-                <Text
-                  className="text-4xl font-bold mb-4"
-                  style={{
-                    color:
-                      selectedDate && getRatingForDate !== null
-                        ? CalendarColors[getRatingForDate - 1]
-                        : "#3b82f6",
-                  }}
-                >
-                  {selectedDate && getRatingForDate !== null
-                    ? getRatingForDate
-                    : "No rating"}
-                </Text>
-                <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
-                  <Text className="text-lg text-gray-600">
-                    {selectedDate && getNoteForDate !== null
-                      ? getNoteForDate
-                      : ""}
-                  </Text>
-                </ScrollView>
-                <TouchableOpacity
-                  onPress={() => {
-                    setModalVisible(false);
-                    setSelectedDate(null);
-                  }}
-                  className="bg-sky-800 px-4 py-2 rounded-md"
-                >
-                  <Text className="text-white text-lg">Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
+          </View>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );

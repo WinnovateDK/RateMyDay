@@ -1,16 +1,14 @@
 import { Tabs, Redirect } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Platform, StatusBar, View } from "react-native";
+import React, { useEffect } from "react";
+import { StatusBar } from "react-native";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useAuthStore from "@/stores/AuthStateStore";
-import PocketBase from "pocketbase";
 import "../../global.css";
 import pb from "@/utills/pbClient";
 
 export default function TabLayout() {
-  const { session, isGuest } = useAuthStore();
+  const { session } = useAuthStore();
 
   useEffect(() => {
     const pbSession = useAuthStore.getState().session;
@@ -20,7 +18,7 @@ export default function TabLayout() {
     }
   }, []);
 
-  if (!session && !isGuest) return <Redirect href="/login" />;
+  if (!session) return <Redirect href="/login" />;
 
   return (
     <SafeAreaProvider>

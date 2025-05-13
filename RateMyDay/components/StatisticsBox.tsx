@@ -29,9 +29,9 @@ const StatisticsBox = ({
   });
   const { weeklyRatings, monthlyRatings, yearlyRatings } = useRatingStorePb();
   const { isRatingUpdated } = useStore();
-  const { session, isGuest } = useAuthStore();
+  const { session } = useAuthStore();
   useEffect(() => {
-    if (session && !isGuest) {
+    if (session) {
       switch (timerange) {
         case "Weekly":
           setStats(weeklyRatings);
@@ -82,22 +82,22 @@ const StatisticsBox = ({
 
   return (
     <View className="justify-center items-center">
-      <View className="flex items-center">
-        <Text className="text-4xl text-sky-800">Average Rating</Text>
-        <Text className="text-4xl font-bold text-sky-900 mt-4">
+      <View className="flex items-center pb-12">
+        <Text className="text-5xl text-sky-800" style={{fontFamily: 'Fredoka_400Regular'}}>Average Rating</Text>
+        <Text className="text-5xl text-sky-900 mt-4" style={{fontFamily: 'Fredoka_700Bold'}}>
           {stats.averageRating ? stats.averageRating : 0}
         </Text>
       </View>
       <View className="mt-5 flex-row justify-between w-full px-4">
         <View className="flex items-center">
-          <Text className="text-xl text-sky-800">Lowest Rating</Text>
-          <Text className="text-2xl font-bold text-sky-900 mt-4">
+          <Text className="text-2xl text-sky-800" style={{fontFamily: 'Fredoka_400Regular'}}>Lowest Rating</Text>
+          <Text className="text-4xl text-sky-900 mt-4" style={{fontFamily: 'Fredoka_700Bold'}}>
             {stats.lowestRating ? stats.lowestRating : 0}
           </Text>
         </View>
         <View className="items-center">
-          <Text className="text-xl text-sky-800">Highest Rating</Text>
-          <Text className="text-2xl font-bold text-sky-900 mt-4">
+          <Text className="text-2xl text-sky-800" style={{fontFamily: 'Fredoka_400Regular'}}>Highest Rating</Text>
+          <Text className="text-4xl text-sky-900 mt-4" style={{fontFamily: 'Fredoka_700Bold'}}>
             {stats.highestRating ? stats.highestRating : 0}
           </Text>
         </View>

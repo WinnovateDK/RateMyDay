@@ -30,7 +30,7 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
   const [data, setData] = useState<TimeSeriesData[]>([]);
   const currentDate = new Date();
   const font = useFont(inter, 12);
-  const { session, isGuest } = useAuthStore();
+  const { session } = useAuthStore();
   const { isRatingUpdated } = useStore();
   const { graphWeeklyRatings, graphMonthlyRatings, graphYearlyRatings } =
     useRatingStorePb();
@@ -51,9 +51,13 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
   };
 
   useEffect(() => {
-    if (session && !isGuest) {
+    if (session) {
       switch (timerange) {
         case "Monthly":
+          if (graphMonthlyRatings.length === 0) {
+            showToast("There is no ratings for the current month.");
+            return;
+          }
           const formattedData = graphMonthlyRatings.map((item) => {
             const [day, month] = item.Label.split("-");
             const currentYear = new Date().getFullYear();
@@ -81,7 +85,6 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
 
           break;
         case "Yearly":
-          console.log("data; ", graphYearlyRatings);
           if (graphYearlyRatings.length === 0) {
             showToast("There is no ratings for the current year.");
             return;
@@ -112,70 +115,9 @@ const GraphComponent = ({ timerange }: { timerange: string }) => {
 
           break;
       }
-    } else {
-      switch (timerange) {
-        case "Monthly":
-          getRatingsforLastMonth().then((ratings) => {
-            if (ratings.length === 0) {
-              showToast("There is no ratings for the current month.");
-              return;
-            }
-            const formattedData = ratings.map((item) => ({
-              ...item,
-              Label: new Date(item.Label),
-            }));
-            const weeklyAveragesData = calculateWeeklyAverages(
-              formattedData,
-              currentDate.getFullYear()
-            );
-            setData(weeklyAveragesData);
-          });
-
-          break;
-        case "Weekly":
-          getRatingsForLastWeek().then((ratings) => {
-            if (ratings.length === 0) {
-              showToast("There is no ratings for the current week.");
-              return;
-            }
-            setData(ratings);
-          });
-          break;
-        case "Yearly":
-          getAverageRatingsPerMonth().then((ratings) => {
-            console.log("data; ", ratings);
-            if (ratings.length === 0) {
-              showToast("There is no ratings for the current year.");
-              return;
-            }
-            const months = [
-              "Jan",
-              "Feb",
-              "Mar",
-              "Apr",
-              "May",
-              "Jun",
-              "Jul",
-              "Aug",
-              "Sep",
-              "Oct",
-              "Nov",
-              "Dec",
-            ];
-
-            const formattedYearlyData = ratings
-              .map((rating, index) => ({
-                Label: months[index],
-                Rating: rating,
-              }))
-              .filter((datapoint) => datapoint.Rating !== 0);
-
-            setData(formattedYearlyData);
-          });
-          break;
-      }
     }
-  }, [timerange, isRatingUpdated]);
+  }, [timerange, session, graphWeeklyRatings, graphMonthlyRatings, graphYearlyRatings]);
+
   return (
     <View className="h-full w-full">
       <View className="p-6 pr-9 items-center">

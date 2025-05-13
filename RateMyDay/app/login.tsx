@@ -10,7 +10,7 @@ import { ActivityIndicator } from "react-native";
 const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, session, setIsGuest, isLoading } = useAuthStore();
+  const { signIn, session, isLoading } = useAuthStore();
   const router = useRouter();
 
   const handleLogin = async (email: string, password: string) => {
@@ -20,17 +20,13 @@ const login = () => {
       showToast(e.message);
     }
   };
+
   const showToast = (text: string) => {
     Toast.show({
       type: "error",
       text1: text,
       position: "bottom",
     });
-  };
-
-  const handleGuest = () => {
-    setIsGuest(true);
-    router.replace("/");
   };
 
   useEffect(() => {
@@ -59,12 +55,6 @@ const login = () => {
             value={password}
             onChangeText={setPassword}
           />
-
-          <TouchableOpacity className="mb-6" onPress={() => handleGuest()}>
-            <Text className="underline text-sky-400 mt-2">
-              Continue as guest.
-            </Text>
-          </TouchableOpacity>
           <View className="flex-row justify-between w-full">
             <TouchableOpacity
               className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 ml-6"
