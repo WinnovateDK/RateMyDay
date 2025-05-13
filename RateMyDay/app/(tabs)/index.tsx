@@ -1,13 +1,11 @@
-import React, { useCallback, useRef } from "react";
+import React, { useRef } from "react";
 import {
   Image,
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   Keyboard,
-  TouchableWithoutFeedback,
   Dimensions,
   ScrollView,
   Pressable,
@@ -23,11 +21,8 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { scale } from "react-native-size-matters";
-import { useWindowDimensions } from "react-native";
 import { Background } from "@/components/Background";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
-import { useAuthStore } from "@/stores/AuthStateStore";
 
 const { width, height } = Dimensions.get("window");
 const aspectRatio = width / height;
