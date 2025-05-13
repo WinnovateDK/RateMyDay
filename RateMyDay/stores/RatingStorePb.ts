@@ -199,12 +199,22 @@ export const useRatingStorePb = create<RatingsState>()(
         let streak = 0;
         let currentDate = today;
 
-        while (true) {
-          const day = currentDate.getDate().toString().padStart(2, '0');
-          const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-          const dateString = `${day}-${month}`;
+        // Sort ratings by date in descending order
+        const sortedRatings = [...allRatings].sort((a, b) => {
+          const dateA = new Date(a.Label.split('-').reverse().join('-')); // Convert DD-MM to MM-DD
+          const dateB = new Date(b.Label.split('-').reverse().join('-'));
+          return dateB.getTime() - dateA.getTime();
+        });
 
-          const hasRating = allRatings.some(r => r.Label === dateString);
+        while (true) {
+          const hasRating = sortedRatings.some(r => {
+            const [day, month] = r.Label.split('-');
+            const year = currentDate.getFullYear();
+            const ratingDate = new Date(year, parseInt(month) - 1, parseInt(day));
+            ratingDate.setHours(0, 0, 0, 0);
+            return ratingDate.getTime() === currentDate.getTime();
+          });
+
           if (!hasRating) break;
 
           streak++;

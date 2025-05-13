@@ -1,9 +1,9 @@
 // PocketBaseBackupService.ts
 import PocketBase from 'pocketbase';
-import Config from 'react-native-config';
+import Constants from "expo-constants";
 
 // Initialize PocketBase client with your backend URL.
-const pb = new PocketBase("https://winnovate.pockethost.io");
+const pb = new PocketBase(Constants.expoConfig?.extra?.EXPO_PUBLIC_POCKETBASE_URL);
 
 /**
  * getCurrentUserId
