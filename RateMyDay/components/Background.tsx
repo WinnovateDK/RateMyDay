@@ -44,7 +44,7 @@ const CLOUDS = [
 
 export function Background({ children, streak }: { children: ReactNode, streak: number }) {
   const cloudAnims = useRef(CLOUDS.map(() => new Animated.Value(-200))).current;
-  const bigCloudAnim = useRef(new Animated.Value(-300)).current;
+  const bigCloudAnim = useRef(new Animated.Value(-800)).current;
   const aspectRatio = width / height;
 
   useEffect(() => {
