@@ -109,7 +109,7 @@ export function Background({ children, streak }: { children: ReactNode, streak :
           }}
         >
           <Image
-            source={require("../assets/cloud-1.png")}
+            source={require("../assets/newcloud.png")}
             style={{
               width: "100%",
               height: "100%",
