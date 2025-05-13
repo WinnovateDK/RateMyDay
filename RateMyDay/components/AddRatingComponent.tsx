@@ -43,7 +43,7 @@ const AddRatingComponent: React.FC<{
   const [showNote, setShowNote] = useState(false);
   const [scoreSet, setScoreSet] = useState<boolean>();
   const { width, height } = useWindowDimensions();
-  const { session, isGuest, encryptionKey, setEncryptionKey } = useAuthStore();
+  const { session, encryptionKey, setEncryptionKey } = useAuthStore();
   const { addNewRatingLocally } = useRatingStorePb();
   const today = new Date();
   const { setRatingUpdated } = useStore();
@@ -57,20 +57,6 @@ const AddRatingComponent: React.FC<{
   const aspectRatio = width / height;
   const buttonSize = Math.ceil(width * 0.08) / aspectRatio;
   const contentOffsetX = width / 2 + buttonSize / 2;
-
-  const setScore = async (score: Number) => {
-    const dateObject = new Date();
-    const formattedDate = formatDate(dateObject);
-    await setItem(`${formattedDate}`, selectedScore, noteText);
-    const key = formattedDate;
-    const newRating = {
-      rating: selectedScore!,
-      note: noteText,
-      selected: true,
-      selectedColor: CalendarColors[selectedScore! - 1],
-    };
-    updateSavedRating(key, newRating);
-  };
 
   const decryptNote = async (note: string) => {
     if (!session) return note;
@@ -143,14 +129,6 @@ const AddRatingComponent: React.FC<{
     }, 200);
   };
 
-  const handleSubmit = () => {
-    if (selectedScore === null) {
-      Alert.alert("Error", "Please select a value before submitting.");
-    } else {
-      setIsNoteDialogOpen(true);
-    }
-  };
-
   const handleSubmitPb = async () => {
     if (session && selectedScore) {
       setIsNoteDialogOpen(true);
@@ -160,20 +138,13 @@ const AddRatingComponent: React.FC<{
   const handleFinalSubmit = async () => {
     setIsNoteDialogOpen(false);
     if (session && selectedScore !== null) {
-      if (!isGuest) {
-        setIsLoading(true);
-        const todaysRating = await getRatingByDate(session.record.id, today);
-        if (!todaysRating) await setRatingPb();
-        else await updateRatingPb(session.record.id, todaysRating);
-        console.log("lol");
-        addNewRatingLocally(selectedScore);
-        setRatingUpdated();
-        setIsLoading(false);
-      } else {
-        setScore(selectedScore);
-        Alert.alert("Success", `You submitted: ${selectedScore}`);
-        setScoreSet(true);
-      }
+      setIsLoading(true);
+      const todaysRating = await getRatingByDate(session.record.id, today);
+      if (!todaysRating) await setRatingPb();
+      else await updateRatingPb(session.record.id, todaysRating);
+      addNewRatingLocally(selectedScore);
+      setRatingUpdated();
+      setIsLoading(false);
       setIsSubmitted(true);
       animateAddIcon(true);
       setTimeout(() => {
@@ -199,10 +170,6 @@ const AddRatingComponent: React.FC<{
     if (scrollStart !== isStartReached) {
       setScrollStart(isStartReached);
     }
-  };
-
-  const handleNote = () => {
-    setShowNote(!showNote);
   };
 
   useEffect(() => {
@@ -261,7 +228,7 @@ const AddRatingComponent: React.FC<{
         <ScrollView
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-          className="mb-4"
+          className="mb-14"
           contentOffset={{ x: contentOffsetX, y: 0 }}
           fadingEdgeLength={80}
           onScroll={handleScroll}
@@ -282,7 +249,7 @@ const AddRatingComponent: React.FC<{
           }`}
           style={{ width: buttonSize * 1.1, height: buttonSize * 1.1 }}
           onPress={
-            !isGuest && selectedScore ? () => handleSubmitPb() : handleSubmit
+            () => handleSubmitPb()
           }
         >
           {isLoading ? (

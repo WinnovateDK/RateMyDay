@@ -14,11 +14,9 @@ interface AuthData {
 
 interface AuthState {
   session: AuthData | null;
-  isGuest: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
-  setIsGuest: (isGuest: boolean) => void;
   encryptionKey: string | null;
   setEncryptionKey: (encryptionKey: string) => void;
 }
@@ -32,7 +30,6 @@ export const useAuthStore = create<AuthState>()(
             token: pb.authStore.token,
           }
         : null,
-      isGuest: false,
       isLoading: false,
       encryptionKey: null,
       setEncryptionKey: (key: string) => {
@@ -44,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
           const authData = await pb
             .collection("users")
             .authWithPassword(email, password);
-          set({ session: authData, isGuest: false });
+          set({ session: authData });
           pb.authStore.save(authData.token, authData.record as RecordModel);
           const ratingStore = useRatingStorePb.getState();
           await ratingStore.setWeeklyRatings(authData.record.id);
@@ -68,8 +65,7 @@ export const useAuthStore = create<AuthState>()(
       signOut: () => {
         pb.authStore.clear();
         set({ session: null });
-      },
-      setIsGuest: (isGuest) => set({ isGuest }),
+      }
     }),
     {
       name: "auth-storage",
