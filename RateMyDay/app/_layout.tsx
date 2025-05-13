@@ -11,15 +11,18 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Toast, { ErrorToast } from "react-native-toast-message";
 import { configureNotifications } from '@/utills/ConfigureNotifications';
+import {
+  Fredoka_400Regular,
+  Fredoka_700Bold,
+} from '@expo-google-fonts/fredoka';
 
 SplashScreen.preventAutoHideAsync();
 configureNotifications();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
+
+  
   const router = useRouter();
   
   const toastConfig = {
@@ -28,6 +31,7 @@ export default function RootLayout() {
     ),
   };
 
+  const [loaded] = useFonts({ Fredoka_400Regular, Fredoka_700Bold });
   useEffect(() => {
 
     if (loaded) {

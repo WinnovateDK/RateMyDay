@@ -39,7 +39,8 @@
           "color": "#ffffff",
           "sounds": ["./assets/notification.wav"]
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

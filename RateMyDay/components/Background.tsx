@@ -3,7 +3,6 @@ import {
   Animated,
   Dimensions,
   Easing,
-  ImageSourcePropType,
   View,
   Image,
   Text,
@@ -43,7 +42,7 @@ const CLOUDS = [
   },
 ];
 
-export function Background({ children, streak }: { children: ReactNode, streak : number }) {
+export function Background({ children, streak }: { children: ReactNode, streak: number }) {
   const cloudAnims = useRef(CLOUDS.map(() => new Animated.Value(-200))).current;
   const bigCloudAnim = useRef(new Animated.Value(-300)).current;
   const aspectRatio = width / height;
@@ -104,8 +103,8 @@ export function Background({ children, streak }: { children: ReactNode, streak :
             width: 200 / aspectRatio,
             height: 80 / aspectRatio,
             transform: [{ translateX: bigCloudAnim }],
-            alignItems: "center", // centers text horizontally
-            justifyContent: "center", // centers text vertically
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Image
@@ -128,11 +127,21 @@ export function Background({ children, streak }: { children: ReactNode, streak :
               style={{
                 color: "white",
                 fontSize: 16,
+                fontFamily: 'Fredoka_700Bold'
+              }} className="pt-14"
+            >
+              Your rating streak is
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                fontSize: 24,
                 fontWeight: "bold",
-                marginTop: 50,
+                marginTop: 5,
+                fontFamily: 'Fredoka_700Bold'
               }}
             >
-              Your rating streak is {streak}🔥
+              {streak}🔥
             </Text>
           </View>
         </Animated.View>

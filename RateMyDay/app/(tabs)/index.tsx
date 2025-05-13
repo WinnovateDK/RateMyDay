@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import {
   Image,
   View,
@@ -39,9 +39,9 @@ export default function AddRating() {
   const scrollRef = useRef<ScrollView>(null);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const { streak, setAllRatings } = useRatingStorePb();
-  const { session } = useAuthStore();
 
   const widthArray = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  const barWidth = useSharedValue(0);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -66,12 +66,23 @@ export default function AddRating() {
     translateX.value = withTiming(showSidePanel ? 0 : 300, { duration: 300 });
   }, [showSidePanel, translateX]);
 
+  useEffect(() => {
+    barWidth.value = withTiming(
+      selectedScore ? widthArray[selectedScore] : 0,
+      { duration: 400 } // 0.3 seconds
+    );
+  }, [selectedScore]);
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
 
+  const animatedBarStyle = useAnimatedStyle(() => ({
+    width: `${barWidth.value}%`,
+  }));
+
   return (
-    <Background streak={streak}>
+    <Background streak={streak} >
       <View className="h-1/4 w-full">
         <View className="flex-row items-center justify-between">
           <View className="w-6" />
@@ -92,14 +103,20 @@ export default function AddRating() {
         <View className="flex-1 gap-3">
           <Text
             className="text-center text-3xl text-white font-semibold"
-            style={{ fontSize: 14 / aspectRatio }}
+            style={{ 
+              fontSize: 14 / aspectRatio,
+              fontFamily: "Fredoka_700Bold", 
+            }}
           >
             Add todays rating
           </Text>
           <View className="flex-1 gap-8 mb-8">
             <Text
               className="text-center text-cyan-200 "
-              style={{ fontSize: 9 / aspectRatio }}
+              style={{ 
+                fontSize: 9 / aspectRatio,
+                fontFamily: "Fredoka_400Regular",
+              }}
             >
               How has your day been?
             </Text>
@@ -109,11 +126,9 @@ export default function AddRating() {
             >
               <Text style={{ fontSize: 14 / aspectRatio }}>😔</Text>
               <View className="flex-1 mx-4 bg-cyan-300 h-2 rounded-full">
-                <View
+                <Animated.View
                   className="h-2 bg-cyan-600 rounded-full"
-                  style={{
-                    width: `${selectedScore ? widthArray[selectedScore] : 0}%`,
-                  }}
+                  style={animatedBarStyle}
                 />
               </View>
               <Text style={{ fontSize: 14 / aspectRatio }}>😊</Text>
