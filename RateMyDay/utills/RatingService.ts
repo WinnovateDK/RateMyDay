@@ -18,6 +18,7 @@ import pb from "./pbClient";
 export type rateDatePair = {
   Label: string;
   Rating: number;
+  fullDate?: Date;  // Add the fullDate property as optional
 };
 
 export type chartDataType = {

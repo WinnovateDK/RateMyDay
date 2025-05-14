@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "@/stores/AuthStateStore";
 import Toast from "react-native-toast-message";
-import PocketBase from "pocketbase";
 import { Router, useRouter } from "expo-router";
 import { ActivityIndicator } from "react-native";
 
@@ -55,7 +54,7 @@ const login = () => {
             value={password}
             onChangeText={setPassword}
           />
-          <View className="flex-row justify-between w-full">
+          <View className="flex-row justify-between w-full pt-8">
             <TouchableOpacity
               className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 ml-6"
               onPress={() => {
