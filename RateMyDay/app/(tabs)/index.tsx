@@ -87,7 +87,7 @@ export default function AddRating() {
             className="absolute left-1/2 -translate-x-1/2"
           />
           <TouchableOpacity
-            className="pb-24 pr-4"
+            className="pb-48 pr-4"
             onPress={() => setShowSidePanel(true)}
           >
             <Ionicons name="settings" size={24} color="#0084c7" />
