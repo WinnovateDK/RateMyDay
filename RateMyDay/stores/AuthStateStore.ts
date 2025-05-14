@@ -51,6 +51,7 @@ export const useAuthStore = create<AuthState>()(
           await ratingStore.setGraphMonthlyRatings(authData.record.id);
           await ratingStore.setGraphYearlyRatings(authData.record.id);
           await ratingStore.setAllRatings(authData.record.id);
+          await ratingStore.calculateStreak();
           const key = await getBackupFromRemote(authData.record.id);
           if (key) {
             set({ encryptionKey: key });

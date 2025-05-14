@@ -50,6 +50,7 @@ interface RatingsState {
   calculateStreak: () => void;
   addNewRatingLocally: (newRating: number) => void;
   setLastDate: (date: Date) => void;
+  checkAndResetStreak: () => void;
 }
 
 function updateOrAppendRating(
@@ -157,7 +158,6 @@ export const useRatingStorePb = create<RatingsState>()(
       },
       setAllRatings: async (userId: string) => {
         try {
-          console.log("Fetching all ratings for user:", userId);
           const allRatings = await pb.collection("ratings").getFullList({
             filter: `userId = "${userId}"`,
             sort: '-date', // Sort by date descending
@@ -193,33 +193,31 @@ export const useRatingStorePb = create<RatingsState>()(
           return;
         }
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        let streak = 0;
-        let currentDate = today;
-
-        // Sort ratings by date in descending order
-        const sortedRatings = [...allRatings].sort((a, b) => {
-          const dateA = new Date(a.Label.split('-').reverse().join('-')); // Convert DD-MM to MM-DD
-          const dateB = new Date(b.Label.split('-').reverse().join('-'));
-          return dateB.getTime() - dateA.getTime();
-        });
-
-        while (true) {
-          const hasRating = sortedRatings.some(r => {
-            const [day, month] = r.Label.split('-');
-            const year = currentDate.getFullYear();
-            const ratingDate = new Date(year, parseInt(month) - 1, parseInt(day));
-            ratingDate.setHours(0, 0, 0, 0);
-            return ratingDate.getTime() === currentDate.getTime();
+        const ratingDates = allRatings
+          .map(r => {
+            if (r.fullDate) {
+              const d = new Date(r.fullDate);
+              d.setHours(0, 0, 0, 0);
+              return d.getTime();
+            } else {
+              const [day, month] = r.Label.split('-');
+              const d = new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
+              d.setHours(0, 0, 0, 0);
+              return d.getTime();
+            }
           });
 
-          if (!hasRating) break;
 
+        const ratingDateSet = new Set(ratingDates);
+
+        let streak = 0;
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        
+        while (ratingDateSet.has(currentDate.getTime())) {
           streak++;
           currentDate.setDate(currentDate.getDate() - 1);
         }
-
         set({ streak });
       },
       addNewRatingLocally(newRating: number) {
@@ -342,6 +340,32 @@ export const useRatingStorePb = create<RatingsState>()(
           return state;
         });
       },
+      checkAndResetStreak: () => {
+        const { allRatings, streak } = get();
+        if (!allRatings.length) {
+          set({ streak: 0 });
+          return;
+        }
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+
+        const hadRatingYesterday = allRatings.some(r => {
+          let d;
+          if (r.fullDate) {
+            d = new Date(r.fullDate);
+          } else {
+            const [day, month] = r.Label.split('-');
+            d = new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
+          }
+          d.setHours(0, 0, 0, 0);
+          return d.getTime() === yesterday.getTime();
+        });
+
+        if (streak > 0 && !hadRatingYesterday) {
+          set({ streak: 0 });
+        }
+      },
     }),
     {
       name: "ratings-storage",
@@ -351,7 +375,7 @@ export const useRatingStorePb = create<RatingsState>()(
           if (typeof state.lastDate === "string") {
             state.lastDate = new Date(state.lastDate);
           }
-          state.calculateStreak();
+          state.checkAndResetStreak();
         }
       },
     }
