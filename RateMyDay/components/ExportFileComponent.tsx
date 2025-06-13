@@ -87,24 +87,24 @@ const ExportFileComponent = ({ onClose }: { onClose: () => void }) => {
       className="flex-1 overflow-hidden"
     >
       <Image
-        source={require("@/assets/cloud-1.png")}
+        source={require("@/assets/newcloud.png")}
         style={{
           position: "absolute",
           top: 450,
           left: 70,
-          width: 250,
-          height: 135,
+          width: 230,
+          height: 150,
           opacity: 0.5,
         }}
       />
       <Image
-        source={require("@/assets/cloud-1.png")}
+        source={require("@/assets/newcloud.png")}
         style={{
           position: "absolute",
           top: 320,
           right: 70,
-          width: 250,
-          height: 135,
+          width: 230,
+          height: 150,
           opacity: 0.5,
         }}
       />

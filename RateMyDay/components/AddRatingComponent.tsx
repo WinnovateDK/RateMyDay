@@ -8,6 +8,8 @@ import {
   ScrollView,
   NativeScrollEvent,
   Animated,
+  Image,
+  ImageBackground,
 } from "react-native";
 import { setItem } from "@/utills/AsyncStorage";
 import { useRatingStore } from "@/stores/RatingStore";
@@ -299,13 +301,13 @@ const AddRatingComponent: React.FC<{
         onClose={() => setIsNoteDialogOpen(false)}
       >
         <DialogContent>
-          <View className="w-full bg-[#034f84] p-6 rounded-3xl">
-            <Text className="text-white text-2xl font-bold mb-4 text-center">
-              Add a note for today
+          <View className="w-full bg-gray-100 p-4 rounded-3xl">
+            <Text className="text-zinc-700 text-2xl font-bold mb-4 text-center">
+              Add a {<Text className="text-cyan-300">note</Text>} for today
             </Text>
 
             <TextInput
-              className="h-32 bg-white/90 border-2 border-cyan-300 rounded-3xl p-4 text-lg text-gray-700"
+              className="h-32 border-2 bg-gray-200 border-cyan-300 rounded-xl p-4 text-lg text-gray-700"
               placeholder="Enter a note for the day (optional)"
               placeholderTextColor="#94a3b8"
               value={noteText}
@@ -313,12 +315,11 @@ const AddRatingComponent: React.FC<{
                 setNoteText(txt);
               }}
               multiline
-              style={[shadowStyle, { elevation: 2 }]}
             />
 
             <View className="flex-row justify-end space-x-3 mt-6">
               <TouchableOpacity
-                className="flex-1 p-3 rounded-2xl bg-gray-500/20"
+                className="flex-1 p-3 rounded-2xl bg-gray-500/20 mr-1"
                 onPress={() => setIsNoteDialogOpen(false)}
               >
                 <Text
@@ -334,12 +335,12 @@ const AddRatingComponent: React.FC<{
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 p-3 rounded-2xl bg-white"
+                className="flex-1 p-3 rounded-2xl bg-cyan-500"
                 onPress={handleFinalSubmit}
               >
                 <Text
                   style={{
-                    color: "#034f84",
+                    color: "white",
                     textAlign: "center",
                     fontSize: 18,
                     fontWeight: "600",
