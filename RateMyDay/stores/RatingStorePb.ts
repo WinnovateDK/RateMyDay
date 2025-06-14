@@ -356,9 +356,23 @@ export const useRatingStorePb = create<RatingsState>()(
           set({ streak: 0 });
           return;
         }
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+        const hadRatingToday = allRatings.some(r => {
+          let d;
+          if (r.fullDate) {
+            d = new Date(r.fullDate);
+          } else {
+            const [day, month] = r.Label.split('-');
+            d = new Date(today.getFullYear(), parseInt(month) - 1, parseInt(day));
+          }
+          d.setHours(0, 0, 0, 0);
+          return d.getTime() === today.getTime();
+        });
 
         const hadRatingYesterday = allRatings.some(r => {
           let d;
@@ -366,13 +380,16 @@ export const useRatingStorePb = create<RatingsState>()(
             d = new Date(r.fullDate);
           } else {
             const [day, month] = r.Label.split('-');
-            d = new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
+            d = new Date(today.getFullYear(), parseInt(month) - 1, parseInt(day));
           }
           d.setHours(0, 0, 0, 0);
           return d.getTime() === yesterday.getTime();
         });
 
-        if (streak > 0 && !hadRatingYesterday) {
+        if (streak > 1 && !hadRatingYesterday) {
+          set({ streak: hadRatingToday ? 1 : 0 });
+        }
+        if (streak === 1 && !hadRatingToday) {
           set({ streak: 0 });
         }
       },

@@ -31,7 +31,6 @@ export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(false);
   const translateX = useSharedValue(300);
-  const scrollRef = useRef<ScrollView>(null);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const { streak, setAllRatings } = useRatingStorePb();
 
