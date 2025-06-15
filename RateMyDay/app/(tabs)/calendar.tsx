@@ -61,24 +61,28 @@ const calendar = () => {
   };
 
   const transformRatingsData = async () => {
-    if (session) {
-      const ratingsData = await getAllRatingsForUser(session?.record.id);
+    if (!session) return {};
 
-      const Data: Record<string, any> = {};
-      ratingsData.forEach((rating) => {
-        decryptNote(rating.note).then((decrypted) => {
-          const date = rating.date.split(" ")[0];
-          Data[date] = {
+    const ratingsData = await getAllRatingsForUser(session.record.id);
+
+    const entries = await Promise.all(
+      ratingsData.map(async (rating) => {
+        const decrypted = await decryptNote(rating.note);
+        const date = rating.date.split(" ")[0];
+        return [
+          date,
+          {
             note: decrypted,
             rating: rating.rating,
             selected: true,
             selectedColor: CalendarColors[rating.rating],
-          };
-        });
-      });
-      return Data;
-    }
-    return {};
+          },
+        ];
+      })
+    );
+
+    const Data = Object.fromEntries(entries);
+    return Data;
   };
 
   useEffect(() => {
@@ -117,16 +121,18 @@ const calendar = () => {
     <SafeAreaView className="flex-1 bg-sky-900">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="justify-center items-center pt-4">
-          <Text className="text-teal-50 text-4xl"
+          <Text
+            className="text-teal-50 text-4xl"
             style={{
-              fontFamily: 'Fredoka_700Bold'
+              fontFamily: "Fredoka_700Bold",
             }}
           >
             Overview of your days
           </Text>
-          <Text className="text-xl text-teal-100"
-            style={{fontFamily: 'Fredoka_400Regular'}}
-            >
+          <Text
+            className="text-xl text-teal-100"
+            style={{ fontFamily: "Fredoka_400Regular" }}
+          >
             Track how your days have been
           </Text>
         </View>
@@ -149,18 +155,17 @@ const calendar = () => {
                   monthTextColor: "#075985",
                   dotColor: "red",
                   arrowColor: "#0084c7",
-                  textDayFontFamily: 'Fredoka_400Regular',
-                  textMonthFontFamily: 'Fredoka_700Bold',
-                  textDayHeaderFontFamily: 'Fredoka_400Regular',
+                  textDayFontFamily: "Fredoka_400Regular",
+                  textMonthFontFamily: "Fredoka_700Bold",
+                  textDayHeaderFontFamily: "Fredoka_400Regular",
                   textDayFontSize: 16,
                   textMonthFontSize: 18,
-                  textDayHeaderFontSize: 14
-                
+                  textDayHeaderFontSize: 14,
                 }}
                 style={{
                   borderRadius: 10,
                   marginVertical: 10,
-                  paddingBottom: 3
+                  paddingBottom: 1,
                 }}
               />
             ) : (
@@ -190,9 +195,10 @@ const calendar = () => {
                 >
                   <AntDesign name="left" size={24} color="#0369a1" />
                 </TouchableOpacity>
-                <Text className="align-middle w-20 text-center text-xl text-sky-900"
+                <Text
+                  className="align-middle w-20 text-center text-xl text-sky-900"
                   style={{
-                    fontFamily: 'Fredoka_700Bold'
+                    fontFamily: "Fredoka_700Bold",
                   }}
                 >
                   {timerange}
@@ -227,7 +233,10 @@ const calendar = () => {
         >
           <View className="flex-1 justify-center items-center bg-black/50">
             <View className="bg-white p-6 rounded-lg items-center w-4/5">
-              <Text className="text-2xl text-sky-900 mb-4" style={{fontFamily: 'Fredoka_700Bold'}}>
+              <Text
+                className="text-2xl text-sky-900 mb-4"
+                style={{ fontFamily: "Fredoka_700Bold" }}
+              >
                 {selectedDate
                   ? `Rating for ${selectedDate}`
                   : "No Date Selected"}
@@ -235,7 +244,7 @@ const calendar = () => {
               <Text
                 className="text-4xl mb-4"
                 style={{
-                  fontFamily: 'Fredoka_700Bold',
+                  fontFamily: "Fredoka_700Bold",
                   color:
                     selectedDate && dateRatings[selectedDate] !== undefined
                       ? CalendarColors[dateRatings[selectedDate].rating]
@@ -247,7 +256,10 @@ const calendar = () => {
                   : "No rating"}
               </Text>
               <ScrollView style={{ maxHeight: 150, marginBottom: 4 }}>
-                <Text style={{fontFamily: 'Fredoka_400Regular'}} className="text-lg text-gray-600">
+                <Text
+                  style={{ fontFamily: "Fredoka_400Regular" }}
+                  className="text-lg text-gray-600"
+                >
                   {selectedDate &&
                   dateRatings[selectedDate] !== undefined &&
                   dateRatings[selectedDate].note !== ""
@@ -262,7 +274,12 @@ const calendar = () => {
                 }}
                 className="bg-sky-800 px-4 py-2 rounded-md mt-4"
               >
-                <Text className="text-white text-lg" style={{fontFamily: 'Fredoka_400Regular'}}>Close</Text>
+                <Text
+                  className="text-white text-lg"
+                  style={{ fontFamily: "Fredoka_400Regular" }}
+                >
+                  Close
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

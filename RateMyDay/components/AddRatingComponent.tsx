@@ -208,7 +208,7 @@ const AddRatingComponent: React.FC<{
         <ScrollView
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-          className="mb-14"
+          className="mb-2"
           contentOffset={{ x: contentOffsetX, y: 0 }}
           fadingEdgeLength={80}
           onScroll={handleScroll}

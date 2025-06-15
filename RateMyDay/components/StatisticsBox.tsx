@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, useWindowDimensions } from "react-native";
 import useAuthStore from "@/stores/AuthStateStore";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
 import useStore from "@/stores/isRatingSetStore";
@@ -25,6 +25,8 @@ const StatisticsBox = ({
   const { weeklyRatings, monthlyRatings, yearlyRatings } = useRatingStorePb();
   const { isRatingUpdated } = useStore();
   const { session } = useAuthStore();
+  const { width, height } = useWindowDimensions();
+  const aspectRatio = width / height;
   useEffect(() => {
     if (session) {
       switch (timerange) {
@@ -45,22 +47,61 @@ const StatisticsBox = ({
 
   return (
     <View className="justify-center items-center">
-      <View className="flex items-center pb-12">
-        <Text className="text-5xl text-sky-800" style={{fontFamily: 'Fredoka_400Regular'}}>Average Rating</Text>
-        <Text className="text-5xl text-sky-900 mt-4" style={{fontFamily: 'Fredoka_700Bold'}}>
+      <View className="flex items-center pb-6">
+        <Text
+          className=" text-sky-800"
+          style={{
+            fontFamily: "Fredoka_400Regular",
+            fontSize: 20 / aspectRatio,
+          }}
+        >
+          Average Rating
+        </Text>
+        <Text
+          className=" text-sky-900 mt-4"
+          style={{ fontFamily: "Fredoka_700Bold", fontSize: 18 / aspectRatio }}
+        >
           {stats.averageRating ? stats.averageRating : 0}
         </Text>
       </View>
       <View className="mt-5 flex-row justify-between w-full px-4">
         <View className="flex items-center">
-          <Text className="text-2xl text-sky-800" style={{fontFamily: 'Fredoka_400Regular'}}>Lowest Rating</Text>
-          <Text className="text-4xl text-sky-900 mt-4" style={{fontFamily: 'Fredoka_700Bold'}}>
+          <Text
+            className=" text-sky-800"
+            style={{
+              fontFamily: "Fredoka_400Regular",
+              fontSize: 12 / aspectRatio,
+            }}
+          >
+            Lowest Rating
+          </Text>
+          <Text
+            className=" text-sky-900 mt-4"
+            style={{
+              fontFamily: "Fredoka_700Bold",
+              fontSize: 12 / aspectRatio,
+            }}
+          >
             {stats.lowestRating ? stats.lowestRating : 0}
           </Text>
         </View>
         <View className="items-center">
-          <Text className="text-2xl text-sky-800" style={{fontFamily: 'Fredoka_400Regular'}}>Highest Rating</Text>
-          <Text className="text-4xl text-sky-900 mt-4" style={{fontFamily: 'Fredoka_700Bold'}}>
+          <Text
+            className=" text-sky-800"
+            style={{
+              fontFamily: "Fredoka_400Regular",
+              fontSize: 12 / aspectRatio,
+            }}
+          >
+            Highest Rating
+          </Text>
+          <Text
+            className=" text-sky-900 mt-4"
+            style={{
+              fontFamily: "Fredoka_700Bold",
+              fontSize: 12 / aspectRatio,
+            }}
+          >
             {stats.highestRating ? stats.highestRating : 0}
           </Text>
         </View>
