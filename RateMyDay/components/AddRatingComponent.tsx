@@ -2,21 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
-  Alert,
   TextInput,
   Text,
   ScrollView,
   NativeScrollEvent,
   Animated,
-  Image,
-  ImageBackground,
 } from "react-native";
-import { setItem } from "@/utills/AsyncStorage";
-import { useRatingStore } from "@/stores/RatingStore";
-import { CalendarColors } from "@/constants/Colors";
-import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { shadowStyle } from "@/constants/Colors";
 import { useWindowDimensions, ActivityIndicator } from "react-native";
 import {
   createRating,
@@ -37,13 +29,10 @@ const AddRatingComponent: React.FC<{
   selectedScore: number | null;
   setSelectedScore: (score: number) => void;
 }> = ({ selectedScore, setSelectedScore }) => {
-  const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
   const [noteText, setNoteText] = useState<string>("");
   const [scrollEnd, setScrollEnd] = useState(false);
   const [scrollStart, setScrollStart] = useState(false);
-  const [updateOrAdd, setUpdateOrAdd] = useState("Add");
   const [showNote, setShowNote] = useState(false);
-  const [scoreSet, setScoreSet] = useState<boolean>();
   const { width, height } = useWindowDimensions();
   const { session, encryptionKey, setEncryptionKey } = useAuthStore();
   const { addNewRatingLocally } = useRatingStorePb();
@@ -53,7 +42,6 @@ const AddRatingComponent: React.FC<{
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [currentAddIcon, setCurrentAddIcon] = useState("check");
-  const [currentNoteIcon, setCurrentNoteIcon] = useState("edit");
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
   const aspectRatio = width / height;
@@ -173,16 +161,6 @@ const AddRatingComponent: React.FC<{
       setScrollStart(isStartReached);
     }
   };
-
-  useEffect(() => {
-    isRatingSetToday().then((isSet) => {
-      if (isSet === true) {
-        setUpdateOrAdd("Update");
-      } else {
-        setUpdateOrAdd("Add");
-      }
-    });
-  }, [scoreSet]);
 
   useEffect(() => {
     fetchTodaysRating();

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
   Image,
   View,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Keyboard,
   Dimensions,
-  ScrollView,
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";

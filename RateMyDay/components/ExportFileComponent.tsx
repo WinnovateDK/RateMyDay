@@ -4,11 +4,14 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { Feather } from "@expo/vector-icons";
+import { encryptData } from "@/utills/EncryptionService";
 import useAuthStore from "@/stores/AuthStateStore";
 import { LinearGradient } from "expo-linear-gradient";
 import NotificationComponent from "./NotificationComponent";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
 import pb from "@/utills/pbClient";
+import { rateDatePair } from "@/utills/RatingService";
+
 
 export default function ExportFileComponent({ onClose }: { onClose: () => void }) {
   const [filePath, setFilePath] = useState<string | null>(null);
@@ -16,7 +19,7 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const { allRatings, setAllRatings } = useRatingStorePb();
-  const { session } = useAuthStore();
+  const { session, encryptionKey } = useAuthStore();
 
   // Export allRatings to JSON and share
   const exportUserData = async () => {
@@ -42,38 +45,52 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
     }
   };
 
-  // Import JSON, set allRatings, and sync with PocketBase
   const loadUserData = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
       if (result.canceled) return;
 
       const content = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-        encoding: FileSystem.EncodingType.UTF8,
+      encoding: FileSystem.EncodingType.UTF8,
       });
-      const importedRatings = JSON.parse(content);
+      const importedRatingsRaw = JSON.parse(content);
+      
+      // Parse to rateDatePair[]
+      const importedRatings: rateDatePair[] = Array.isArray(importedRatingsRaw)
+      ? importedRatingsRaw.map((item) => ({
+        Label: item.Label ?? "",
+        Rating: item.Rating,
+        Note: item.Note,
+        fullDate: item.fullDate,
+        }))
+      : [];
 
-      if (Array.isArray(importedRatings)) {
-        if (session?.record?.id) {
-          for (const rating of importedRatings) {
-            await pb.collection("ratings").create({
-              userId: session.record.id,
-              rating: rating.Rating,
-              date: rating.fullDate ? new Date(rating.fullDate).toISOString() : undefined,
-            });
-          }
+      if (Array.isArray(importedRatings) && importedRatings.length > 0) {
+      if (session?.record?.id && encryptionKey) {
+        for (const rating of importedRatings) {
+        let encryptedNote = "";
+        if (rating) {
+          encryptedNote = await encryptData("test", encryptionKey);
+        } else {
+          encryptedNote = await encryptData("", encryptionKey);
         }
+        await pb.collection("ratings").create({
+          userId: session.record.id,
+          rating: rating.Rating,
+          note: encryptedNote,
+          date: rating.fullDate ? new Date(rating.fullDate).toISOString() : undefined,
+        });
+        }
+      }
 
         if (session?.record?.id) {
           setAllRatings(session.record.id);
         }
-
         Alert.alert("Success", "User data loaded and synced.");
       } else {
-        Alert.alert("Error", "Invalid data format.");
+        Alert.alert("Error", "Invalid data format or error getting user id or encrytion key");
       }
     } catch (error) {
-      console.error("Error loading file:", error);
       Alert.alert("Error", "Failed to load user data.");
     }
   };

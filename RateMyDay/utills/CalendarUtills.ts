@@ -1,4 +1,4 @@
-import { getItem } from "@/utills/AsyncStorage";
+
 import moment from "moment";
 
 export function daysPassedThisWeek(): number {
@@ -55,26 +55,6 @@ export function getDatesInCurrentWeekPb(): Date[] {
   }
 
   return dates;
-}
-
-export async function handleGetTodaysRating() {
-  const date = new Date();
-  const formattedDate = formatDate(date);
-  const rating = await getItem(`${formattedDate}`).then((rating) => {
-    return rating;
-  });
-  return rating;
-}
-
-export async function isRatingSetToday(): Promise<boolean> {
-  const isTodaysRatingSet = handleGetTodaysRating().then((rating) => {
-    if (rating === null) {
-      return false;
-    }
-    return true;
-  });
-
-  return isTodaysRatingSet;
 }
 
 export function getDaysInCurrentMonth(): number {

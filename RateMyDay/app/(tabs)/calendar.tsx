@@ -9,20 +9,16 @@ import {
   Dimensions,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import StatisticsBox from "@/components/StatisticsBox";
 import { CalendarColors } from "@/constants/Colors";
-import { useRatingStore } from "@/stores/RatingStore";
 import "../../global.css";
-import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
-import { useIsFocused } from "@react-navigation/native";
 import { useEffect } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
 import GraphComponent from "@/components/GraphComponent";
 import { getAllRatingsForUser } from "@/utills/PocketBase";
 import useAuthStore from "@/stores/AuthStateStore";
-import { RecordModel } from "pocketbase";
 import useStore from "@/stores/isRatingSetStore";
 import {
   decryptData,
@@ -44,10 +40,6 @@ const calendar = () => {
     >
   >({});
   const [hasLoaded, setHasLoaded] = useState(false);
-  const storedDateRatings = useRatingStore((state) => state.savedRatings);
-  const isFocused = useIsFocused();
-  const storageSavedDates = useStorageSavedDates(isFocused);
-  const setStoredDateRatings = useRatingStore((state) => state.setSavedRatings);
   const [timerange, setTimerange] = useState("Monthly");
   const [statsType, setStatsType] = useState("Numbers");
   const { session, encryptionKey, setEncryptionKey } = useAuthStore();
