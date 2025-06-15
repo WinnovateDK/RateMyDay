@@ -7,17 +7,7 @@ import {
 } from "@/utills/CalendarUtills";
 import { getRatingByDate, getRatingsForThisYearPb } from "./PocketBase";
 import pb from "./pbClient";
-
-export type rateDatePair = {
-  Label: string;
-  Rating: number;
-  fullDate?: Date;  // Add the fullDate property as optional
-};
-
-export type chartDataType = {
-  Label: Date;
-  Rating: number;
-};
+import { chartDataType, Rating } from "@/utills/Models";
 
 export async function calculateAverageRatingForWeekPb(userId: string) {
   const startOfWeek = new Date();
@@ -82,10 +72,10 @@ export async function calculateAverageRatingForWeekPb(userId: string) {
 
 export async function getRatingsforLastMonthPb(
   userId: string
-): Promise<rateDatePair[]> {
+): Promise<Rating[]> {
   let daysPassed = daysPassedThisMonth();
   const datesInPastMonth = getDatesInCurrentMonthPb();
-  const pastMontsRatings: rateDatePair[] = [];
+  const pastMontsRatings: Rating[] = [];
   let daysWithoutARating = 0;
   const today = new Date();
   const todayRating = await getRatingByDate(userId, today);
@@ -100,9 +90,10 @@ export async function getRatingsforLastMonthPb(
         if (rating === null) {
           daysWithoutARating += 1;
         } else {
-          const dateRate: rateDatePair = {
+          const dateRate: Rating = {
             Label: datesInPastMonth[i].toISOString().split("T")[0],
             Rating: parseInt(rating?.rating),
+            fullDate: datesInPastMonth[i],
           };
           pastMontsRatings.push(dateRate);
         }
@@ -115,10 +106,10 @@ export async function getRatingsforLastMonthPb(
 
 export async function getRatingsForLastWeekPb(
   userId: string
-): Promise<rateDatePair[]> {
+): Promise<Rating[]> {
   let daysPassed = daysPassedThisWeek();
   const datesInPastWeek = getDatesInCurrentWeekPb();
-  const pastWeeksRatings: rateDatePair[] = [];
+  const pastWeeksRatings: Rating[] = [];
   let daysWithoutARating = 0;
 
   const today = new Date();
@@ -146,6 +137,7 @@ export async function getRatingsForLastWeekPb(
         pastWeeksRatings.push({
           Label: `${day}-${month}`,
           Rating: parseInt(rating?.rating),
+          fullDate: dateObj,
         });
       }
     }

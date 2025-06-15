@@ -8,37 +8,22 @@ import {
   getRatingsforLastMonthPb,
 } from "@/utills/PocketBase";
 import {
-  rateDatePair,
   getAverageRatingsPerMonthPb,
 } from "@/utills/RatingService";
 import { zustandAsyncStorage } from "@/utills/ZustandAsyncStorage";
 import { isSameWeek, isSameMonth, isSameYear } from "@/utills/CalendarUtills";
-import  pb  from "@/utills/pbClient";
-
-type Ratings = {
-  averageRating: number;
-  highestRating: number;
-  lowestRating: number;
-  count: number;
-};
-
-type RatingsYear = {
-  averageRating: number;
-  highestRating: number;
-  lowestRating: number;
-  count: number;
-  allRatings: number[];
-};
+import pb from "@/utills/pbClient";
+import { Rating, RatingStats, RatingStatsYear } from "@/utills/Models";
 
 interface RatingsState {
-  weeklyRatings: Ratings;
-  monthlyRatings: Ratings;
-  yearlyRatings: RatingsYear;
-  graphWeeklyRatings: rateDatePair[];
-  graphMonthlyRatings: rateDatePair[];
+  weeklyRatings: RatingStats;
+  monthlyRatings: RatingStats;
+  yearlyRatings: RatingStatsYear;
+  graphWeeklyRatings: Rating[];
+  graphMonthlyRatings: Rating[];
   graphYearlyRatings: number[];
   lastDate: Date;
-  allRatings: rateDatePair[];
+  allRatings: Rating[];
   streak: number;
   setWeeklyRatings: (userId: string) => Promise<void>;
   setMonthlyRatings: (userId: string) => Promise<void>;
@@ -54,10 +39,10 @@ interface RatingsState {
 }
 
 function updateOrAppendRating(
-  graphData: rateDatePair[],
+  graphData: Rating[],
   label: string,
   rating: number
-): rateDatePair[] {
+): Rating[] {
   const index = graphData.findIndex((entry) => entry.Label === label);
   if (index !== -1) {
     const updated = [...graphData];
@@ -163,24 +148,19 @@ export const useRatingStorePb = create<RatingsState>()(
             sort: '-date', // Sort by date descending
           });
 
-          interface FormattedRating {
-            Label: string;
-            Rating: number;
-            fullDate: Date;
-          }
+          const Ratings: Rating[] = allRatings.map((record) => {
+            const dateObj = new Date(record.date);
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            return {
+              Label: `${day}-${month}`,
+              Rating: parseInt(record.rating),
+              fullDate: dateObj,
+              Note: record.note ? record.note : "No note",
+            };
+          });
 
-                    const formattedRatings: FormattedRating[] = allRatings.map((record) => {
-                      const dateObj = new Date(record.date);
-                      const day = dateObj.getDate().toString().padStart(2, '0');
-                      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-                      return {
-                        Label: `${day}-${month}`,
-                        Rating: parseInt(record.rating),
-                        fullDate: dateObj
-                      };
-                    });
-
-          set({ allRatings: formattedRatings });
+          set({ allRatings: Ratings });
           get().calculateStreak();
         } catch (error) {
           console.error("Error fetching all ratings:", error);
@@ -213,7 +193,7 @@ export const useRatingStorePb = create<RatingsState>()(
         let streak = 0;
         let currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
-        
+
         while (ratingDateSet.has(currentDate.getTime())) {
           streak++;
           currentDate.setDate(currentDate.getDate() - 1);
@@ -244,7 +224,7 @@ export const useRatingStorePb = create<RatingsState>()(
             Math.round(
               (weeklyRatingsValues.reduce((sum, r) => sum + r, 0) /
                 weeklyRatingsValues.length) *
-                100
+              100
             ) / 100,
           highestRating: Math.max(...weeklyRatingsValues),
           lowestRating: Math.min(...weeklyRatingsValues),
@@ -261,7 +241,7 @@ export const useRatingStorePb = create<RatingsState>()(
             Math.round(
               (monthlyRatingsValues.reduce((sum, r) => sum + r, 0) /
                 monthlyRatingsValues.length) *
-                100
+              100
             ) / 100,
           highestRating: Math.max(...monthlyRatingsValues),
           lowestRating: Math.min(...monthlyRatingsValues),
@@ -304,7 +284,7 @@ export const useRatingStorePb = create<RatingsState>()(
 
           const monthlyAvg = thisMonthRatings.length
             ? thisMonthRatings.reduce((sum, r) => sum + r, 0) /
-              thisMonthRatings.length
+            thisMonthRatings.length
             : newRating;
 
           updatedYearlyRatings[monthIndex] = Math.round(monthlyAvg * 100) / 100;
@@ -334,7 +314,7 @@ export const useRatingStorePb = create<RatingsState>()(
               Math.round(
                 (updatedAllRatings.reduce((sum, r) => sum + r, 0) /
                   updatedAllRatings.length) *
-                  100
+                100
               ) / 100,
             highestRating: Math.max(...updatedAllRatings),
             lowestRating: Math.min(...updatedAllRatings),

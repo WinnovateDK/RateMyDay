@@ -41,7 +41,7 @@ const AddRatingComponent: React.FC<{
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
-  const [currentAddIcon, setCurrentAddIcon] = useState("check");
+  const [currentAddIcon, setCurrentAddIcon] = useState("plus");
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
   const aspectRatio = width / height;
@@ -115,7 +115,7 @@ const AddRatingComponent: React.FC<{
     ]).start();
 
     setTimeout(() => {
-      setCurrentAddIcon(toCheck ? "check" : "check");
+      setCurrentAddIcon(toCheck ? "check" : "plus");
     }, 200);
   };
 

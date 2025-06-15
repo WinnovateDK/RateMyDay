@@ -10,16 +10,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import NotificationComponent from "./NotificationComponent";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
 import pb from "@/utills/pbClient";
-import { rateDatePair } from "@/utills/RatingService";
+import { Rating } from "@/utills/Models";
 
-export default function ExportFileComponent({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+
+export default function ExportFileComponent({ onClose }: { onClose: () => void }) {
   const [filePath, setFilePath] = useState<string | null>(null);
   const { signOut } = useAuthStore();
-
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const { allRatings, setAllRatings } = useRatingStorePb();
   const { session, encryptionKey } = useAuthStore();
@@ -59,34 +55,32 @@ export default function ExportFileComponent({
       const importedRatingsRaw = JSON.parse(content);
 
       // Parse to rateDatePair[]
-      const importedRatings: rateDatePair[] = Array.isArray(importedRatingsRaw)
-        ? importedRatingsRaw.map((item) => ({
-            Label: item.Label ?? "",
-            Rating: item.Rating,
-            Note: item.Note,
-            fullDate: item.fullDate,
-          }))
-        : [];
+      const importedRatings: Rating[] = Array.isArray(importedRatingsRaw)
+      ? importedRatingsRaw.map((item) => ({
+        Label: item.Label ?? "",
+        Rating: item.Rating,
+        Note: item.Note,
+        fullDate: item.fullDate,
+        }))
+      : [];
 
       if (Array.isArray(importedRatings) && importedRatings.length > 0) {
-        if (session?.record?.id && encryptionKey) {
-          for (const rating of importedRatings) {
-            let encryptedNote = "";
-            if (rating) {
-              encryptedNote = await encryptData("test", encryptionKey);
-            } else {
-              encryptedNote = await encryptData("", encryptionKey);
-            }
-            await pb.collection("ratings").create({
-              userId: session.record.id,
-              rating: rating.Rating,
-              note: encryptedNote,
-              date: rating.fullDate
-                ? new Date(rating.fullDate).toISOString()
-                : undefined,
-            });
-          }
+      if (session?.record?.id && encryptionKey) {
+        for (const rating of importedRatings) {
+        let encryptedNote = "";
+        if (rating.Note) {
+          encryptedNote = await encryptData(rating.Note, encryptionKey);
+        } else {
+          encryptedNote = await encryptData("", encryptionKey);
         }
+        await pb.collection("ratings").create({
+          userId: session.record.id,
+          rating: rating.Rating,
+          note: encryptedNote,
+          date: rating.fullDate ? new Date(rating.fullDate).toISOString() : undefined,
+        });
+        }
+      }
 
         if (session?.record?.id) {
           setAllRatings(session.record.id);

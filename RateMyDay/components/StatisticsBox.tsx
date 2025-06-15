@@ -3,12 +3,7 @@ import { View, Text, useWindowDimensions } from "react-native";
 import useAuthStore from "@/stores/AuthStateStore";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
 import useStore from "@/stores/isRatingSetStore";
-
-type Stats = {
-  averageRating: number;
-  highestRating: number;
-  lowestRating: number;
-};
+import { Stats } from "@/utills/Models";
 
 const StatisticsBox = ({
   renderCondition,
