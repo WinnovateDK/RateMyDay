@@ -3,54 +3,48 @@ import { View, Text, TouchableOpacity, Alert, Image } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
-import { useIsFocused } from "@react-navigation/native";
-import { setItem } from "@/utills/AsyncStorage";
 import { Feather } from "@expo/vector-icons";
+import { encryptData } from "@/utills/EncryptionService";
 import useAuthStore from "@/stores/AuthStateStore";
 import { LinearGradient } from "expo-linear-gradient";
 import NotificationComponent from "./NotificationComponent";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
+import pb from "@/utills/pbClient";
+import { rateDatePair } from "@/utills/RatingService";
 
-export default function ExportFileComponent({ onClose }: { onClose: () => void }) {
+export default function ExportFileComponent({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const [filePath, setFilePath] = useState<string | null>(null);
-  const isFocused = useIsFocused();
-  const userData = useStorageSavedDates(isFocused);
   const { signOut } = useAuthStore();
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const { allRatings, setAllRatings } = useRatingStorePb();
+  const { session, encryptionKey } = useAuthStore();
 
-  const saveUserData = async () => {
+  // Export allRatings to JSON and share
+  const exportUserData = async () => {
     try {
       const path = `${FileSystem.documentDirectory}user_data.json`;
       await FileSystem.writeAsStringAsync(
         path,
-        JSON.stringify(userData, null, 2),
+        JSON.stringify(allRatings, null, 2),
         {
           encoding: FileSystem.EncodingType.UTF8,
         }
       );
       setFilePath(path);
-      Alert.alert("Success", "User data saved successfully.");
-    } catch (error) {
-      console.error("Error saving file:", error);
-      Alert.alert("Error", "Failed to save user data.");
-    }
-  };
 
-  const shareUserData = async () => {
-    if (!filePath) {
-      Alert.alert("Error", "No file available to share.");
-      return;
-    }
-
-    try {
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(filePath, { mimeType: "application/json" });
+        await Sharing.shareAsync(path, { mimeType: "application/json" });
       } else {
         Alert.alert("Error", "Sharing is not available on this device.");
       }
     } catch (error) {
-      console.error("Error sharing file:", error);
+      console.error("Error exporting file:", error);
+      Alert.alert("Error", "Failed to export user data.");
     }
   };
 
@@ -62,19 +56,49 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       const content = await FileSystem.readAsStringAsync(result.assets[0].uri, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-      const data = JSON.parse(content);
+      const importedRatingsRaw = JSON.parse(content);
 
-      for (const [key, value] of Object.entries(data)) {
-        const userValue = value as { rating: any; note: string };
-        await setItem(key, userValue.rating, userValue.note);
+      // Parse to rateDatePair[]
+      const importedRatings: rateDatePair[] = Array.isArray(importedRatingsRaw)
+        ? importedRatingsRaw.map((item) => ({
+            Label: item.Label ?? "",
+            Rating: item.Rating,
+            Note: item.Note,
+            fullDate: item.fullDate,
+          }))
+        : [];
+
+      if (Array.isArray(importedRatings) && importedRatings.length > 0) {
+        if (session?.record?.id && encryptionKey) {
+          for (const rating of importedRatings) {
+            let encryptedNote = "";
+            if (rating) {
+              encryptedNote = await encryptData("test", encryptionKey);
+            } else {
+              encryptedNote = await encryptData("", encryptionKey);
+            }
+            await pb.collection("ratings").create({
+              userId: session.record.id,
+              rating: rating.Rating,
+              note: encryptedNote,
+              date: rating.fullDate
+                ? new Date(rating.fullDate).toISOString()
+                : undefined,
+            });
+          }
+        }
+
+        if (session?.record?.id) {
+          setAllRatings(session.record.id);
+        }
+        Alert.alert("Success", "User data loaded and synced.");
+      } else {
+        Alert.alert(
+          "Error",
+          "Invalid data format or error getting user id or encrytion key"
+        );
       }
-
-      Alert.alert(
-        "Data Loaded",
-        `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`
-      );
     } catch (error) {
-      console.error("Error loading file:", error);
       Alert.alert("Error", "Failed to load user data.");
     }
   };
@@ -85,24 +109,24 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       className="flex-1 overflow-hidden"
     >
       <Image
-        source={require("@/assets/cloud-1.png")}
+        source={require("@/assets/newcloud.png")}
         style={{
           position: "absolute",
           top: 450,
           left: 70,
-          width: 250,
-          height: 135,
+          width: 230,
+          height: 150,
           opacity: 0.5,
         }}
       />
       <Image
-        source={require("@/assets/cloud-1.png")}
+        source={require("@/assets/newcloud.png")}
         style={{
           position: "absolute",
           top: 320,
           right: 70,
-          width: 250,
-          height: 135,
+          width: 230,
+          height: 150,
           opacity: 0.5,
         }}
       />
@@ -112,8 +136,8 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       <View className="flex-1 w-full items-center justify-between">
         <View className="w-full">
           <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
-            onPress={saveUserData}
+            className="w-fit flex-row items-center rounded-md my-1 mx-2"
+            onPress={exportUserData}
           >
             <Feather
               name="download"
@@ -121,24 +145,11 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
               className="m-4 mr-6"
               color="white"
             />
-            <Text className="text-xl text-white ">Save Data to File</Text>
+            <Text className="text-xl text-white ">Export Data to File</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
-            onPress={shareUserData}
-          >
-            <Feather
-              name="share-2"
-              size={25}
-              className="m-4 mr-6"
-              color="white"
-            />
-            <Text className=" text-xl text-white">Share File</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
+            className="w-fit flex-row items-center rounded-md my-1 mx-2"
             onPress={loadUserData}
           >
             <Feather

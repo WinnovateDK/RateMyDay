@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "@/stores/AuthStateStore";
-import PocketBase from "pocketbase";
 import { Router, useRouter } from "expo-router";
 import { createUser } from "@/utills/PocketBase";
 import { Alert } from "react-native";
-import { s } from "react-native-size-matters";
-import parseErrorStack from "react-native/Libraries/Core/Devtools/parseErrorStack";
-import { deriveEncryptionKey } from "@/utills/EncryptionService";
-import { saveBackupToRemote } from "@/utills/PocketBaseBackupService";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+import TermsAndConditionsModal from "@/components/TermsAndConditionsModal";
+import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { signIn, signOut, session, isLoading } = useAuthStore();
+  const [localChecked, setLocalChecked] = useState(false);
+  const [ppModalVisible, setPPModalVisible] = useState(false);
+  const [tcModalVisible, setTCModalVisible] = useState(false);
   const router = useRouter();
 
   const handleSignUp = async (
@@ -29,6 +37,13 @@ const SignUp = () => {
     }
     if (password !== confirmPassword) {
       Alert.alert("Password Mismatch", "Passwords do not match.");
+      return;
+    }
+    if (localChecked === false) {
+      Alert.alert(
+        "Terms and conditions and Privacy policy",
+        "You must agree to the Terms and conditions and Privacy policy to create an account."
+      );
       return;
     }
 
@@ -80,6 +95,38 @@ const SignUp = () => {
             onChangeText={setConfirmPassword}
           />
           <TextInput />
+          <View className="w-full flex-row align-middle h-20 -mt-4">
+            <BouncyCheckbox
+              size={25}
+              fillColor="#034f84"
+              iconStyle={{ borderColor: "#034f84" }}
+              textStyle={{
+                color: "#000",
+                fontSize: 15,
+              }}
+              isChecked={localChecked}
+              onPress={(isChecked) => setLocalChecked(isChecked)}
+              className="-mt-4 mb-3"
+            />
+            <Text className="flex-1 text-black text-sm flex-wrap">
+              By checking this box, I confirm that I have read and agree to the{" "}
+              <Text
+                className="text-blue-600 underline"
+                onPress={() => setTCModalVisible(true)}
+              >
+                Terms and Conditions
+              </Text>{" "}
+              and{" "}
+              <Text
+                className="text-blue-600 underline"
+                onPress={() => setPPModalVisible(true)}
+              >
+                Privacy Policy
+              </Text>
+              .
+            </Text>
+          </View>
+
           <View className="flex-row">
             <TouchableOpacity
               className="w-2/5 h-12 bg-blue-500 rounded-lg justify-center items-center active:bg-blue-700 mr-2"
@@ -98,6 +145,14 @@ const SignUp = () => {
           </View>
         </View>
       </View>
+      <PrivacyPolicyModal
+        ppModalVisible={ppModalVisible}
+        setPPModalVisible={setPPModalVisible}
+      />
+      <TermsAndConditionsModal
+        ppModalVisible={tcModalVisible}
+        setPPModalVisible={setTCModalVisible}
+      />
     </LinearGradient>
   );
 };

@@ -310,9 +310,21 @@ export const useRatingStorePb = create<RatingsState>()(
           updatedYearlyRatings[monthIndex] = Math.round(monthlyAvg * 100) / 100;
         }
 
-        updatedAllRatings = current.graphMonthlyRatings
-          .map((r) => r.Rating)
-          .filter((r) => typeof r === "number" && !isNaN(r));
+        let updatedAllRatingsArray = [...current.allRatings];
+        const existingIndex = updatedAllRatingsArray.findIndex(r => r.Label === label);
+        if (existingIndex !== -1) {
+          updatedAllRatingsArray[existingIndex] = {
+            Label: label,
+            Rating: newRating,
+            fullDate: now
+          };
+        } else {
+          updatedAllRatingsArray.push({
+            Label: label,
+            Rating: newRating,
+            fullDate: now
+          });
+        }
 
         set({
           weeklyRatings: newStatsWeekly,
@@ -333,12 +345,53 @@ export const useRatingStorePb = create<RatingsState>()(
           graphMonthlyRatings: newGraphMonthly,
           graphYearlyRatings: updatedYearlyRatings,
           lastDate: now,
+          allRatings: updatedAllRatingsArray,
         });
 
-        set(state => {
-          state.calculateStreak();
-          return state;
+        get().calculateStreak();
+      },
+      checkAndResetStreak: () => {
+        const { allRatings, streak } = get();
+        if (!allRatings.length) {
+          set({ streak: 0 });
+          return;
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+        const hadRatingToday = allRatings.some(r => {
+          let d;
+          if (r.fullDate) {
+            d = new Date(r.fullDate);
+          } else {
+            const [day, month] = r.Label.split('-');
+            d = new Date(today.getFullYear(), parseInt(month) - 1, parseInt(day));
+          }
+          d.setHours(0, 0, 0, 0);
+          return d.getTime() === today.getTime();
         });
+
+        const hadRatingYesterday = allRatings.some(r => {
+          let d;
+          if (r.fullDate) {
+            d = new Date(r.fullDate);
+          } else {
+            const [day, month] = r.Label.split('-');
+            d = new Date(today.getFullYear(), parseInt(month) - 1, parseInt(day));
+          }
+          d.setHours(0, 0, 0, 0);
+          return d.getTime() === yesterday.getTime();
+        });
+
+        if (streak > 1 && !hadRatingYesterday) {
+          set({ streak: hadRatingToday ? 1 : 0 });
+        }
+        if (streak === 1 && !hadRatingToday) {
+          set({ streak: 0 });
+        }
       },
       checkAndResetStreak: () => {
         const { allRatings, streak } = get();

@@ -1,13 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import useAuthStore from "@/stores/AuthStateStore";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
 import useStore from "@/stores/isRatingSetStore";
-import {
-  calculateAverageRatingForMonth,
-  calculateAverageRatingForWeek,
-  calculateAverageRatingForYear,
-} from "@/utills/RatingService";
 
 type Stats = {
   averageRating: number;
@@ -43,38 +38,6 @@ const StatisticsBox = ({
 
         case "Yearly":
           setStats(yearlyRatings);
-          break;
-      }
-    } else {
-      switch (timerange) {
-        case "Weekly":
-          calculateAverageRatingForWeek().then((avgRatings) => {
-            setStats({
-              averageRating: avgRatings.averageRating,
-              highestRating: avgRatings.highestRating,
-              lowestRating: avgRatings.lowestRating,
-            });
-          });
-          break;
-
-        case "Monthly":
-          calculateAverageRatingForMonth().then((avgRatings) => {
-            setStats({
-              averageRating: avgRatings.averageRating,
-              highestRating: avgRatings.highestRating,
-              lowestRating: avgRatings.lowestRating,
-            });
-          });
-          break;
-
-        case "Yearly":
-          calculateAverageRatingForYear().then((avgRatings) => {
-            setStats({
-              averageRating: avgRatings.averageRating,
-              highestRating: avgRatings.highestRating,
-              lowestRating: avgRatings.lowestRating,
-            });
-          });
           break;
       }
     }

@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import {
   calculateWeeklyAverages,
-  getAverageRatingsPerMonth,
-  getRatingsforLastMonth,
-  getRatingsForLastWeek,
 } from "@/utills/RatingService";
 import {
   CartesianChart,

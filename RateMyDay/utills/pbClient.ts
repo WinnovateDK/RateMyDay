@@ -10,4 +10,6 @@ const pb = new PocketBase(
   })
 );
 
+//const pb = new PocketBase("https://winnovate.dk/");
+
 export default pb;

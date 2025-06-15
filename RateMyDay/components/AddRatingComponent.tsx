@@ -2,19 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
-  Alert,
   TextInput,
   Text,
   ScrollView,
   NativeScrollEvent,
   Animated,
 } from "react-native";
-import { setItem } from "@/utills/AsyncStorage";
-import { useRatingStore } from "@/stores/RatingStore";
-import { CalendarColors } from "@/constants/Colors";
-import { formatDate, isRatingSetToday } from "@/utills/CalendarUtills";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { shadowStyle } from "@/constants/Colors";
 import { useWindowDimensions, ActivityIndicator } from "react-native";
 import {
   createRating,
@@ -35,13 +29,10 @@ const AddRatingComponent: React.FC<{
   selectedScore: number | null;
   setSelectedScore: (score: number) => void;
 }> = ({ selectedScore, setSelectedScore }) => {
-  const updateSavedRating = useRatingStore((state) => state.updateSavedRating);
   const [noteText, setNoteText] = useState<string>("");
   const [scrollEnd, setScrollEnd] = useState(false);
   const [scrollStart, setScrollStart] = useState(false);
-  const [updateOrAdd, setUpdateOrAdd] = useState("Add");
   const [showNote, setShowNote] = useState(false);
-  const [scoreSet, setScoreSet] = useState<boolean>();
   const { width, height } = useWindowDimensions();
   const { session, encryptionKey, setEncryptionKey } = useAuthStore();
   const { addNewRatingLocally } = useRatingStorePb();
@@ -51,7 +42,6 @@ const AddRatingComponent: React.FC<{
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [currentAddIcon, setCurrentAddIcon] = useState("check");
-  const [currentNoteIcon, setCurrentNoteIcon] = useState("edit");
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [todaysRating, setTodaysRating] = useState<RecordModel | null>(null);
   const aspectRatio = width / height;
@@ -173,16 +163,6 @@ const AddRatingComponent: React.FC<{
   };
 
   useEffect(() => {
-    isRatingSetToday().then((isSet) => {
-      if (isSet === true) {
-        setUpdateOrAdd("Update");
-      } else {
-        setUpdateOrAdd("Add");
-      }
-    });
-  }, [scoreSet]);
-
-  useEffect(() => {
     fetchTodaysRating();
   }, []);
 
@@ -248,9 +228,7 @@ const AddRatingComponent: React.FC<{
             isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
           }`}
           style={{ width: buttonSize * 1.1, height: buttonSize * 1.1 }}
-          onPress={
-            () => handleSubmitPb()
-          }
+          onPress={() => handleSubmitPb()}
         >
           {isLoading ? (
             <ActivityIndicator size="large" />
@@ -266,13 +244,13 @@ const AddRatingComponent: React.FC<{
         onClose={() => setIsNoteDialogOpen(false)}
       >
         <DialogContent>
-          <View className="w-full bg-[#034f84] p-6 rounded-3xl">
-            <Text className="text-white text-2xl font-bold mb-4 text-center">
-              Add a note for today
+          <View className="w-full bg-gray-100 p-4 rounded-3xl">
+            <Text className="text-zinc-700 text-2xl font-bold mb-4 text-center">
+              Add a {<Text className="text-cyan-300">note</Text>} for today
             </Text>
 
             <TextInput
-              className="h-32 bg-white/90 border-2 border-cyan-300 rounded-3xl p-4 text-lg text-gray-700"
+              className="h-32 border-2 bg-gray-200 border-cyan-300 rounded-xl p-4 text-lg text-gray-700"
               placeholder="Enter a note for the day (optional)"
               placeholderTextColor="#94a3b8"
               value={noteText}
@@ -280,12 +258,11 @@ const AddRatingComponent: React.FC<{
                 setNoteText(txt);
               }}
               multiline
-              style={[shadowStyle, { elevation: 2 }]}
             />
 
             <View className="flex-row justify-end space-x-3 mt-6">
               <TouchableOpacity
-                className="flex-1 p-3 rounded-2xl bg-gray-500/20"
+                className="flex-1 p-3 rounded-2xl bg-gray-500/20 mr-1"
                 onPress={() => setIsNoteDialogOpen(false)}
               >
                 <Text
@@ -301,12 +278,12 @@ const AddRatingComponent: React.FC<{
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 p-3 rounded-2xl bg-white"
+                className="flex-1 p-3 rounded-2xl bg-cyan-500"
                 onPress={handleFinalSubmit}
               >
                 <Text
                   style={{
-                    color: "#034f84",
+                    color: "white",
                     textAlign: "center",
                     fontSize: 18,
                     fontWeight: "600",

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
   Image,
   View,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Keyboard,
   Dimensions,
-  ScrollView,
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,7 +30,6 @@ export default function AddRating() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(false);
   const translateX = useSharedValue(300);
-  const scrollRef = useRef<ScrollView>(null);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const { streak, setAllRatings } = useRatingStorePb();
 
