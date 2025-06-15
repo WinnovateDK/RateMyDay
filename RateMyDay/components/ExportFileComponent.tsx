@@ -3,57 +3,46 @@ import { View, Text, TouchableOpacity, Alert, Image } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { useStorageSavedDates } from "@/hooks/useStorageSavedDates";
-import { useIsFocused } from "@react-navigation/native";
-import { setItem } from "@/utills/AsyncStorage";
 import { Feather } from "@expo/vector-icons";
 import useAuthStore from "@/stores/AuthStateStore";
 import { LinearGradient } from "expo-linear-gradient";
 import NotificationComponent from "./NotificationComponent";
+import { useRatingStorePb } from "@/stores/RatingStorePb";
+import pb from "@/utills/pbClient";
 
 export default function ExportFileComponent({ onClose }: { onClose: () => void }) {
   const [filePath, setFilePath] = useState<string | null>(null);
-  const isFocused = useIsFocused();
-  const userData = useStorageSavedDates(isFocused);
   const { signOut } = useAuthStore();
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const { allRatings, setAllRatings } = useRatingStorePb();
+  const { session } = useAuthStore();
 
-  const saveUserData = async () => {
+  // Export allRatings to JSON and share
+  const exportUserData = async () => {
     try {
       const path = `${FileSystem.documentDirectory}user_data.json`;
       await FileSystem.writeAsStringAsync(
         path,
-        JSON.stringify(userData, null, 2),
+        JSON.stringify(allRatings, null, 2),
         {
           encoding: FileSystem.EncodingType.UTF8,
         }
       );
       setFilePath(path);
-      Alert.alert("Success", "User data saved successfully.");
-    } catch (error) {
-      console.error("Error saving file:", error);
-      Alert.alert("Error", "Failed to save user data.");
-    }
-  };
 
-  const shareUserData = async () => {
-    if (!filePath) {
-      Alert.alert("Error", "No file available to share.");
-      return;
-    }
-
-    try {
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(filePath, { mimeType: "application/json" });
+        await Sharing.shareAsync(path, { mimeType: "application/json" });
       } else {
         Alert.alert("Error", "Sharing is not available on this device.");
       }
     } catch (error) {
-      console.error("Error sharing file:", error);
+      console.error("Error exporting file:", error);
+      Alert.alert("Error", "Failed to export user data.");
     }
   };
 
+  // Import JSON, set allRatings, and sync with PocketBase
   const loadUserData = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
@@ -62,17 +51,27 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       const content = await FileSystem.readAsStringAsync(result.assets[0].uri, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-      const data = JSON.parse(content);
+      const importedRatings = JSON.parse(content);
 
-      for (const [key, value] of Object.entries(data)) {
-        const userValue = value as { rating: any; note: string };
-        await setItem(key, userValue.rating, userValue.note);
+      if (Array.isArray(importedRatings)) {
+        if (session?.record?.id) {
+          for (const rating of importedRatings) {
+            await pb.collection("ratings").create({
+              userId: session.record.id,
+              rating: rating.Rating,
+              date: rating.fullDate ? new Date(rating.fullDate).toISOString() : undefined,
+            });
+          }
+        }
+
+        if (session?.record?.id) {
+          setAllRatings(session.record.id);
+        }
+
+        Alert.alert("Success", "User data loaded and synced.");
+      } else {
+        Alert.alert("Error", "Invalid data format.");
       }
-
-      Alert.alert(
-        "Data Loaded",
-        `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`
-      );
     } catch (error) {
       console.error("Error loading file:", error);
       Alert.alert("Error", "Failed to load user data.");
@@ -112,8 +111,8 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       <View className="flex-1 w-full items-center justify-between">
         <View className="w-full">
           <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
-            onPress={saveUserData}
+            className="w-fit flex-row items-center rounded-md my-1 mx-2"
+            onPress={exportUserData}
           >
             <Feather
               name="download"
@@ -121,24 +120,11 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
               className="m-4 mr-6"
               color="white"
             />
-            <Text className="text-xl text-white ">Save Data to File</Text>
+            <Text className="text-xl text-white ">Export Data to File</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
-            onPress={shareUserData}
-          >
-            <Feather
-              name="share-2"
-              size={25}
-              className="m-4 mr-6"
-              color="white"
-            />
-            <Text className=" text-xl text-white">Share File</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className=" w-fit flex-row items-center rounded-md my-1 mx-2"
+            className="w-fit flex-row items-center rounded-md my-1 mx-2"
             onPress={loadUserData}
           >
             <Feather
