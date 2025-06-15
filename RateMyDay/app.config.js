@@ -10,25 +10,25 @@ module.exports = {
     splash: {
       image: "./assets/images/splash.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
     ios: {
       bundleIdentifier: "dk.winnovate.ratemyday",
       buildNumber: "1.0.0",
       supportsTablet: true,
-      icon: "./assets/images/adaptive-icon.png"
+      icon: "./assets/images/adaptive-icon.png",
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
       },
-      package: "dk.winnovate.ratemyday"
+      package: "dk.winnovate.ratemyday",
     },
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/images/favicon.png",
     },
     plugins: [
       "expo-router",
@@ -37,23 +37,23 @@ module.exports = {
         {
           icon: "./assets/images/icon.png",
           color: "#ffffff",
-          sounds: ["./assets/notification.wav"]
-        }
+          sounds: ["./assets/notification.wav"],
+        },
       ],
-      "expo-font"
+      "expo-font",
     ],
     experiments: {
-      typedRoutes: true
+      typedRoutes: true,
     },
-    owner: "dulda",
+    owner: "tromborg",
     extra: {
       EXPO_PUBLIC_POCKETBASE_URL: process.env.EXPO_PUBLIC_POCKETBASE_URL,
       router: {
-        origin: false
+        origin: false,
       },
       eas: {
-        projectId: "3576a9b3-952e-4db9-9843-84d0217683f2"
-      }
-    }
-  }
+        projectId: "3576a9b3-952e-4db9-9843-84d0217683f2",
+      },
+    },
+  },
 };
