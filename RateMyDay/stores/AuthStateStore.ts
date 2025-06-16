@@ -26,9 +26,9 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       session: pb.authStore.isValid
         ? {
-            record: pb.authStore.record as RecordModel,
-            token: pb.authStore.token,
-          }
+          record: pb.authStore.record as RecordModel,
+          token: pb.authStore.token,
+        }
         : null,
       isLoading: false,
       encryptionKey: null,

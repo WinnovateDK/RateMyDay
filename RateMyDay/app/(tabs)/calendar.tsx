@@ -261,8 +261,8 @@ const calendar = () => {
                   className="text-lg text-gray-600"
                 >
                   {selectedDate &&
-                  dateRatings[selectedDate] !== undefined &&
-                  dateRatings[selectedDate].note !== ""
+                    dateRatings[selectedDate] !== undefined &&
+                    dateRatings[selectedDate].note !== ""
                     ? dateRatings[selectedDate].note
                     : "No note was given for this day"}
                 </Text>

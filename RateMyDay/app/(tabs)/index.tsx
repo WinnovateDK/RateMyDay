@@ -96,9 +96,9 @@ export default function AddRating() {
         <View className="flex-1 gap-3">
           <Text
             className="text-center text-3xl text-white font-semibold"
-            style={{ 
+            style={{
               fontSize: 14 / aspectRatio,
-              fontFamily: "Fredoka_700Bold", 
+              fontFamily: "Fredoka_700Bold",
             }}
           >
             Add todays rating
@@ -106,7 +106,7 @@ export default function AddRating() {
           <View className="flex-1 gap-8 mb-8">
             <Text
               className="text-center text-cyan-200 "
-              style={{ 
+              style={{
                 fontSize: 9 / aspectRatio,
                 fontFamily: "Fredoka_400Regular",
               }}

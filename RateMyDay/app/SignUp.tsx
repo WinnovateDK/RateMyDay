@@ -4,12 +4,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
-  ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "@/stores/AuthStateStore";
-import { Router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { createUser } from "@/utills/PocketBase";
 import { Alert } from "react-native";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
@@ -20,7 +18,7 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const { signIn, signOut, session, isLoading } = useAuthStore();
+  const { session } = useAuthStore();
   const [localChecked, setLocalChecked] = useState(false);
   const [ppModalVisible, setPPModalVisible] = useState(false);
   const [tcModalVisible, setTCModalVisible] = useState(false);

@@ -171,9 +171,8 @@ const AddRatingComponent: React.FC<{
     return Array.from({ length: totalCircles }, (_, index) => (
       <TouchableOpacity
         key={index}
-        className={`aspect-square rounded-full justify-center items-center mx-2 ${
-          selectedScore === index ? "bg-cyan-700" : "bg-cyan-300"
-        } shadow-lg`}
+        className={`aspect-square rounded-full justify-center items-center mx-2 ${selectedScore === index ? "bg-cyan-700" : "bg-cyan-300"
+          } shadow-lg`}
         onPress={() => {
           setSelectedScore(index);
           setShowNote(true);
@@ -224,9 +223,8 @@ const AddRatingComponent: React.FC<{
         style={{ height: aspectRatio < 0.6 ? "80%" : 90 }}
       >
         <TouchableOpacity
-          className={`aspect-square rounded-full items-center justify-center m-6 mt-24 ${
-            isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
-          }`}
+          className={`aspect-square rounded-full items-center justify-center m-6 mt-24 ${isSubmitted ? "bg-green-300" : "bg-[#67e8f9]"
+            }`}
           style={{ width: buttonSize * 1.1, height: buttonSize * 1.1 }}
           onPress={() => handleSubmitPb()}
         >

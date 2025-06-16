@@ -27,7 +27,7 @@ const getCurrentUserId = (): string => {
  * @param backupRecord - The backup string in the format "backupSalt:iv:wrappedDEK".
  */
 export const saveBackupToRemote = async (backupRecord: string, userid: string | undefined = undefined): Promise<any> => {
-  if (!userid){
+  if (!userid) {
     userid = getCurrentUserId();
   }
   const data = {

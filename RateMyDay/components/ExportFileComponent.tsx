@@ -4,29 +4,45 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { Feather } from "@expo/vector-icons";
-import { encryptData } from "@/utills/EncryptionService";
+import { encryptData, decryptData } from "@/utills/EncryptionService";
 import useAuthStore from "@/stores/AuthStateStore";
 import { LinearGradient } from "expo-linear-gradient";
 import NotificationComponent from "./NotificationComponent";
 import { useRatingStorePb } from "@/stores/RatingStorePb";
 import pb from "@/utills/pbClient";
 import { Rating } from "@/utills/Models";
-
+import AboutModal from "./AboutModal";
 
 export default function ExportFileComponent({ onClose }: { onClose: () => void }) {
   const [filePath, setFilePath] = useState<string | null>(null);
   const { signOut } = useAuthStore();
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
   const { allRatings, setAllRatings } = useRatingStorePb();
   const { session, encryptionKey } = useAuthStore();
 
-  // Export allRatings to JSON and share
   const exportUserData = async () => {
     try {
+      if (!session?.record?.id || !encryptionKey) {
+        Alert.alert(
+          "Error",
+          "User session or encryption key not found. Please log in again."
+        );
+        return;
+      }
+      const decryptedRatings = await Promise.all(
+        allRatings.map(async (rating) => ({
+          ...rating,
+          Note: rating.Note
+            ? await decryptData(rating.Note, encryptionKey)
+            : "",
+        }))
+      );
+
       const path = `${FileSystem.documentDirectory}user_data.json`;
       await FileSystem.writeAsStringAsync(
         path,
-        JSON.stringify(allRatings, null, 2),
+        JSON.stringify(decryptedRatings, null, 2),
         {
           encoding: FileSystem.EncodingType.UTF8,
         }
@@ -54,38 +70,37 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       });
       const importedRatingsRaw = JSON.parse(content);
 
-      // Parse to rateDatePair[]
       const importedRatings: Rating[] = Array.isArray(importedRatingsRaw)
-      ? importedRatingsRaw.map((item) => ({
-        Label: item.Label ?? "",
-        Rating: item.Rating,
-        Note: item.Note,
-        fullDate: item.fullDate,
+        ? importedRatingsRaw.map((item) => ({
+          Label: item.Label ?? "",
+          Rating: item.Rating,
+          Note: item.Note,
+          fullDate: item.fullDate,
         }))
-      : [];
+        : [];
 
       if (Array.isArray(importedRatings) && importedRatings.length > 0) {
-      if (session?.record?.id && encryptionKey) {
-        for (const rating of importedRatings) {
-        let encryptedNote = "";
-        if (rating.Note) {
-          encryptedNote = await encryptData(rating.Note, encryptionKey);
-        } else {
-          encryptedNote = await encryptData("", encryptionKey);
+        if (session?.record?.id && encryptionKey) {
+          for (const rating of importedRatings) {
+            let encryptedNote = "";
+            if (rating.Note) {
+              encryptedNote = await encryptData(rating.Note, encryptionKey);
+            } else {
+              encryptedNote = await encryptData("", encryptionKey);
+            }
+            await pb.collection("ratings").create({
+              userId: session.record.id,
+              rating: rating.Rating,
+              note: encryptedNote,
+              date: rating.fullDate ? new Date(rating.fullDate).toISOString() : undefined,
+            });
+          }
         }
-        await pb.collection("ratings").create({
-          userId: session.record.id,
-          rating: rating.Rating,
-          note: encryptedNote,
-          date: rating.fullDate ? new Date(rating.fullDate).toISOString() : undefined,
-        });
-        }
-      }
 
         if (session?.record?.id) {
           setAllRatings(session.record.id);
         }
-        Alert.alert("Success", "User data loaded and synced.");
+        Alert.alert("Success", "User data loaded and synced. Please log out and log back in to see the changes.");
       } else {
         Alert.alert(
           "Error",
@@ -161,6 +176,13 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
             <Feather name="bell" size={25} className="m-4 mr-6" color="white" />
             <Text className="text-white text-xl">Notification Reminder</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            className="w-fit flex-row items-center rounded-md my-1 mx-2"
+            onPress={() => setAboutModalVisible(true)}
+          >
+            <Feather name="info" size={25} className="m-4 mr-6" color="white" />
+            <Text className="text-white text-xl">About</Text>
+          </TouchableOpacity>
         </View>
         <View className="w-full">
           <TouchableOpacity
@@ -175,6 +197,10 @@ export default function ExportFileComponent({ onClose }: { onClose: () => void }
       <NotificationComponent
         showModal={showNotificationModal}
         onCloseModal={() => setShowNotificationModal(false)}
+      />
+      <AboutModal
+        aboutModalVisible={aboutModalVisible}
+        setAboutModalVisible={setAboutModalVisible}
       />
     </LinearGradient>
   );
