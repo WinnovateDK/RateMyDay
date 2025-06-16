@@ -45,7 +45,7 @@ module.exports = {
     experiments: {
       typedRoutes: true,
     },
-    owner: "tromborg",
+    owner: "winnovate",
     extra: {
       EXPO_PUBLIC_POCKETBASE_URL: process.env.EXPO_PUBLIC_POCKETBASE_URL,
       router: {
