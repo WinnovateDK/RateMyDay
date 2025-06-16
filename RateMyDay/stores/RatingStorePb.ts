@@ -373,32 +373,6 @@ export const useRatingStorePb = create<RatingsState>()(
           set({ streak: 0 });
         }
       },
-      checkAndResetStreak: () => {
-        const { allRatings, streak } = get();
-        if (!allRatings.length) {
-          set({ streak: 0 });
-          return;
-        }
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
-
-        const hadRatingYesterday = allRatings.some(r => {
-          let d;
-          if (r.fullDate) {
-            d = new Date(r.fullDate);
-          } else {
-            const [day, month] = r.Label.split('-');
-            d = new Date(new Date().getFullYear(), parseInt(month) - 1, parseInt(day));
-          }
-          d.setHours(0, 0, 0, 0);
-          return d.getTime() === yesterday.getTime();
-        });
-
-        if (streak > 0 && !hadRatingYesterday) {
-          set({ streak: 0 });
-        }
-      },
     }),
     {
       name: "ratings-storage",
