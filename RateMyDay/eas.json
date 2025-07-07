@@ -1,32 +1,13 @@
 {
   "build": {
-    "preview": {
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "preview2": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      }
-    },
-    "preview3": {
-      "developmentClient": true
-    },
-    "preview4": {
-      "distribution": "internal"
-    },
     "production": {
       "android": {
         "image": "latest",
         "resourceClass": "medium",
         "buildType": "apk",
         "cache": {
-          "key": "gradle-deps-v1",
-          "paths": [
-            "~/.gradle/caches",
-            "~/.gradle/wrapper"
-          ]
+          "key": "gradle-deps-production-v1",
+          "paths": ["~/.gradle/caches", "~/.gradle/wrapper", "android/.gradle"]
         },
         "env": {
           "GRADLE_OPTS": "-Dorg.gradle.caching=true -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false"
@@ -36,14 +17,17 @@
     "development": {
       "android": {
         "image": "latest",
-        "buildType": "apk",
+        "buildType": "developmentClient",
         "cache": {
           "key": "gradle-deps-dev-v1",
-          "paths": [
-            "~/.gradle/caches",
-            "~/.gradle/wrapper"
-          ]
+          "paths": ["~/.gradle/caches", "~/.gradle/wrapper"]
         }
+      }
+    },
+    "preview": {
+      "android": {
+        "image": "latest",
+        "buildType": "apk"
       }
     }
   }
