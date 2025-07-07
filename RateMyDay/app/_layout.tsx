@@ -44,13 +44,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     const loadingScreen = async (): Promise<void> => {
-      // Trigger logo fade-in
       Animated.timing(logoOpacity, {
         toValue: 1,
         duration: 800,
         useNativeDriver: true,
       }).start(() => {
-        // After logo appears, fade in credit text
         Animated.timing(textOpacity, {
           toValue: 1,
           duration: 600,
