@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "RateMyDay",
     slug: "RateMyDay",
-    version: "1.0.0",
+    version: "1.0.1",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "ratemyday",
@@ -14,7 +14,7 @@ module.exports = {
     },
     ios: {
       bundleIdentifier: "dk.winnovate.ratemyday",
-      buildNumber: "1.0.0",
+      buildNumber: "1.0.1",
       supportsTablet: true,
       icon: "./assets/images/adaptive-icon.png",
     },
