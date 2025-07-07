@@ -17,11 +17,33 @@
       "distribution": "internal"
     },
     "production": {
-      "ios": {
-        "simulator": false
-      },
       "android": {
-        "buildType": "app-bundle"
+        "image": "latest",
+        "resourceClass": "medium",
+        "buildType": "apk",
+        "cache": {
+          "key": "gradle-deps-v1",
+          "paths": [
+            "~/.gradle/caches",
+            "~/.gradle/wrapper"
+          ]
+        },
+        "env": {
+          "GRADLE_OPTS": "-Dorg.gradle.caching=true -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false"
+        }
+      }
+    },
+    "development": {
+      "android": {
+        "image": "latest",
+        "buildType": "apk",
+        "cache": {
+          "key": "gradle-deps-dev-v1",
+          "paths": [
+            "~/.gradle/caches",
+            "~/.gradle/wrapper"
+          ]
+        }
       }
     }
   }
