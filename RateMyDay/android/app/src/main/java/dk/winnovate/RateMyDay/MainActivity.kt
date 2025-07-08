@@ -1,4 +1,4 @@
-package dk.winnovate.RateMyDay
+package com.anonymous.RateMyDay
 
 import android.os.Build
 import android.os.Bundle
